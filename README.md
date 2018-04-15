@@ -248,9 +248,12 @@ BLINKER_LOG("detail message 1", " 2")
   
 # 准备工作
 开始使用前你需要做好如下准备:
-* [Arduino IDE](https://www.arduino.cc/en/Main/Software) 1.6.12及更新版本
-* 使用 Arduino IDE 的开发板管理器安装 [esp8266/arduino](https://github.com/esp8266/arduino)
-* 按照 [安装说明](https://github.com/espressif/arduino-esp32#installation-instructions) 安装 [espressif/arduino-esp32](https://github.com/espressif/arduino-esp32)
+* [python](https://www.python.org/downloads/) 2.7.x
+* Install the [simple-websocket-server](https://github.com/dpallot/simple-websocket-server)  
+`pip install https://github.com/dpallot/simple-websocket-server.git`  
+
+* Install the [python-zeroconf](https://github.com/jstasiak/python-zeroconf)  
+`pip install https://github.com/jstasiak/python-zeroconf/archive/0.17.7.zip`
 <!-- * 使用 Arduino IDE 的库管理器安装 [WebSockets](https://github.com/Links2004/arduinoWebSockets)     -->
   
 # Blinker接口函数
