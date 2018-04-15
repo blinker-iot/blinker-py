@@ -245,3 +245,10 @@ def ahrs(axis):
         return bProto.Ahrs[axis]
     else:
         return 0
+
+def vibrate(time = 500):
+    if time > 1000:
+        time = 1000
+    data = {BLINKER_CMD_VIBRATE:time}
+    data = json.dumps(data)
+    Print(data)

@@ -7,8 +7,8 @@ Blinker python library for hardware. Works with Raspberry Pi, linux, windows.
 [Blinker](https://blinker-iot.com/) 是一个运行在 IOS 和 Android 上用于控制嵌入式硬件的应用程序。你可以通过拖放控制组件，轻松地为你的项目建立图形化控制界面。  
 
 # Reference/参考
-* [EN-英文](https://github.com/i3water/blinker-library#currently-supported-hardware)  
-* [CN-中文](https://github.com/i3water/blinker-library#%E7%9B%AE%E5%89%8D%E6%94%AF%E6%8C%81%E7%9A%84%E7%A1%AC%E4%BB%B6)  
+* [EN-英文](https://github.com/blinker-iot/blinker-py#currently-supported-hardware)  
+* [CN-中文](https://github.com/blinker-iot/blinker-py#%E7%9B%AE%E5%89%8D%E6%94%AF%E6%8C%81%E7%9A%84%E7%A1%AC%E4%BB%B6)  
 
   
 # Currently supported hardware
@@ -43,12 +43,10 @@ Choose different parameters based on the type of connection you use
   
 BLE:
 ```
-#define BLINKER_BLE  
-#include <Blinker.h>  
+import Blinker  
   
-void setup() {  
-    Blinker.begin();  
-}
+Blinker.setMode(BLINKER_BLE)
+Blinker.begin()
 ```  
 
 >SerialBLE Modules:  
@@ -60,22 +58,18 @@ void setup() {
   
 WiFi:
 ```
-#define BLINKER_WIFI  
-#include <Blinker.h>  
+import Blinker  
   
-void setup() {  
-    Blinker.begin(ssid, pswd);  
-}
+Blinker.setMode(BLINKER_WIFI)  
+Blinker.begin()
 ```  
   
 MQTT:
 ```
-#define BLINKER_MQTT  
-#include <Blinker.h>  
+import Blinker  
   
-void setup() {  
-    Blinker.begin(auth, ssid, pswd);  
-}
+Blinker.setMode(BLINKER_MQTT)  
+Blinker.begin()
 ```
 > MQTT support hardware: WiFiduino, WiFiduino32, ESP8266, ESP32  
 
@@ -83,7 +77,7 @@ void setup() {
 1.Configure hardware  
 2.Wait for connection app  
 
-## Connection management
+<!-- ## Connection management
 ### Blinker.connect()
 This function will try onnecting to app.  
 Return true when connected, return false if timeout reached.  
@@ -111,33 +105,36 @@ This function should be called frequently to process incoming commands and perfo
 void loop() {
     Blinker.run();
 }
-```
+``` -->
 ## Data management
 ### Blinker.available()
 Return true when data already arrived and stored in the receive buffer
 ```
-bool result = Blinker.available();
+if Blinker.available():  
+    print 'data available'  
+else:  
+    print 'none data'
 ```
 ### Blinker.readString()
 This function to reads characters from Blinker into a string.
 ```
-String data = Blinker.readString();
+data = Blinker.readString()
 ```
 `*max read data bytes is 256bytes`
-### Blinker.print()
+### Blinker.Print()
 Prints data to Blinker app
 ```
-Blinker.print(data);
+Blinker.Print(data)
 ```
-Prints a Json data to Blinkrt app, eg: {"temp":30.2}
+<!-- Prints a Json data to Blinkrt app, eg: {"temp":30.2}
 ```
-Blinker.print("temp", 30.2);
+Blinker.Print("temp", 30.2)
 ```  
 Prints a Json data with unit to Blinkrt app, eg: {"temp":"30.2 °C"}
 ```
-Blinker.print("temp", 30.2, "°C");
+Blinker.Print("temp", 30.2, "°C");
 ```
->Json data can display in the Blinker TEXT widget  
+>Json data can display in the Blinker TEXT widget   -->
 
 `*max send data bytes is 128bytes`
 
@@ -145,9 +142,9 @@ Blinker.print("temp", 30.2, "°C");
 ### Blinker.wInit()
 Init widget, **Button** **Slider** and **Toggle** widget recommended to initialize before use.
 ```
-Blinker.wInit("ButtonName", W_BUTTON);  
-Blinker.wInit("SliderName", W_SLIDER);  
-Blinker.wInit("ToggleName", W_TOGGLE);//keyName, type  
+Blinker.wInit("ButtonName", W_BUTTON)  
+Blinker.wInit("SliderName", W_SLIDER)  
+Blinker.wInit("ToggleName", W_TOGGLE)//keyName, type  
 ```
 >type:  
 >W_BUTTON Button  
@@ -157,52 +154,58 @@ Blinker.wInit("ToggleName", W_TOGGLE);//keyName, type
 ### Blinker.button() 
 Device receives an update of **Button** state from app, return true when **Pressed**, return false when **Released**.
 ```
-bool result = Blinker.button("Button1");
+if Blinker.button("Button1"):  
+    print 'Button pressed!'  
+else:  
+    print 'Button released!'
 ```  
 ### Blinker.slider()
 Return the latest update of **Slider** value from app
 ```
-uint8_t result = Blinker.slider("Slider1");
+result = Blinker.slider("Slider1")
 ```
 ### Blinker.toggle() 
 Device receives an update of **Toggle** state from app, return true when **ON**, return false when **OFF**.
 ```
-bool result = Blinker.toggle("ToggleKey1");
+if Blinker.toggle("Toggle1"):  
+    print 'Toggle1 on!'  
+else:  
+    print 'Toggle1 off!'
 ```
 ### Blinker.joystick()
 Return the latest update of **Joystick** value from app
 ```
-uint8_t result_X = Blinker.joystick(J_Xaxis);
-uint8_t result_Y = Blinker.joystick(J_Yaxis);
+result_X = Blinker.joystick(J_Xaxis)  
+result_Y = Blinker.joystick(J_Yaxis)
 ```
 ### Blinker.ahrs()
 Send **AHRS** attach commond to Blinker
 ```
-Blinker.attachAhrs();
+Blinker.attachAhrs()
 ```
 Return the latest update of **AHRS** value from app
 ```
-int16_t result_Yaw = Blinker.ahrs(Yaw);
-int16_t result_Roll = Blinker.ahrs(Roll);
-int16_t result_Pitch = Blinker.ahrs(Pitch);
+result_Yaw = Blinker.ahrs(Yaw)  
+result_Roll = Blinker.ahrs(Roll)  
+result_Pitch = Blinker.ahrs(Pitch)
 ```
 Send **AHRS** detach commond to Blinker
 ```
-Blinker.detachAhrs();
+Blinker.detachAhrs()
 ```
 ### Blinker.vibrate()
 Send vibrate commond to Blinker, default vibration time is 500 milliseconds
 ```
-Blinker.vibrate();
-Blinker.vibrate(255);  
+Blinker.vibrate()  
+Blinker.vibrate(255)
 ```
 ## Delay
 ### Blinker.delay()
 This function can process incoming commands and perform of Blinker connection when delay
 ```
-Blinker.delay(500);
+Blinker.delay(500)
 ```  
-## Debug
+<!-- ## Debug
 To enable debug prints on the Serial, add this on the top of your sketch:
 ```
 #define BLINKER_PRINTER Serial
@@ -217,16 +220,12 @@ If you want debug output all detail :
 ```
 #define BLINKER_PRINTER Serial
 #define BLINKER_DEBUG_ALL  //add this behind
-```
+``` -->
 ## LOG
 After enabled debug, you can use **BLINKER_LOG()** to debug output:
 ```
-BLINKER_LOG1("detail message 1");  
-BLINKER_LOG2("detail message 1", " 2");  
-BLINKER_LOG3("detail message 1", " 2", " 3");  
-BLINKER_LOG4("detail message 1", " 2", " 3", " 4");  
-BLINKER_LOG5("detail message 1", " 2", " 3", " 4", " 5");  
-BLINKER_LOG6("detail message 1", " 2", " 3", " 4", " 5", " 6");  
+BLINKER_LOG("detail message 1")  
+BLINKER_LOG("detail message 1", " 2")  
 ```
   
 # Thanks
@@ -236,11 +235,11 @@ BLINKER_LOG6("detail message 1", " 2", " 3", " 4", " 5", " 6");
 
 ---
 # 目前支持的硬件
-* Arduino boards
+<!-- * Arduino boards
     - Arduino Uno, Duemilanove
     - Arduino Nano, Mini, Pro Mini, Pro Micro, Due, Mega
 * 使用 [esp8266/arduino](https://github.com/esp8266/arduino) 的ESP8266  
-* 使用 [espressif/arduino-esp32](https://github.com/espressif/arduino-esp32) 的ESP32  
+* 使用 [espressif/arduino-esp32](https://github.com/espressif/arduino-esp32) 的ESP32   -->
   
 # 连接类型
 * Bluetooth Smart (BLE 4.0)  
@@ -266,12 +265,10 @@ Blinker.begin(...);
 
 BLE:
 ```
-#define BLINKER_BLE  
-#include <Blinker.h>  
+import Blinker  
   
-void setup() {  
-    Blinker.begin();  
-}
+Blinker.setMode(BLINKER_BLE)  
+Blinker.begin()
 ```  
   
 >串口蓝牙模块:  
@@ -283,22 +280,18 @@ void setup() {
   
 WiFi:
 ```
-#define BLINKER_WIFI  
-#include <Blinker.h>  
+import Blinker  
   
-void setup() {  
-    Blinker.begin(ssid, pswd);  
-}
+Blinker.setMode(BLINKER_WIFI)  
+Blinker.begin()
 ```  
   
 MQTT:
 ```
-#define BLINKER_MQTT  
-#include <Blinker.h>  
+import Blinker  
   
-void setup() {  
-    Blinker.begin(auth, ssid, pswd);  
-}
+Blinker.setMode(BLINKER_MQTT)  
+Blinker.begin()
 ```
 > MQTT 支持的硬件: WiFiduino, WiFiduino32, ESP8266, ESP32  
 
@@ -315,7 +308,7 @@ bool result = Blinker.connect();
 uint32_t timeout = 30000;//ms  
 bool result = Blinker.connect(timeout);
 ```
-### Blinker.disconnect()
+<!-- ### Blinker.disconnect()
 断开 **Blinker** 设备间连接
 ```
 Blinker.disconnect();
@@ -331,33 +324,36 @@ bool result = Blinker.connected();
 void loop() {
     Blinker.run();
 }
-```
+``` -->
 ## 数据管理
 ### Blinker.available()
 检测是否有接收到数据
 ```
-bool result = Blinker.available();
+if Blinker.available():  
+    print 'data available'  
+else:  
+    print 'none data'
 ```
 ### Blinker.readString()
 读取接收到的数据
 ```
-String data = Blinker.readString();
+data = Blinker.readString()
 ```
 `*读取数据最大为 256 字节`
-### Blinker.print()
+### Blinker.Print()
 发送数据
 ```
-Blinker.print(data);
+Blinker.Print(data)
 ```
-发送一个Json数据, 如 {text1:data}
+<!-- 发送一个Json数据, 如 {text1:data}
 ```
-Blinker.print(text1, data);
+Blinker.Print(text1, data)
 ```  
 发送一个带单位的Json数据, eg: {"temp":"30.2 °C"}
 ```
-Blinker.print("temp", 30.2, "°C");
+Blinker.Print("temp", 30.2, "°C")
 ```
->发送的Json数据可以在 Blinker APP 的 TEXT 组件中显示  
+>发送的Json数据可以在 Blinker APP 的 TEXT 组件中显示   -->
 
 `*发送数据最大为 128 字节`
 
@@ -365,9 +361,9 @@ Blinker.print("temp", 30.2, "°C");
 ### Blinker.wInit()
 组件初始化, 建议在使用前初始化 **Button** 、**Slider**及 **Toggle**
 ```
-Blinker.wInit("ButtonName", W_BUTTON);  
-Blinker.wInit("SliderName", W_SLIDER);  
-Blinker.wInit("ToggleName", W_TOGGLE);//键词, 类型  
+Blinker.wInit("ButtonName", W_BUTTON)  
+Blinker.wInit("SliderName", W_SLIDER)  
+Blinker.wInit("ToggleName", W_TOGGLE)//键词, 类型  
 ```
 >类型:  
 >W_BUTTON 按键  
@@ -377,38 +373,44 @@ Blinker.wInit("ToggleName", W_TOGGLE);//键词, 类型
 ### Blinker.button() 
 读取开关/按键数据, 按下(Pressed)时返回true, 松开(Released)时返回false
 ```
-bool result = Blinker.button("Button1");
+if Blinker.button("Button1"):  
+    print 'Button pressed!'  
+else:  
+    print 'Button released!'
 ```
 ### Blinker.slider()
 读取滑动条数据
 ```
-uint8_t result = Blinker.slider("Slider1");
+result = Blinker.slider("Slider1")
 ```
 ### Blinker.toggle() 
 读取拨动开关数据, 打开(ON)时返回true, 关闭(OFF)时返回false
 ```
-bool result = Blinker.toggle("Toggle1");
+if Blinker.toggle("Toggle1"):  
+    print 'Toggle1 on!'  
+else:  
+    print 'Toggle1 off!'
 ```
 ### Blinker.joystick()
 读取摇杆数据
 ```
-uint8_t result_X = Blinker.joystick(J_Xaxis);
-uint8_t result_Y = Blinker.joystick(J_Yaxis);
+result_X = Blinker.joystick(J_Xaxis)  
+result_Y = Blinker.joystick(J_Yaxis)
 ```
 ### Blinker.ahrs()
 开启手机 **AHRS** 功能
 ```
-Blinker.attachAhrs();
+Blinker.attachAhrs()
 ```
 读取 **AHRS** 数据
 ```
-int16_t result_Yaw = Blinker.ahrs(Yaw);
-int16_t result_Roll = Blinker.ahrs(Roll);
-int16_t result_Pitch = Blinker.ahrs(Pitch);
+result_Yaw = Blinker.ahrs(Yaw)  
+result_Roll = Blinker.ahrs(Roll)  
+result_Pitch = Blinker.ahrs(Pitch)
 ```
 关闭手机 **AHRS** 功能
 ```
-Blinker.dettachAhrs();
+Blinker.dettachAhrs()
 ```
 ### Blinker.vibrate()
 发送手机振动指令, 震动时间, 单位ms 毫秒, 数值范围0-1000, 默认为500
@@ -420,11 +422,11 @@ Blinker.vibrate(255);
 ### Blinker.delay()
 延时函数, 在延时过程中仍保持设备间连接及数据接收处理
 ```
-Blinker.delay(500);
+Blinker.delay(500)
 ```
 >*为了连接设备成功, 需要延时时务必使用该函数;  
 >使用此函数可以在延时期间连接设备及接收数据并处理数据, 延时完成后才能执行后面的程序;  
-## Debug
+<!-- ## Debug
 将这行代码添加到你的工程文件第一行, 以启用串口调试输出功能:
 ```
 #define BLINKER_PRINTER Serial
@@ -439,16 +441,12 @@ Serial.begin(115200);
 ```
 #define BLINKER_PRINTER Serial
 #define BLINKER_DEBUG_ALL  //add this behind
-```
+``` -->
 ## LOG
 开启调试输出 (Debug) 后可以使用 **BLINKER_LOG()** 打印输出调试信息:
 ```
-BLINKER_LOG1("detail message 1");  
-BLINKER_LOG2("detail message 1", " 2");  
-BLINKER_LOG3("detail message 1", " 2", " 3");  
-BLINKER_LOG4("detail message 1", " 2", " 3", " 4");  
-BLINKER_LOG5("detail message 1", " 2", " 3", " 4", " 5");  
-BLINKER_LOG6("detail message 1", " 2", " 3", " 4", " 5", " 6");  
+BLINKER_LOG("detail message 1")  
+BLINKER_LOG("detail message 1", " 2")    
 ```
 
 # 感谢

@@ -14,6 +14,7 @@ if __name__ == '__main__':
         if Blinker.available() == True:
             BLINKER_LOG('Blinker.readString(): ', Blinker.readString())
             Blinker.Print(Blinker.times())
+            Blinker.vibrate()
 
         if Blinker.button(Button1):
             Blinker.Print('Button pressed!')
