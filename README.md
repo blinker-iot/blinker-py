@@ -1,5 +1,5 @@
 # blinker-py
-Blinker python library for hardware. Works with Raspberry Pi, linux windows.  
+Blinker python library for hardware. Works with Raspberry Pi, linux, windows.  
 
 # What's Blinker
 [Blinker](https://blinker-iot.com/) is a platform with iOS and Android apps to control embedded hardware like Arduino. You can easily build graphic interfaces for all your projects by simply dragging and dropping widgets.  
@@ -25,9 +25,12 @@ Blinker python library for hardware. Works with Raspberry Pi, linux windows.
   
 # Prerequisites
 You should have the following ready before beginning with hardware:
-* [python](https://www.python.org/downloads/) 1.6.12 or later
-* Install the [simple-websocket-server](https://github.com/dpallot/simple-websocket-server) 
-* Install the [python-zeroconf](https://github.com/jstasiak/python-zeroconf)   
+* [python](https://www.python.org/downloads/) 2.7.x
+* Install the [simple-websocket-server](https://github.com/dpallot/simple-websocket-server)  
+`pip install https://github.com/dpallot/simple-websocket-server.git`  
+
+* Install the [python-zeroconf](https://github.com/jstasiak/python-zeroconf)  
+`pip install https://github.com/jstasiak/python-zeroconf/archive/0.17.7.zip`   
   
 # Blinker Api
 ## Configuration
