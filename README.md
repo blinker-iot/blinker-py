@@ -230,8 +230,8 @@ BLINKER_LOG6("detail message 1", " 2", " 3", " 4", " 5", " 6");
 ```
   
 # Thanks
-[WebSockets](https://github.com/Links2004/arduinoWebSockets) - for Blinker to build up a websocket server  
-[Adafruit_MQTT_Library](https://github.com/adafruit/Adafruit_MQTT_Library) - for Blinker to build up a mqtt client  
+[simple-websocket-server](https://github.com/dpallot/simple-websocket-server) - for Blinker to build up a websocket server  
+[python-zeroconf](https://github.com/jstasiak/python-zeroconf) - for Blinker to build up a mDNS service  
   
 
 ---
@@ -452,6 +452,6 @@ BLINKER_LOG6("detail message 1", " 2", " 3", " 4", " 5", " 6");
 ```
 
 # 感谢
-[WebSockets](https://github.com/Links2004/arduinoWebSockets) - Blinker 用这个库建立了一个 websocket 服务器  
-[Adafruit_MQTT_Library](https://github.com/adafruit/Adafruit_MQTT_Library) - Blinker 用这个库建立了一个 MQTT 客户端
+[simple-websocket-server](https://github.com/dpallot/simple-websocket-server) - Blinker 用这个库建立了一个 websocket 服务器  
+[python-zeroconf](https://github.com/jstasiak/python-zeroconf) - Blinker 用这个库建立了一个 mDNS 服务
 
