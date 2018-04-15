@@ -25,12 +25,13 @@ Blinker python library for hardware. Works with Raspberry Pi, linux, windows.
   
 # Prerequisites
 You should have the following ready before beginning with hardware:
-* [python](https://www.python.org/downloads/) 2.7.x
+* [python](https://www.python.org/downloads/) 
 * Install the [simple-websocket-server](https://github.com/dpallot/simple-websocket-server)  
 `pip install https://github.com/dpallot/simple-websocket-server.git`  
 
 * Install the [python-zeroconf](https://github.com/jstasiak/python-zeroconf)  
-`pip install https://github.com/jstasiak/python-zeroconf/archive/0.17.7.zip`   
+py2.7.x : `pip install https://github.com/jstasiak/python-zeroconf/archive/0.17.7.zip`  
+py3.x : `pip install zeroconf`   
   
 # Blinker Api
 ## Configuration
@@ -248,12 +249,13 @@ BLINKER_LOG("detail message 1", " 2")
   
 # 准备工作
 开始使用前你需要做好如下准备:
-* [python](https://www.python.org/downloads/) 2.7.x
+* [python](https://www.python.org/downloads/) 
 * Install the [simple-websocket-server](https://github.com/dpallot/simple-websocket-server)  
 `pip install https://github.com/dpallot/simple-websocket-server.git`  
 
 * Install the [python-zeroconf](https://github.com/jstasiak/python-zeroconf)  
-`pip install https://github.com/jstasiak/python-zeroconf/archive/0.17.7.zip`
+py2.7.x : `pip install https://github.com/jstasiak/python-zeroconf/archive/0.17.7.zip`  
+py3.x : `pip install zeroconf` 
 <!-- * 使用 Arduino IDE 的库管理器安装 [WebSockets](https://github.com/Links2004/arduinoWebSockets)     -->
   
 # Blinker接口函数
