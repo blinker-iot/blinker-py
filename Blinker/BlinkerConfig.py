@@ -3,7 +3,7 @@ import uuid
 import socket
 from BlinkerDebug import *
 
-wsPort = 8000
+wsPort = 81
 BLINKER_BLE = 1
 BLINKER_WIFI = 2
 

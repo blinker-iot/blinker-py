@@ -6,3 +6,4 @@ Debug/
 *.sln
 .vscode/
 *.pyc
+Blinker/__pycache__

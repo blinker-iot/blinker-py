@@ -42,10 +42,14 @@ class Protocol():
 bProto = Protocol()
 
 def mDNSinit():
-    info = ServiceInfo("_DiyArduino._tcp.local.",
-                       deviceName + "._DiyArduino._tcp.local.",
+    # deviceType = '_DiyArduino'
+    deviceType = '_DiyLinux'
+    desc = {'deviceType': deviceType}
+
+    info = ServiceInfo(deviceType + "._tcp.local.",
+                       deviceName + "." + deviceType +"._tcp.local.",
                        socket.inet_aton(deviceIP), wsPort, 0, 0,
-                       "", deviceName + ".local.")
+                       desc, deviceName + ".local.")
 
     zeroconf = Zeroconf()
     zeroconf.register_service(info)
@@ -114,21 +118,21 @@ def begin():
 
 def wInit(name, wType):
     if wType == W_BUTTON:
-        if bProto.Buttons.has_key(name):
+        if name in bProto.Buttons:
             return
         else:
             bProto.Buttons[name] = False
         # BLINKER_LOG(bProto.Buttons)
 
     elif wType == W_SLIDER:
-        if bProto.Sliders.has_key(name):
+        if name in bProto.Sliders:
             return
         else:
             bProto.Sliders[name] = 0
         # BLINKER_LOG(bProto.Sliders)
 
     elif wType == W_TOGGLE:
-        if bProto.Toggles.has_key(name):
+        if name in bProto.Toggles:
             return
         else:
             bProto.Toggles[name] = False
@@ -159,7 +163,7 @@ def parse():
         data = json.loads(data)
         for key in data.keys():
             # BLINKER_LOG(key)
-            if bProto.Buttons.has_key(key):
+            if key in bProto.Buttons:
                 # bProto.isAvail = False
                 bProto.isRead = False
                 if data[key] == BLINKER_CMD_BUTTON_PRESSED:
@@ -168,13 +172,13 @@ def parse():
                     bProto.Buttons[key] = False
                 # BLINKER_LOG(bProto.Buttons)
 
-            elif bProto.Sliders.has_key(key):
+            elif key in bProto.Sliders:
                 # bProto.isAvail = False
                 bProto.isRead = False
                 bProto.Sliders[key] = data[key]
                 # BLINKER_LOG(bProto.Buttons)
 
-            elif bProto.Toggles.has_key(key):
+            elif key in bProto.Toggles:
                 # bProto.isAvail = False
                 bProto.isRead = False
                 if data[key] == BLINKER_CMD_ON:
@@ -207,7 +211,7 @@ def parse():
         return
 
 def button(name):
-    if bProto.Buttons.has_key(name):
+    if name in bProto.Buttons:
         state = bProto.Buttons[name]
         bProto.Buttons[name] = False
         return state
@@ -219,7 +223,7 @@ def button(name):
         return state
 
 def slider(name):
-    if bProto.Sliders.has_key(name):
+    if name in bProto.Sliders:
         return bProto.Sliders[name]
     else:
         wInit(name, W_SLIDER)
@@ -227,7 +231,7 @@ def slider(name):
         return bProto.Sliders[name]
 
 def toggle(name):
-    if bProto.Toggles.has_key(name):
+    if name in bProto.Toggles:
         return bProto.Toggles[name]
     else:
         wInit(name, W_TOGGLE)
