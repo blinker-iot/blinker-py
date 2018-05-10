@@ -36,6 +36,7 @@ class CharacteristicUserDescriptionDescriptor(Descriptor):
                 characteristic)
 
     def ReadValue(self, options):
+        print('2902 Read: ' + str(self.value))
         return self.value
 
     def WriteValue(self, value, options):
@@ -57,7 +58,7 @@ class BLEMessageService(Characteristic):
         self.hr_ee_count = 0
 
     def ReadValue(self, options):
-        print('Read: ' + str(self.value))
+        print('FFE1 Read: ' + str(self.value))
 
         option_list = [
                         make_option("-i", "--device", action="store",
@@ -69,9 +70,23 @@ class BLEMessageService(Characteristic):
         return self.value
 
     def WriteValue(self, value, options):
-        print('Write: ' + str(value))
+        print('FFE1 read: ' + str(value))
 
+        value = 'hello world'
+        length = len(value)
+        a = []
+        b = []
+        for i in range(0, length):
+            a.append(dbus.Byte(ord(value[i])))
+            b.append(value[i])
+        print(len(value))
+        print(a)
+        print(b)
+
+        value = dbus.Array(a, signature=dbus.Signature('y'))
+        print(value)
         self.PropertiesChanged(GATT_CHRC_IFACE, { 'Value': value }, [])
+        print('FFE1 Write: ' + str(value))
 
     def StartNotify(self):
         if self.notifying:
