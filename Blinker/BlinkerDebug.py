@@ -1,7 +1,4 @@
-import time
-
-def now():
-    return time.strftime("%H:%M:%S %Y", time.localtime())
+from Blinker.BlinkerConfig import *
 
 def BLINKER_LOG(arg1, *vartuple):
     # timeInfo = time.strftime("%H:%M:%S %Y", time.localtime())
@@ -16,6 +13,6 @@ def BLINKER_ERR_LOG(arg1, *vartuple):
     data = str(arg1)
     for var in vartuple:
         data = data + str(var)
-    data = '[' + now() + ']' + data
+    data = '[' + now() + '] Error: ' + data
     print(data)
     

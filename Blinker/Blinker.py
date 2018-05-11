@@ -24,8 +24,15 @@ def check_json_format(raw_msg):
     else:
         return False
 
+def json_encode(key, value):
+    data = {}
+    data[key] = value
+    data = json.dumps(data)
+    return data
+
 class Protocol():
     conType = BLINKER_WIFI
+    state = CONNECTING
     isAvail = False
     isRead = False
     msgBuf = ""
@@ -33,7 +40,9 @@ class Protocol():
     Sliders = {}
     Toggles = {}
     Joystick = [BLINKER_JOYSTICK_VALUE_DEFAULT, BLINKER_JOYSTICK_VALUE_DEFAULT]
-    Ahrs = [0, 0, 0]
+    Ahrs = [0, 0, 0, False]
+    GPS = ["0.000000", "0.000000"]
+    RGB = {}
 
     # def parse(self):
     #     data = str(Protocol.msgBuf)
@@ -63,15 +72,21 @@ class HandleServer(WebSocket):
         # bProto.isAvail = True
         bProto.isRead = True
         parse()
-        # BLINKER_LOG('Read data: ', self.data)
+        BLINKER_LOG('Read data: ', self.data)
         
     def handleConnected(self):
         clients.append(self)
-        # BLINKER_LOG(self.address, 'connected')
+        msg = json_encode(BLINKER_CMD_STATE, BLINKER_CMD_CONNECTED)
+        for client in clients:
+            client.sendMessage(msg)
+        BLINKER_LOG(self.address, 'connected')
+        bProto.state = CONNECTED
 
     def handleClose(self):
         clients.remove(self)
-        # BLINKER_LOG(self.address, 'closed')
+        BLINKER_LOG(self.address, 'closed')
+        if len(clients) == 0:
+            bProto.state = DISCONNECTED
 
 class WebSocketServer(Thread):
     def __init__(self, name, port):
@@ -121,7 +136,7 @@ def wInit(name, wType):
         if name in bProto.Buttons:
             return
         else:
-            bProto.Buttons[name] = False
+            bProto.Buttons[name] = BLINKER_CMD_BUTTON_RELEASED
         # BLINKER_LOG(bProto.Buttons)
 
     elif wType == W_SLIDER:
@@ -136,15 +151,58 @@ def wInit(name, wType):
             return
         else:
             bProto.Toggles[name] = False
-        # BLINKER_LOG(bProto.Toggles)
 
-def Print(data):
+    elif wType == W_RGB:
+        if name in bProto.RGB:
+            return
+        else:
+            rgb = [0, 0, 0]
+            bProto.RGB[name] = rgb
+        BLINKER_LOG(bProto.Toggles)
+
+def print(key, value = None, uint = None):
     if bProto.conType == BLINKER_BLE:
         return
     elif bProto.conType == BLINKER_WIFI:
-        data = str(data)
+        if value is None:
+            data = str(key)
+        else:
+            key = str(key)
+            if not uint is None:
+                value = str(value) + str(uint)
+            data = json_encode(key, value)
+        if len(data) > BLINKER_MAX_SEND_SIZE:
+            BLINKER_ERR_LOG('SEND DATA BYTES MAX THAN LIMIT!')
+            return
         bWSServer.broadcast(data)
         BLINKER_LOG('Send data: ', data)
+
+def notify(msg):
+    print(BLINKER_CMD_NOTICE, msg)
+
+def connected():
+    if bProto.state is CONNECTED:
+        return True
+    else:
+        return False 
+
+def connect(timeout = BLINKER_STREAM_TIMEOUT):
+    bProto.state = CONNECTING
+    start_time = millis()
+    while (millis() - start_time) < timeout:
+        parse()
+        if bProto.state is CONNECTED:
+            return True
+    return False
+
+def disconnect():
+    bProto.state = DISCONNECTED
+
+def delay(ms):
+    start = millis()
+    time_run = 0
+    while time_run < ms:
+        time_run = millis() - start
 
 def available():
     return bProto.isAvail
@@ -159,6 +217,8 @@ def times():
 
 def parse():
     data = str(bProto.msgBuf)
+    if data is '':
+        return
     if check_json_format(data):
         data = json.loads(data)
         for key in data.keys():
@@ -166,10 +226,13 @@ def parse():
             if key in bProto.Buttons:
                 # bProto.isAvail = False
                 bProto.isRead = False
-                if data[key] == BLINKER_CMD_BUTTON_PRESSED:
-                    bProto.Buttons[key] = True
+                if data[key] == BLINKER_CMD_BUTTON_TAP:
+                    bProto.Buttons[key] = BLINKER_CMD_BUTTON_TAP
+                elif data[key] == BLINKER_CMD_BUTTON_PRESSED:
+                    bProto.Buttons[key] = BLINKER_CMD_BUTTON_PRESSED
                 else:
-                    bProto.Buttons[key] = False
+                    bProto.Buttons[key] = BLINKER_CMD_BUTTON_RELEASED
+                # if data[key] 
                 # BLINKER_LOG(bProto.Buttons)
 
             elif key in bProto.Sliders:
@@ -186,6 +249,14 @@ def parse():
                 else:
                     bProto.Toggles[key] = False
                 # BLINKER_LOG(bProto.Toggles)
+
+            elif key in bProto.RGB:
+                bProto.isRead = False
+                rgb = [0, 0, 0]
+                rgb[R] = data[key][R]
+                rgb[G] = data[key][G]
+                rgb[B] = data[key][B]
+                bProto.RGB[key] = rgb
             
             elif key == BLINKER_CMD_JOYSTICK:
                 # bProto.isAvail = False
@@ -200,7 +271,13 @@ def parse():
                 bProto.Ahrs[Yaw] = data[key][Yaw]
                 bProto.Ahrs[Pitch] = data[key][Pitch]
                 bProto.Ahrs[Roll] = data[key][Roll]
+                bProto.Ahrs[AHRS_state] = True
                 # BLINKER_LOG(bProto.Ahrs)
+
+            elif key == BLINKER_CMD_GPS:
+                bProto.isRead = False
+                bProto.GPS[LONG] = str(data[key][LONG])
+                bProto.GPS[LAT] = str(data[key][LAT])
 
         if bProto.isRead:
             bProto.isAvail = True
@@ -211,16 +288,16 @@ def parse():
         return
 
 def button(name):
-    if name in bProto.Buttons:
-        state = bProto.Buttons[name]
-        bProto.Buttons[name] = False
-        return state
-    else:
+    if not name in bProto.Buttons:
         wInit(name, W_BUTTON)
         parse()
-        state = bProto.Buttons[name]
-        bProto.Buttons[name] = False
-        return state
+
+    if bProto.Buttons[name] is BLINKER_CMD_BUTTON_RELEASED:
+        return False
+    
+    if bProto.Buttons[name] is BLINKER_CMD_BUTTON_TAP:
+        bProto.Buttons[name] = BLINKER_CMD_BUTTON_RELEASED
+    return True
 
 def slider(name):
     if name in bProto.Sliders:
@@ -238,6 +315,14 @@ def toggle(name):
         parse()
         return bProto.Toggles[name]
 
+def rgb(name, color):
+    if name in bProto.RGB:
+        return bProto.RGB[name][color]
+    else:
+        wInit(name, W_RGB)
+        parse()
+        return bProto.RGB[name][color]
+
 def joystick(axis):
     if axis >= J_Xaxis and axis <= J_Yaxis:
         return bProto.Joystick[axis]
@@ -250,9 +335,42 @@ def ahrs(axis):
     else:
         return 0
 
+def attachAhrs():
+    state = False
+    while connected() is False:
+        connect()
+    print(BLINKER_CMD_AHRS, BLINKER_CMD_ON)
+    delay(100)
+    parse()
+    start_time = millis()
+    state = bProto.Ahrs[AHRS_state]
+    while state is False:
+        if (millis() - start_time) > BLINKER_CONNECT_TIMEOUT_MS:
+            BLINKER_LOG("AHRS attach failed...Try again")
+            start_time = millis()
+            print(BLINKER_CMD_AHRS, BLINKER_CMD_ON)
+            delay(100)
+            parse()
+        state = bProto.Ahrs[AHRS_state]
+    BLINKER_LOG("AHRS attach sucessed...")
+
+def detachAhrs():
+    print(BLINKER_CMD_AHRS, BLINKER_CMD_OFF)
+    bProto.Ahrs[Yaw] = 0
+    bProto.Ahrs[Roll] = 0
+    bProto.Ahrs[Pitch] = 0
+    bProto.Ahrs[AHRS_state] = False
+
+def gps(axis):
+    print(BLINKER_CMD_GET, BLINKER_CMD_GPS)
+    delay(100)
+    parse()
+    if axis >= LONG and axis <= LAT:
+        return bProto.GPS[axis]
+    else:
+        return "0.000000"
+
 def vibrate(time = 500):
     if time > 1000:
         time = 1000
-    data = {BLINKER_CMD_VIBRATE:time}
-    data = json.dumps(data)
-    Print(data)
+    print(BLINKER_CMD_VIBRATE, time)

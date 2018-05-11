@@ -6,9 +6,6 @@ Blinker.setMode(BLINKER_WIFI)
 Blinker.begin()
 Blinker.wInit(BUTTON_1, W_BUTTON)
 
-s_value = 0
-on_off = 'on'
-
 if __name__ == '__main__':
     while True:
         if Blinker.available() == True:
@@ -19,5 +16,6 @@ if __name__ == '__main__':
 
         if Blinker.button(BUTTON_1):
             Blinker.print('Button pressed!')
-        
+            Blinker.notify('!Button pressed!')
+
         Blinker.delay(2000)

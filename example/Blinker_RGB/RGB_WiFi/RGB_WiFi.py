@@ -1,13 +1,10 @@
 from Blinker import *
 
-BUTTON_1 = ('ButtonKey')
+RGB_1 = ('RGBKey')
 
 Blinker.setMode(BLINKER_WIFI)
 Blinker.begin()
-Blinker.wInit(BUTTON_1, W_BUTTON)
-
-s_value = 0
-on_off = 'on'
+Blinker.wInit(RGB_1, W_RGB)
 
 if __name__ == '__main__':
     while True:
@@ -17,7 +14,8 @@ if __name__ == '__main__':
             Blinker.vibrate()
             Blinker.print('millis', millis())            
 
-        if Blinker.button(BUTTON_1):
-            Blinker.print('Button pressed!')
-        
+        BLINKER_LOG("Red color: ", Blinker.rgb(RGB_1,R))
+        BLINKER_LOG("Green color: ", Blinker.rgb(RGB_1,G))
+        BLINKER_LOG("Blue color: ", Blinker.rgb(RGB_1,B))
+
         Blinker.delay(2000)

@@ -1,13 +1,7 @@
 from Blinker import *
 
-BUTTON_1 = ('ButtonKey')
-
 Blinker.setMode(BLINKER_WIFI)
 Blinker.begin()
-Blinker.wInit(BUTTON_1, W_BUTTON)
-
-s_value = 0
-on_off = 'on'
 
 if __name__ == '__main__':
     while True:
@@ -15,9 +9,9 @@ if __name__ == '__main__':
             BLINKER_LOG('Blinker.readString(): ', Blinker.readString())
             Blinker.print(Blinker.times())
             Blinker.vibrate()
-            Blinker.print('millis', millis())            
-
-        if Blinker.button(BUTTON_1):
-            Blinker.print('Button pressed!')
+            Blinker.print('millis', millis())
         
+        BLINKER_LOG('GPS LONG: ', Blinker.gps(LONG))
+        BLINKER_LOG('GPS LAT: ', Blinker.gps(LAT))
+
         Blinker.delay(2000)

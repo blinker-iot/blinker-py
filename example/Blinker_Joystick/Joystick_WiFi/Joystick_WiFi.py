@@ -1,13 +1,7 @@
 from Blinker import *
 
-BUTTON_1 = ('ButtonKey')
-
 Blinker.setMode(BLINKER_WIFI)
 Blinker.begin()
-Blinker.wInit(BUTTON_1, W_BUTTON)
-
-s_value = 0
-on_off = 'on'
 
 if __name__ == '__main__':
     while True:
@@ -17,7 +11,7 @@ if __name__ == '__main__':
             Blinker.vibrate()
             Blinker.print('millis', millis())            
 
-        if Blinker.button(BUTTON_1):
-            Blinker.print('Button pressed!')
-        
+        BLINKER_LOG("Joystick X axis: ", Blinker.joystick(J_Xaxis))
+        BLINKER_LOG("Joystick Y axis: ", Blinker.joystick(J_Yaxis))
+
         Blinker.delay(2000)

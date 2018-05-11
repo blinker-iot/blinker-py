@@ -1,13 +1,10 @@
 from Blinker import *
 
-BUTTON_1 = ('ButtonKey')
+SLIDER_1 = ('SliderKey')
 
 Blinker.setMode(BLINKER_WIFI)
 Blinker.begin()
-Blinker.wInit(BUTTON_1, W_BUTTON)
-
-s_value = 0
-on_off = 'on'
+Blinker.wInit(SLIDER_1, W_SLIDER)
 
 if __name__ == '__main__':
     while True:
@@ -15,9 +12,8 @@ if __name__ == '__main__':
             BLINKER_LOG('Blinker.readString(): ', Blinker.readString())
             Blinker.print(Blinker.times())
             Blinker.vibrate()
-            Blinker.print('millis', millis())            
-
-        if Blinker.button(BUTTON_1):
-            Blinker.print('Button pressed!')
+            Blinker.print('millis', millis())
         
+        BLINKER_LOG("Slider read: ", Blinker.slider(SLIDER_1))
+
         Blinker.delay(2000)

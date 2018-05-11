@@ -1,13 +1,8 @@
 from Blinker import *
 
-BUTTON_1 = ('ButtonKey')
-
 Blinker.setMode(BLINKER_WIFI)
 Blinker.begin()
-Blinker.wInit(BUTTON_1, W_BUTTON)
-
-s_value = 0
-on_off = 'on'
+Blinker.wInit(TOGGLE_1, W_TOGGLE)
 
 if __name__ == '__main__':
     while True:
@@ -17,7 +12,9 @@ if __name__ == '__main__':
             Blinker.vibrate()
             Blinker.print('millis', millis())            
 
-        if Blinker.button(BUTTON_1):
-            Blinker.print('Button pressed!')
-        
+        if Blinker.toggle(TOGGLE_1):
+            Blinker.print('Toggle on!')
+        else:
+            Blinker.print('Toggle off!')
+
         Blinker.delay(2000)
