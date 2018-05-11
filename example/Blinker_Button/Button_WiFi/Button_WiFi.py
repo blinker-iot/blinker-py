@@ -1,6 +1,4 @@
-import Blinker
-from BlinkerConfig import *
-from BlinkerDebug import *
+from Blinker import *
 
 Button1 = ('Button')
 
@@ -18,4 +16,3 @@ if __name__ == '__main__':
 
         if Blinker.button(Button1):
             Blinker.Print('Button pressed!')
-            

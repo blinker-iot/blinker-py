@@ -1,7 +1,7 @@
 import uuid
 # import json
 import socket
-from BlinkerDebug import *
+from Blinker.BlinkerDebug import *
 
 wsPort = 81
 BLINKER_BLE = 1
