@@ -104,13 +104,13 @@ Get the status of **Blinker** connection
 ```
 bool result = Blinker.connected();
 ```  
-<!-- ### Blinker.run()
-This function should be called frequently to process incoming commands and perform of Blinker connection. It is usually called in void loop() {}
+### Blinker.run()
+This function should be called frequently to process incoming commands and perform of Blinker connection. It is usually called in main
 ```
-void loop() {
-    Blinker.run();
-}
-``` -->
+if __name__ == '__main__':  
+    while True:  
+        Blinker.run()
+```
 ## Data management
 ### Blinker.available()
 Return true when data already arrived and stored in the receive buffer
@@ -353,13 +353,13 @@ Blinker.disconnect();
 ```
 bool result = Blinker.connected();
 ```  
-<!-- ### Blinker.run()
-此函数需要频繁调用以保持设备间连接及处理收到的数据, 建议放在 **loop()** 函数中
+### Blinker.run()
+此函数需要频繁调用以保持设备间连接及处理收到的数据, 建议放在 **main** 函数中
 ```
-void loop() {
-    Blinker.run();
-}
-``` -->
+if __name__ == '__main__':  
+    while True:  
+        Blinker.run()
+```
 ## 数据管理
 ### Blinker.available()
 检测是否有接收到数据
