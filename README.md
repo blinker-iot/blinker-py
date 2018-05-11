@@ -12,6 +12,7 @@ Blinker python library for hardware. Works with Raspberry Pi, linux, windows.
 
   
 # Currently supported hardware
+* Raspberry Pi boards
 <!-- * Arduino boards
     - Arduino Uno, Duemilanove
     - Arduino Nano, Mini, Pro Mini, Pro Micro, Due, Mega
@@ -30,11 +31,11 @@ You should have the following ready before beginning with hardware:
 `pip3 install https://github.com/dpallot/simple-websocket-server.git`  
 
 * Install the [python-zeroconf](https://github.com/jstasiak/python-zeroconf)  
-`py3.x : pip3 install zeroconf`   
+`pip3 install zeroconf`   
 
 <!-- py2.7.x : `pip install https://github.com/jstasiak/python-zeroconf/archive/0.17.7.zip`   -->
 * Install the [blinker-py](https://github.com/blinker-iot/blinker-py)  
-`py3.x : pip3 setup.py install`
+`pip3 install https://github.com/blinker-iot/blinker-py.git`  
   
 # Blinker Api
 ## Configuration
@@ -47,7 +48,7 @@ Choose different parameters based on the type of connection you use
   
 BLE:
 ```
-import Blinker  
+from Blinker import * 
   
 Blinker.setMode(BLINKER_BLE)
 Blinker.begin()
@@ -62,7 +63,7 @@ Blinker.begin()
   
 WiFi:
 ```
-import Blinker  
+from Blinker import *  
   
 Blinker.setMode(BLINKER_WIFI)  
 Blinker.begin()
@@ -70,7 +71,7 @@ Blinker.begin()
   
 MQTT:
 ```
-import Blinker  
+from Blinker import *  
   
 Blinker.setMode(BLINKER_MQTT)  
 Blinker.begin()
@@ -81,7 +82,7 @@ Blinker.begin()
 1.Configure hardware  
 2.Wait for connection app  
 
-<!-- ## Connection management
+## Connection management
 ### Blinker.connect()
 This function will try onnecting to app.  
 Return true when connected, return false if timeout reached.  
@@ -102,8 +103,8 @@ Blinker.disconnect();
 Get the status of **Blinker** connection
 ```
 bool result = Blinker.connected();
-```
-### Blinker.run()
+```  
+<!-- ### Blinker.run()
 This function should be called frequently to process incoming commands and perform of Blinker connection. It is usually called in void loop() {}
 ```
 void loop() {
@@ -115,9 +116,9 @@ void loop() {
 Return true when data already arrived and stored in the receive buffer
 ```
 if Blinker.available():  
-    print 'data available'  
+    print('data available')  
 else:  
-    print 'none data'
+    print('none data')
 ```
 ### Blinker.readString()
 This function to reads characters from Blinker into a string.
@@ -125,20 +126,20 @@ This function to reads characters from Blinker into a string.
 data = Blinker.readString()
 ```
 `*max read data bytes is 256bytes`
-### Blinker.Print()
+### Blinker.print()
 Prints data to Blinker app
 ```
-Blinker.Print(data)
+Blinker.print(data)
 ```
-<!-- Prints a Json data to Blinkrt app, eg: {"temp":30.2}
+Prints a Json data to Blinkrt app, eg: {"temp":30.2}
 ```
-Blinker.Print("temp", 30.2)
+Blinker.print("temp", 30.2)
 ```  
 Prints a Json data with unit to Blinkrt app, eg: {"temp":"30.2 °C"}
 ```
-Blinker.Print("temp", 30.2, "°C");
+Blinker.print("temp", 30.2, "°C");
 ```
->Json data can display in the Blinker TEXT widget   -->
+>Json data can display in the Blinker TEXT widget  
 
 `*max send data bytes is 128bytes`
 
@@ -153,15 +154,16 @@ Blinker.wInit("ToggleName", W_TOGGLE)//keyName, type
 >type:  
 >W_BUTTON Button  
 >W_SLIDER Slider  
->W_TOGGLE toggle  
+>W_TOGGLE Toggle  
+>W_RGB    RGB  
 
 ### Blinker.button() 
 Device receives an update of **Button** state from app, return true when **Pressed**, return false when **Released**.
 ```
 if Blinker.button("Button1"):  
-    print 'Button pressed!'  
+    print('Button pressed!')  
 else:  
-    print 'Button released!'
+    print('Button released!')
 ```  
 ### Blinker.slider()
 Return the latest update of **Slider** value from app
@@ -172,9 +174,9 @@ result = Blinker.slider("Slider1")
 Device receives an update of **Toggle** state from app, return true when **ON**, return false when **OFF**.
 ```
 if Blinker.toggle("Toggle1"):  
-    print 'Toggle1 on!'  
+    print('Toggle1 on!')  
 else:  
-    print 'Toggle1 off!'
+    print('Toggle1 off!')
 ```
 ### Blinker.joystick()
 Return the latest update of **Joystick** value from app
@@ -196,6 +198,26 @@ result_Pitch = Blinker.ahrs(Pitch)
 Send **AHRS** detach commond to Blinker
 ```
 Blinker.detachAhrs()
+```
+### Blinker.gps()
+<!-- Send **GPS** fresh commond to Blinker
+```
+Blinker.freshGPS();
+``` -->
+Return the latest update of **GPS** value from app
+```
+result_LONG = Blinker.gps(LONG)  
+result_LAT = Blinker.gps(LAT)
+```
+> LONG for longitude  
+> LAT for latitude  
+
+### Blinker.rgb()
+Return the latest update of **RGB** value from app
+```
+result_R = Blinker.rgb("RGBKEY", R)  
+result_G = Blinker.rgb("RGBKEY", G)  
+result_B = Blinker.rgb("RGBKEY", B)
 ```
 ### Blinker.vibrate()
 Send vibrate commond to Blinker, default vibration time is 500 milliseconds
@@ -252,13 +274,18 @@ BLINKER_LOG("detail message 1", " 2")
   
 # 准备工作
 开始使用前你需要做好如下准备:
-* [python](https://www.python.org/downloads/) 
+* [python3.x](https://www.python.org/downloads/) 
 * Install the [simple-websocket-server](https://github.com/dpallot/simple-websocket-server)  
-`pip install https://github.com/dpallot/simple-websocket-server.git`  
+`pip3 install https://github.com/dpallot/simple-websocket-server.git`  
 
 * Install the [python-zeroconf](https://github.com/jstasiak/python-zeroconf)  
-py2.7.x : `pip install https://github.com/jstasiak/python-zeroconf/archive/0.17.7.zip`  
-py3.x : `pip install zeroconf` 
+`pip3 install zeroconf`   
+
+<!-- py2.7.x : `pip install https://github.com/jstasiak/python-zeroconf/archive/0.17.7.zip`   -->
+* Install the [blinker-py](https://github.com/blinker-iot/blinker-py)  
+`pip3 install https://github.com/blinker-iot/blinker-py.git`  
+<!-- py2.7.x : `pip install https://github.com/jstasiak/python-zeroconf/archive/0.17.7.zip`  
+py3.x : `pip install zeroconf`  -->
 <!-- * 使用 Arduino IDE 的库管理器安装 [WebSockets](https://github.com/Links2004/arduinoWebSockets)     -->
   
 # Blinker接口函数
@@ -273,7 +300,7 @@ Blinker.begin(...);
 
 BLE:
 ```
-import Blinker  
+from Blinker import *  
   
 Blinker.setMode(BLINKER_BLE)  
 Blinker.begin()
@@ -288,7 +315,7 @@ Blinker.begin()
   
 WiFi:
 ```
-import Blinker  
+from Blinker import *  
   
 Blinker.setMode(BLINKER_WIFI)  
 Blinker.begin()
@@ -296,7 +323,7 @@ Blinker.begin()
   
 MQTT:
 ```
-import Blinker  
+from Blinker import *  
   
 Blinker.setMode(BLINKER_MQTT)  
 Blinker.begin()
@@ -316,7 +343,7 @@ bool result = Blinker.connect();
 uint32_t timeout = 30000;//ms  
 bool result = Blinker.connect(timeout);
 ```
-<!-- ### Blinker.disconnect()
+### Blinker.disconnect()
 断开 **Blinker** 设备间连接
 ```
 Blinker.disconnect();
@@ -325,8 +352,8 @@ Blinker.disconnect();
 返回 **Blinker** 设备间连接状态
 ```
 bool result = Blinker.connected();
-```
-### Blinker.run()
+```  
+<!-- ### Blinker.run()
 此函数需要频繁调用以保持设备间连接及处理收到的数据, 建议放在 **loop()** 函数中
 ```
 void loop() {
@@ -338,9 +365,9 @@ void loop() {
 检测是否有接收到数据
 ```
 if Blinker.available():  
-    print 'data available'  
+    print('data available')  
 else:  
-    print 'none data'
+    print('none data')
 ```
 ### Blinker.readString()
 读取接收到的数据
@@ -348,20 +375,20 @@ else:
 data = Blinker.readString()
 ```
 `*读取数据最大为 256 字节`
-### Blinker.Print()
+### Blinker.print()
 发送数据
 ```
-Blinker.Print(data)
+Blinker.print(data)
 ```
-<!-- 发送一个Json数据, 如 {text1:data}
+发送一个Json数据, 如 {text1:data}
 ```
-Blinker.Print(text1, data)
+Blinker.print(text1, data)
 ```  
 发送一个带单位的Json数据, eg: {"temp":"30.2 °C"}
 ```
-Blinker.Print("temp", 30.2, "°C")
+Blinker.print("temp", 30.2, "°C")
 ```
->发送的Json数据可以在 Blinker APP 的 TEXT 组件中显示   -->
+>发送的Json数据可以在 Blinker APP 的 TEXT 组件中显示  
 
 `*发送数据最大为 128 字节`
 
@@ -377,14 +404,15 @@ Blinker.wInit("ToggleName", W_TOGGLE)//键词, 类型
 >W_BUTTON 按键  
 >W_SLIDER 滑动条  
 >W_TOGGLE 开关  
+>W_RGB    RGB调色板
 
 ### Blinker.button() 
 读取开关/按键数据, 按下(Pressed)时返回true, 松开(Released)时返回false
 ```
 if Blinker.button("Button1"):  
-    print 'Button pressed!'  
+    print('Button pressed!')  
 else:  
-    print 'Button released!'
+    print('Button released!')
 ```
 ### Blinker.slider()
 读取滑动条数据
@@ -395,9 +423,9 @@ result = Blinker.slider("Slider1")
 读取拨动开关数据, 打开(ON)时返回true, 关闭(OFF)时返回false
 ```
 if Blinker.toggle("Toggle1"):  
-    print 'Toggle1 on!'  
+    print('Toggle1 on!')  
 else:  
-    print 'Toggle1 off!'
+    print('Toggle1 off!')
 ```
 ### Blinker.joystick()
 读取摇杆数据
@@ -419,6 +447,26 @@ result_Pitch = Blinker.ahrs(Pitch)
 关闭手机 **AHRS** 功能
 ```
 Blinker.dettachAhrs()
+```
+### Blinker.gps()
+<!-- 刷新手机 **GPS** 功能
+```
+Blinker.freshAhrs();
+``` -->
+读取 **GPS** 数据
+```
+result_LONG = Blinker.gps(LONG)  
+result_LAT = Blinker.gps(LAT)
+```
+> LONG 经度  
+> LAT 维度  
+
+### Blinker.rgb()
+读取 **RGB** 数据
+```
+result_R = Blinker.rgb("RGBKEY", R)
+result_G = Blinker.rgb("RGBKEY", G)
+result_B = Blinker.rgb("RGBKEY", B)
 ```
 ### Blinker.vibrate()
 发送手机振动指令, 震动时间, 单位ms 毫秒, 数值范围0-1000, 默认为500
