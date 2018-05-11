@@ -11,6 +11,8 @@ on_off = 'on'
 
 if __name__ == '__main__':
     while True:
+        Blinker.run()
+        
         if Blinker.available() == True:
             BLINKER_LOG('Blinker.readString(): ', Blinker.readString())
             Blinker.print(Blinker.times())

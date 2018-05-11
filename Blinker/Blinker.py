@@ -3,34 +3,14 @@ import json
 import socket
 from Blinker.BlinkerConfig import *
 from Blinker.BlinkerDebug import *
-from threading import Thread
-from zeroconf import ServiceInfo, Zeroconf
-from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
-
-clients = []
-deviceName = macDeviceName()
-deviceIP = localIP()
-
-def check_json_format(raw_msg):
-    if isinstance(raw_msg, str):
-        if raw_msg[0] == '{':
-            try:
-                json.loads(raw_msg, encoding='utf-8')
-            except ValueError:
-                return False
-            return True
-        else:
-            return False
-    else:
-        return False
-
-def json_encode(key, value):
-    data = {}
-    data[key] = value
-    data = json.dumps(data)
-    return data
+from Blinker.BlinkerLinuxWS import *
+from Blinker.BlinkerUtility import *
+# from threading import Thread
+# from zeroconf import ServiceInfo, Zeroconf
+# from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 
 class Protocol():
+    conn = None
     conType = BLINKER_WIFI
     state = CONNECTING
     isAvail = False
@@ -44,92 +24,30 @@ class Protocol():
     GPS = ["0.000000", "0.000000"]
     RGB = {}
 
-    # def parse(self):
-    #     data = str(Protocol.msgBuf)
-    #     BLINKER_LOG(data, check_json_format(data))
-
 bProto = Protocol()
-
-def mDNSinit():
-    # deviceType = '_DiyArduino'
-    deviceType = '_DiyLinux'
-    desc = {'deviceType': deviceType}
-
-    info = ServiceInfo(deviceType + "._tcp.local.",
-                       deviceName + "." + deviceType +"._tcp.local.",
-                       socket.inet_aton(deviceIP), wsPort, 0, 0,
-                       desc, deviceName + ".local.")
-
-    zeroconf = Zeroconf()
-    zeroconf.register_service(info)
-
-    BLINKER_LOG('mDNS responder init!')
-
-class HandleServer(WebSocket):
-
-    def handleMessage(self):
-        bProto.msgBuf = self.data
-        # bProto.isAvail = True
-        bProto.isRead = True
-        parse()
-        BLINKER_LOG('Read data: ', self.data)
-        
-    def handleConnected(self):
-        clients.append(self)
-        msg = json_encode(BLINKER_CMD_STATE, BLINKER_CMD_CONNECTED)
-        for client in clients:
-            client.sendMessage(msg)
-        BLINKER_LOG(self.address, 'connected')
-        bProto.state = CONNECTED
-
-    def handleClose(self):
-        clients.remove(self)
-        BLINKER_LOG(self.address, 'closed')
-        if len(clients) == 0:
-            bProto.state = DISCONNECTED
-
-class WebSocketServer(Thread):
-    def __init__(self, name, port):
-        Thread.__init__(self)
-        self.server = SimpleWebSocketServer(deviceIP, wsPort, HandleServer)
-        self._isClosed = False
-        mDNSinit()
-        BLINKER_LOG('websocket Server init')
-        BLINKER_LOG('ws://', deviceIP, ':', wsPort)
-        self.setDaemon(True)
-
-    def start(self):
-        super(WebSocketServer, self).start()
-
-    def run(self):
-        self.server.serveforever()
-
-    def stop(self):
-        self.server.close()
-        self._isClosed = True
-
-    def broadcast(self, msg):
-        if isinstance(msg, str):
-            msg = msg.encode('utf-8').decode("utf-8")
-        for client in clients:
-            client.sendMessage(msg)
-            while client.sendq:
-                opcode, payload = client.sendq.popleft()
-                remaining = client._sendBuffer(payload)
-                if remaining is not None:
-                    client.sendq.appendleft((opcode, remaining))
-                    break
-
-bWSServer = WebSocketServer(deviceIP, wsPort)
 
 def setMode(setType = BLINKER_WIFI):
     bProto.conType = setType
+    if bProto.conType == BLINKER_BLE:
+        return
+    elif bProto.conType == BLINKER_WIFI:
+        bProto.conn = bWSServer
 
 def begin():
     if bProto.conType == BLINKER_BLE:
         return
     elif bProto.conType == BLINKER_WIFI:
-        bWSServer.start()
+        bProto.conn.start()
+
+def run():
+    if bProto.conType == BLINKER_BLE:
+        return
+    elif bProto.conType == BLINKER_WIFI:
+        if wsProto.isRead is True:
+            bProto.msgBuf = wsProto.msgBuf
+            bProto.isRead = True
+            wsProto.isRead = False
+            parse()
 
 def wInit(name, wType):
     if wType == W_BUTTON:
@@ -174,7 +92,7 @@ def print(key, value = None, uint = None):
         if len(data) > BLINKER_MAX_SEND_SIZE:
             BLINKER_ERR_LOG('SEND DATA BYTES MAX THAN LIMIT!')
             return
-        bWSServer.broadcast(data)
+        bProto.conn.broadcast(data)
         BLINKER_LOG('Send data: ', data)
 
 def notify(msg):
@@ -190,7 +108,7 @@ def connect(timeout = BLINKER_STREAM_TIMEOUT):
     bProto.state = CONNECTING
     start_time = millis()
     while (millis() - start_time) < timeout:
-        parse()
+        run()
         if bProto.state is CONNECTED:
             return True
     return False
@@ -202,6 +120,7 @@ def delay(ms):
     start = millis()
     time_run = 0
     while time_run < ms:
+        run()
         time_run = millis() - start
 
 def available():
@@ -290,7 +209,7 @@ def parse():
 def button(name):
     if not name in bProto.Buttons:
         wInit(name, W_BUTTON)
-        parse()
+        run()
 
     if bProto.Buttons[name] is BLINKER_CMD_BUTTON_RELEASED:
         return False
@@ -304,7 +223,7 @@ def slider(name):
         return bProto.Sliders[name]
     else:
         wInit(name, W_SLIDER)
-        parse()
+        run()
         return bProto.Sliders[name]
 
 def toggle(name):
@@ -312,7 +231,7 @@ def toggle(name):
         return bProto.Toggles[name]
     else:
         wInit(name, W_TOGGLE)
-        parse()
+        run()
         return bProto.Toggles[name]
 
 def rgb(name, color):
@@ -320,7 +239,7 @@ def rgb(name, color):
         return bProto.RGB[name][color]
     else:
         wInit(name, W_RGB)
-        parse()
+        run()
         return bProto.RGB[name][color]
 
 def joystick(axis):
@@ -341,7 +260,7 @@ def attachAhrs():
         connect()
     print(BLINKER_CMD_AHRS, BLINKER_CMD_ON)
     delay(100)
-    parse()
+    run()
     start_time = millis()
     state = bProto.Ahrs[AHRS_state]
     while state is False:
@@ -350,7 +269,7 @@ def attachAhrs():
             start_time = millis()
             print(BLINKER_CMD_AHRS, BLINKER_CMD_ON)
             delay(100)
-            parse()
+            run()
         state = bProto.Ahrs[AHRS_state]
     BLINKER_LOG("AHRS attach sucessed...")
 
@@ -364,7 +283,7 @@ def detachAhrs():
 def gps(axis):
     print(BLINKER_CMD_GET, BLINKER_CMD_GPS)
     delay(100)
-    parse()
+    run()
     if axis >= LONG and axis <= LAT:
         return bProto.GPS[axis]
     else:
