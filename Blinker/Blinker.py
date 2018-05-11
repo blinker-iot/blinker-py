@@ -198,6 +198,13 @@ def parse():
                 bProto.GPS[LONG] = str(data[key][LONG])
                 bProto.GPS[LAT] = str(data[key][LAT])
 
+            elif key == BLINKER_CMD_GET and data[key] == BLINKER_CMD_VERSION:
+                bProto.isRead = False
+                print(BLINKER_CMD_VERSION, BLINKER_VERSION)
+
+            elif key == BLINKER_CMD_GET and data[key] == BLINKER_CMD_STATE:
+                heartBeat()
+
         if bProto.isRead:
             bProto.isAvail = True
         # BLINKER_LOG(data.keys())
@@ -205,6 +212,12 @@ def parse():
         if bProto.isRead:
             bProto.isAvail = True
         return
+
+def heartBeat():
+    if bProto.conType is BLINKER_MQTT:
+        print(BLINKER_CMD_STATE, BLINKER_CMD_ONLINE)
+    else:
+        print(BLINKER_CMD_STATE, BLINKER_CMD_CONNECTED)
 
 def button(name):
     if not name in bProto.Buttons:
