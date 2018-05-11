@@ -3,8 +3,8 @@ import json
 import socket
 from Blinker.BlinkerConfig import *
 from Blinker.BlinkerDebug import *
-from Blinker.BlinkerLinuxWS import *
 from Blinker.BlinkerUtility import *
+from Blinker.BlinkerLinuxWS import *
 # from threading import Thread
 # from zeroconf import ServiceInfo, Zeroconf
 # from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
