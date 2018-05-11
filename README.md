@@ -25,13 +25,16 @@ Blinker python library for hardware. Works with Raspberry Pi, linux, windows.
   
 # Prerequisites
 You should have the following ready before beginning with hardware:
-* [python](https://www.python.org/downloads/) 
+* [python3.x](https://www.python.org/downloads/) 
 * Install the [simple-websocket-server](https://github.com/dpallot/simple-websocket-server)  
-`pip install https://github.com/dpallot/simple-websocket-server.git`  
+`pip3 install https://github.com/dpallot/simple-websocket-server.git`  
 
 * Install the [python-zeroconf](https://github.com/jstasiak/python-zeroconf)  
-py2.7.x : `pip install https://github.com/jstasiak/python-zeroconf/archive/0.17.7.zip`  
-py3.x : `pip install zeroconf`   
+`py3.x : pip3 install zeroconf`   
+
+<!-- py2.7.x : `pip install https://github.com/jstasiak/python-zeroconf/archive/0.17.7.zip`   -->
+* Install the [blinker-py](https://github.com/blinker-iot/blinker-py)  
+`py3.x : pip3 setup.py install`
   
 # Blinker Api
 ## Configuration

@@ -1,8 +1,8 @@
 import sys
 import json
 import socket
-from BlinkerConfig import *
-from BlinkerDebug import *
+from Blinker.BlinkerConfig import *
+from Blinker.BlinkerDebug import *
 from threading import Thread
 from zeroconf import ServiceInfo, Zeroconf
 from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
@@ -95,7 +95,7 @@ class WebSocketServer(Thread):
 
     def broadcast(self, msg):
         if isinstance(msg, str):
-            msg = unicode(msg, "utf-8")
+            msg = msg.encode('utf-8').decode("utf-8")
         for client in clients:
             client.sendMessage(msg)
             while client.sendq:
