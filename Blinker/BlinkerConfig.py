@@ -1,11 +1,3 @@
-# import uuid
-# import json
-# import time
-# import socket
-# from Blinker.BlinkerDebug import *
-
-# os_time_start = time.time()
-
 wsPort = 81
 BLINKER_BLE = 1
 BLINKER_WIFI = 2
@@ -60,38 +52,3 @@ BLINKER_CMD_CONNECTED           = 'connected'
 BLINKER_CMD_VERSION             = 'version'
 BLINKER_CMD_NOTICE              = 'notice'
 BLINKER_JOYSTICK_VALUE_DEFAULT  = 128
-
-# def check_json_format(raw_msg):
-#     if isinstance(raw_msg, str):
-#         try:
-#             json.loads(raw_msg, encoding='utf-8')
-#         except ValueError:
-#             return False
-#         return True
-#     else:
-#         return False
-
-# def millis():
-#     ms = (time.time() - os_time_start) * 1000
-#     return int(ms)
-
-# def now():
-#     return time.strftime("%H:%M:%S %Y", time.localtime())
-
-# def macAddress():
-#     return (':'.join(['{:02X}'.format((uuid.getnode() >> ele) & 0xff)
-#         for ele in range(0,8*6,8)][::-1]))
-
-# def macDeviceName():
-#     return (''.join(['{:02X}'.format((uuid.getnode() >> ele) & 0xff)
-#         for ele in range(0,8*6,8)][::-1]))
-
-# def localIP():
-#     try:
-#         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-#         s.connect(('8.8.8.8', 80))
-#         ip = s.getsockname()[0]
-#     finally:
-#         s.close()
-
-#     return ip

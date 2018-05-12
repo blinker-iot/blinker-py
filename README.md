@@ -88,21 +88,21 @@ This function will try onnecting to app.
 Return true when connected, return false if timeout reached.  
 Default timeout is 10 seconds.
 ```
-bool result = Blinker.connect();  
+result = Blinker.connect()  
   
 
-uint32_t timeout = 30000;//ms  
-bool result = Blinker.connect(timeout);
+timeout = 30000 # ms  
+result = Blinker.connect(timeout)
 ```
 ### Blinker.disconnect()
 Disconnect **Blinker** connection
 ```
-Blinker.disconnect();
+Blinker.disconnect()
 ```
 ### Blinker.connected()
 Get the status of **Blinker** connection
 ```
-bool result = Blinker.connected();
+result = Blinker.connected()
 ```  
 ### Blinker.run()
 This function should be called frequently to process incoming commands and perform of Blinker connection. It is usually called in main
@@ -337,21 +337,21 @@ Blinker.begin()
 ### Blinker.connect()
 建立 **Blinker** 设备间连接并返回连接状态, 默认超时时间为10秒
 ```
-bool result = Blinker.connect();  
+result = Blinker.connect()  
   
 
-uint32_t timeout = 30000;//ms  
-bool result = Blinker.connect(timeout);
+timeout = 30000 # ms  
+result = Blinker.connect(timeout)
 ```
 ### Blinker.disconnect()
 断开 **Blinker** 设备间连接
 ```
-Blinker.disconnect();
+Blinker.disconnect()
 ```
 ### Blinker.connected()
 返回 **Blinker** 设备间连接状态
 ```
-bool result = Blinker.connected();
+result = Blinker.connected()
 ```  
 ### Blinker.run()
 此函数需要频繁调用以保持设备间连接及处理收到的数据, 建议放在 **main** 函数中

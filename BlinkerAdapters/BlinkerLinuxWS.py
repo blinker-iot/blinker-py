@@ -94,4 +94,4 @@ class WebSocketServer(Thread):
                     client.sendq.appendleft((opcode, remaining))
                     break
 
-bWSServer = WebSocketServer(deviceIP, wsPort)
+# bWSServer = WebSocketServer(deviceIP, wsPort)

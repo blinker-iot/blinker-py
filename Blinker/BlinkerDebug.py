@@ -1,4 +1,3 @@
-# from Blinker.BlinkerConfig import *
 from BlinkerUtility.BlinkerUtility import *
 
 def BLINKER_LOG(arg1, *vartuple):

@@ -31,7 +31,8 @@ def setMode(setType = BLINKER_WIFI):
     if bProto.conType == BLINKER_BLE:
         return
     elif bProto.conType == BLINKER_WIFI:
-        bProto.conn = bWSServer
+        # bProto.conn = bWSServer
+        bProto.conn = WebSocketServer(deviceIP, wsPort)
 
 def begin():
     if bProto.conType == BLINKER_BLE:
