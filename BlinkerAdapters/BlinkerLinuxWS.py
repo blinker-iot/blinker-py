@@ -3,7 +3,7 @@ from zeroconf import ServiceInfo, Zeroconf
 from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 from Blinker.BlinkerConfig import *
 from Blinker.BlinkerDebug import *
-from Blinker.BlinkerUtility import *
+from BlinkerUtility.BlinkerUtility import *
 
 clients = []
 deviceName = macDeviceName()
@@ -94,4 +94,4 @@ class WebSocketServer(Thread):
                     client.sendq.appendleft((opcode, remaining))
                     break
 
-bWSServer = WebSocketServer(deviceIP, wsPort)
+# bWSServer = WebSocketServer(deviceIP, wsPort)

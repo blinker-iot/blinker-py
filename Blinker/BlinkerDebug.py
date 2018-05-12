@@ -1,4 +1,4 @@
-from Blinker.BlinkerConfig import *
+from BlinkerUtility.BlinkerUtility import *
 
 def BLINKER_LOG(arg1, *vartuple):
     # timeInfo = time.strftime("%H:%M:%S %Y", time.localtime())

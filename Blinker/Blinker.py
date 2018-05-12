@@ -3,8 +3,8 @@ import json
 import socket
 from Blinker.BlinkerConfig import *
 from Blinker.BlinkerDebug import *
-from Blinker.BlinkerUtility import *
-from Blinker.BlinkerLinuxWS import *
+from BlinkerUtility.BlinkerUtility import *
+from BlinkerAdapters.BlinkerLinuxWS import *
 # from threading import Thread
 # from zeroconf import ServiceInfo, Zeroconf
 # from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
@@ -31,7 +31,8 @@ def setMode(setType = BLINKER_WIFI):
     if bProto.conType == BLINKER_BLE:
         return
     elif bProto.conType == BLINKER_WIFI:
-        bProto.conn = bWSServer
+        # bProto.conn = bWSServer
+        bProto.conn = WebSocketServer(deviceIP, wsPort)
 
 def begin():
     if bProto.conType == BLINKER_BLE:
