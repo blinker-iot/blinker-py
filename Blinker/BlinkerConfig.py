@@ -1,10 +1,10 @@
-import uuid
+# import uuid
 # import json
-import time
-import socket
+# import time
+# import socket
 # from Blinker.BlinkerDebug import *
 
-os_time_start = time.time()
+# os_time_start = time.time()
 
 wsPort = 81
 BLINKER_BLE = 1
@@ -70,27 +70,28 @@ BLINKER_JOYSTICK_VALUE_DEFAULT  = 128
 #         return True
 #     else:
 #         return False
-def millis():
-    ms = (time.time() - os_time_start) * 1000
-    return int(ms)
 
-def now():
-    return time.strftime("%H:%M:%S %Y", time.localtime())
+# def millis():
+#     ms = (time.time() - os_time_start) * 1000
+#     return int(ms)
 
-def macAddress():
-    return (':'.join(['{:02X}'.format((uuid.getnode() >> ele) & 0xff)
-        for ele in range(0,8*6,8)][::-1]))
+# def now():
+#     return time.strftime("%H:%M:%S %Y", time.localtime())
 
-def macDeviceName():
-    return (''.join(['{:02X}'.format((uuid.getnode() >> ele) & 0xff)
-        for ele in range(0,8*6,8)][::-1]))
+# def macAddress():
+#     return (':'.join(['{:02X}'.format((uuid.getnode() >> ele) & 0xff)
+#         for ele in range(0,8*6,8)][::-1]))
 
-def localIP():
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(('8.8.8.8', 80))
-        ip = s.getsockname()[0]
-    finally:
-        s.close()
+# def macDeviceName():
+#     return (''.join(['{:02X}'.format((uuid.getnode() >> ele) & 0xff)
+#         for ele in range(0,8*6,8)][::-1]))
 
-    return ip
+# def localIP():
+#     try:
+#         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+#         s.connect(('8.8.8.8', 80))
+#         ip = s.getsockname()[0]
+#     finally:
+#         s.close()
+
+#     return ip

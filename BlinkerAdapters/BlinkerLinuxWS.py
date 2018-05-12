@@ -3,7 +3,7 @@ from zeroconf import ServiceInfo, Zeroconf
 from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 from Blinker.BlinkerConfig import *
 from Blinker.BlinkerDebug import *
-from Blinker.BlinkerUtility import *
+from BlinkerUtility.BlinkerUtility import *
 
 clients = []
 deviceName = macDeviceName()
