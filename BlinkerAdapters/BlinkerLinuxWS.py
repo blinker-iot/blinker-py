@@ -13,11 +13,18 @@ class WS_Protol():
     msgBuf = ''
     isRead = False
     state = CONNECTING
+    debug = BLINKER_DEBUG
 
 wsProto = WS_Protol()
 
-def mDNSinit():
-    deviceType = '_DiyArduino'
+def isDebugAll():
+    if wsProto.debug == BLINKER_DEBUG_ALL:
+        return True
+    else:
+        return False
+
+def mDNSinit(type):
+    deviceType = type # '_DiyArduino'
     # deviceType = '_DiyLinux'
     desc = {'deviceType': deviceType}
 
@@ -34,13 +41,10 @@ def mDNSinit():
 class HandleServer(WebSocket):
 
     def handleMessage(self):
-        # bProto.msgBuf = self.data
-        # bProto.isRead = True
         wsProto.msgBuf = self.data
         wsProto.isRead = True
-        # parse()
-        # dataGet(self.data)
-        BLINKER_LOG('Read data: ', self.data)
+        if isDebugAll() is True:
+            BLINKER_LOG('Read data: ', self.data)
         
     def handleConnected(self):
         clients.append(self)
@@ -61,18 +65,19 @@ class HandleServer(WebSocket):
         #     freshState(DISCONNECTED)
 
 class WebSocketServer(Thread):
-    def __init__(self, name, port):
+    def __init__(self, name, port, type = BLINKER_DIY_WIFI):
         Thread.__init__(self)
-        self.server = SimpleWebSocketServer(deviceIP, wsPort, HandleServer)
+        self.name = name
+        self.port = port
+        self.type = type
+        self.server = SimpleWebSocketServer(self.name, self.port, HandleServer)
         self._isClosed = False
-        mDNSinit()
-        # BLINKER_LOG('websocket Server init')
-        # BLINKER_LOG('ws://', deviceIP, ':', wsPort)
         self.setDaemon(True)
 
     def start(self):
+        mDNSinit(self.type)
         BLINKER_LOG('websocket Server init')
-        BLINKER_LOG('ws://', deviceIP, ':', wsPort)
+        BLINKER_LOG('ws://', self.name, ':', self.port)
         super(WebSocketServer, self).start()
 
     def run(self):
@@ -83,6 +88,8 @@ class WebSocketServer(Thread):
         self._isClosed = True
 
     def broadcast(self, msg):
+        if isDebugAll() is True:
+            BLINKER_LOG('Send data: ', data)
         if isinstance(msg, str):
             msg = msg.encode('utf-8').decode("utf-8")
         for client in clients:
