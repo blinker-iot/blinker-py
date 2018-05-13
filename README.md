@@ -33,9 +33,18 @@ You should have the following ready before beginning with hardware:
 * Install the [python-zeroconf](https://github.com/jstasiak/python-zeroconf)  
 `pip3 install zeroconf`   
 
+* Install the [paho.mqtt.python](https://github.com/eclipse/paho.mqtt.python)  
+`pip3 install paho-mqtt`
+
+* Install the [requests](https://github.com/requests/requests)  
+`pip3 install requests`  
+
 <!-- py2.7.x : `pip install https://github.com/jstasiak/python-zeroconf/archive/0.17.7.zip`   -->
 * Install the [blinker-py](https://github.com/blinker-iot/blinker-py)  
 `pip3 install https://github.com/blinker-iot/blinker-py.git`  
+
+
+
   
 # Blinker Api
 ## Configuration
@@ -54,12 +63,12 @@ Blinker.setMode(BLINKER_BLE)
 Blinker.begin()
 ```  
 
->SerialBLE Modules:  
+<!-- >SerialBLE Modules:  
 >**Blinker.begin()** will config SoftWareSerial with default settings.  
 >  
 >Blinker.begin();// default settings digital pins 2(RX) 3(TX) and baudrate 9600 bps  
 >Blinker.begin(4, 5);// config digital pins 4(RX) 5(TX) with default baudrate 9600 bps  
->Blinker.begin(4, 5, 115200);// config digital pins 4(RX) 5(TX) and baudrate 115200 bps  
+>Blinker.begin(4, 5, 115200);// config digital pins 4(RX) 5(TX) and baudrate 115200 bps   -->
   
 WiFi:
 ```
@@ -76,7 +85,7 @@ from Blinker import *
 Blinker.setMode(BLINKER_MQTT)  
 Blinker.begin()
 ```
-> MQTT support hardware: WiFiduino, WiFiduino32, ESP8266, ESP32  
+<!-- > MQTT support hardware: WiFiduino, WiFiduino32, ESP8266, ESP32   -->
 
 **begin()** is basically doing these steps:  
 1.Configure hardware  
@@ -260,6 +269,8 @@ BLINKER_LOG("detail message 1", " 2")
 # Thanks
 [simple-websocket-server](https://github.com/dpallot/simple-websocket-server) - for Blinker to build up a websocket server  
 [python-zeroconf](https://github.com/jstasiak/python-zeroconf) - for Blinker to build up a mDNS service  
+[paho.mqtt.python](https://github.com/eclipse/paho.mqtt.python) - for Blinker to build up a MQTT Client  
+[requests](https://github.com/requests/requests) - for Blinker to send a web request  
   
 
 ---
@@ -283,6 +294,12 @@ BLINKER_LOG("detail message 1", " 2")
 
 * Install the [python-zeroconf](https://github.com/jstasiak/python-zeroconf)  
 `pip3 install zeroconf`   
+
+* Install the [paho.mqtt.python](https://github.com/eclipse/paho.mqtt.python)  
+`pip3 install paho-mqtt`
+
+* Install the [requests](https://github.com/requests/requests)  
+`pip3 install requests`  
 
 <!-- py2.7.x : `pip install https://github.com/jstasiak/python-zeroconf/archive/0.17.7.zip`   -->
 * Install the [blinker-py](https://github.com/blinker-iot/blinker-py)  
@@ -515,5 +532,7 @@ BLINKER_LOG("detail message 1", " 2")
 
 # 感谢
 [simple-websocket-server](https://github.com/dpallot/simple-websocket-server) - Blinker 用这个库建立了一个 websocket 服务器  
-[python-zeroconf](https://github.com/jstasiak/python-zeroconf) - Blinker 用这个库建立了一个 mDNS 服务
+[python-zeroconf](https://github.com/jstasiak/python-zeroconf) - Blinker 用这个库建立了一个 mDNS 服务  
+[paho.mqtt.python](https://github.com/eclipse/paho.mqtt.python) - Blinker 用这个库建立了一个 MQTT Client  
+[requests](https://github.com/requests/requests) - Blinker 用这个库发送网络请求  
 
