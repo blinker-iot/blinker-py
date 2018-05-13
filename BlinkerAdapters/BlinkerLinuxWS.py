@@ -89,7 +89,14 @@ class WebSocketServer(Thread):
 
     def broadcast(self, msg):
         if isDebugAll() is True:
-            BLINKER_LOG('Send data: ', data)
+            BLINKER_LOG('Response data: ', msg)
+        if len(clients) == 0:
+            wsProto.state = DISCONNECTED
+            if isDebugAll() is True:
+                BLINKER_ERR_LOG('Faile... Disconnected')
+            return
+        if isDebugAll() is True:
+            BLINKER_LOG('Succese...')
         if isinstance(msg, str):
             msg = msg.encode('utf-8').decode("utf-8")
         for client in clients:

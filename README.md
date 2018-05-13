@@ -231,8 +231,8 @@ This function can process incoming commands and perform of Blinker connection wh
 ```
 Blinker.delay(500)
 ```  
-<!-- ## Debug
-To enable debug prints on the Serial, add this on the top of your sketch:
+## Debug
+<!-- To enable debug prints on the Serial, add this on the top of your sketch:
 ```
 #define BLINKER_PRINTER Serial
 ```
@@ -240,13 +240,16 @@ Init & enable Serial in `void setup()` :
 ```
 Serial.begin(115200);
 ```
-You can also use spare HardWareSerial or SoftWareSerial for debug output (you will need an adapter to connect to it with your PC).  
+You can also use spare HardWareSerial or SoftWareSerial for debug output (you will need an adapter to connect to it with your PC).   -->
   
 If you want debug output all detail :
 ```
-#define BLINKER_PRINTER Serial
-#define BLINKER_DEBUG_ALL  //add this behind
-``` -->
+from Blinker import *  
+
+Blinker.setMode(BLINKER_WIFI)  
+Blinker.debugLevel(BLINKER_DEBUG_ALL)  
+Blinker.begin()
+```
 ## LOG
 After enabled debug, you can use **BLINKER_LOG()** to debug output:
 ```
@@ -306,12 +309,12 @@ Blinker.setMode(BLINKER_BLE)
 Blinker.begin()
 ```  
   
->串口蓝牙模块:  
+<!-- >串口蓝牙模块:  
 >**Blinker.begin()** 将使用默认设置配置 SoftWareSerial   
 >  
 >Blinker.begin();// 默认设置: 数字IO 2(RX) 3(TX), 波特率 9600 bps  
 >Blinker.begin(4, 5);// 设置数字IO 4(RX) 5(TX), 默认波特率 9600 bps  
->Blinker.begin(4, 5, 115200);// 设置数字IO 4(RX) 5(TX) 及波特率 115200 bps  
+>Blinker.begin(4, 5, 115200);// 设置数字IO 4(RX) 5(TX) 及波特率 115200 bps   -->
   
 WiFi:
 ```
@@ -328,7 +331,7 @@ from Blinker import *
 Blinker.setMode(BLINKER_MQTT)  
 Blinker.begin()
 ```
-> MQTT 支持的硬件: WiFiduino, WiFiduino32, ESP8266, ESP32  
+<!-- > MQTT 支持的硬件: WiFiduino, WiFiduino32, ESP8266, ESP32   -->
 
 **begin()** 主要完成以下配置:  
 1.初始化硬件设置;  
@@ -394,17 +397,19 @@ Blinker.print("temp", 30.2, "°C")
 
 ## App Widgets
 ### Blinker.wInit()
-组件初始化, 建议在使用前初始化 **Button** 、**Slider**及 **Toggle**
+组件初始化, 建议在使用前初始化 **Button** 、**Slider** 、 **Toggle** 及 **RGB**
 ```
 Blinker.wInit("ButtonName", W_BUTTON)  
 Blinker.wInit("SliderName", W_SLIDER)  
-Blinker.wInit("ToggleName", W_TOGGLE)//键词, 类型  
+Blinker.wInit("ToggleName", W_TOGGLE)
+Blinker.wInit("RGBName", W_RGB)//键词, 类型  
 ```
 >类型:  
 >W_BUTTON 按键  
 >W_SLIDER 滑动条  
 >W_TOGGLE 开关  
->W_RGB    RGB调色板
+>W_RGB    RGB调色板  
+
 
 ### Blinker.button() 
 读取开关/按键数据, 按下(Pressed)时返回true, 松开(Released)时返回false
@@ -482,8 +487,8 @@ Blinker.delay(500)
 ```
 >*为了连接设备成功, 需要延时时务必使用该函数;  
 >使用此函数可以在延时期间连接设备及接收数据并处理数据, 延时完成后才能执行后面的程序;  
-<!-- ## Debug
-将这行代码添加到你的工程文件第一行, 以启用串口调试输出功能:
+## Debug
+<!-- 将这行代码添加到你的工程文件第一行, 以启用串口调试输出功能:
 ```
 #define BLINKER_PRINTER Serial
 ```
@@ -492,12 +497,15 @@ Blinker.delay(500)
 Serial.begin(115200);
 ```
 你可以用额外的硬件串口 (HardWareSerial) 或者软串口 (SoftWareSerial) 来调试输出 (你需要额外的适配器将该串口连接到你的电脑上).  
-  
+   -->
 如果你想调试输出更多细节信息 :
 ```
-#define BLINKER_PRINTER Serial
-#define BLINKER_DEBUG_ALL  //add this behind
-``` -->
+from Blinker import *
+
+Blinker.setMode(BLINKER_WIFI)
+Blinker.debugLevel(BLINKER_DEBUG_ALL)
+Blinker.begin()
+```
 ## LOG
 开启调试输出 (Debug) 后可以使用 **BLINKER_LOG()** 打印输出调试信息:
 ```
