@@ -61,12 +61,16 @@ def run():
     if bProto.conType == BLINKER_BLE:
         return
     elif bProto.conType == BLINKER_WIFI:
+        bProto.state = wsProto.state
         if wsProto.isRead is True:
             bProto.msgBuf = str(wsProto.msgBuf)
             bProto.isRead = True
             wsProto.isRead = False
             parse()
     elif bProto.conType == BLINKER_MQTT:
+        bProto.state = mProto.state
+        if wsProto.state is CONNECTED:
+            bProto.state = wsProto.state
         if mProto.isRead is True:
             bProto.msgBuf = mProto.msgBuf
             bProto.msgFrom = BLINKER_MQTT
