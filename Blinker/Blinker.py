@@ -126,7 +126,7 @@ def print(key, value = None, uint = None):
             return
 
         bProto.conn1.broadcast(data)
-        BLINKER_LOG('Send data: ', data)
+        # BLINKER_LOG('Send data: ', data)
     elif bProto.conType == BLINKER_MQTT and bProto.msgFrom == BLINKER_MQTT:
         if value is None:
             data = str(key)
@@ -156,7 +156,7 @@ def print(key, value = None, uint = None):
             return
 
         bProto.conn2.broadcast(data)
-        BLINKER_LOG('Send data: ', data)
+        # BLINKER_LOG('Send data: ', data)
 
 def notify(msg):
     print(BLINKER_CMD_NOTICE, msg)
