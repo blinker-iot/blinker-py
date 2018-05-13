@@ -1,38 +1,48 @@
-wsPort = 81
-BLINKER_BLE = 1
-BLINKER_WIFI = 2
+wsPort                          = 81
 
-W_BUTTON = 1
-W_SLIDER = 2
-W_TOGGLE = 3
-W_RGB = 4
+BLINKER_BLE                     = 0
+BLINKER_WIFI                    = 1
+BLINKER_MQTT                    = 2
 
-J_Xaxis = 0
-J_Yaxis = 1
+W_BUTTON                        = 0
+W_SLIDER                        = 1
+W_TOGGLE                        = 2
+W_RGB                           = 3
 
-Yaw = 0
-Pitch = 1
-Roll = 2
-AHRS_state = 3
+J_Xaxis                         = 0
+J_Yaxis                         = 1
 
-LONG = 0
-LAT = 1
+Yaw                             = 0
+Pitch                           = 1
+Roll                            = 2
+AHRS_state                      = 3
 
-R = 0
-G = 1
-B = 2
+LONG                            = 0
+LAT                             = 1
 
-CONNECTING = 0
-CONNECTED = 1
-DISCONNECTED = 2
+R                               = 0
+G                               = 1
+B                               = 2
+
+CONNECTING                      = 0
+CONNECTED                       = 1
+DISCONNECTED                    = 2
+
+BLINKER_DEBUG                   = 0
+BLINKER_DEBUG_ALL               = 1
 
 BLINKER_VERSION                 = '0.1.0'
 
 BLINKER_MAX_READ_SIZE           = 256
 BLINKER_MAX_SEND_SIZE           = 128
 
+BLINKER_DIY_WIFI                = '_DiyArduino'
+BLINKER_DIY_MQTT                = '_DiyArduinoMQTT'
+
 BLINKER_CONNECT_TIMEOUT_MS      = 10000
 BLINKER_STREAM_TIMEOUT          = 100
+BLINKER_MQTT_MSG_LIMIT          = 1000
+BLINKER_MQTT_KEEPALIVE          = 120000
 BLINKER_CMD_ON                  = 'on'
 BLINKER_CMD_OFF                 = 'off'
 BLINKER_CMD_JOYSTICK            = 'joy'

@@ -5,17 +5,20 @@ from Blinker.BlinkerConfig import *
 from Blinker.BlinkerDebug import *
 from BlinkerUtility.BlinkerUtility import *
 from BlinkerAdapters.BlinkerLinuxWS import *
+from BlinkerAdapters.BlinkerMQTT import *
 # from threading import Thread
 # from zeroconf import ServiceInfo, Zeroconf
 # from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 
 class Protocol():
-    conn = None
+    conn1 = None
+    conn2 = None
     conType = BLINKER_WIFI
     state = CONNECTING
     isAvail = False
     isRead = False
     msgBuf = ""
+    msgFrom = None
     Buttons = {}
     Sliders = {}
     Toggles = {}
@@ -23,6 +26,7 @@ class Protocol():
     Ahrs = [0, 0, 0, False]
     GPS = ["0.000000", "0.000000"]
     RGB = {}
+    debug = BLINKER_DEBUG
 
 bProto = Protocol()
 
@@ -31,21 +35,47 @@ def setMode(setType = BLINKER_WIFI):
     if bProto.conType == BLINKER_BLE:
         return
     elif bProto.conType == BLINKER_WIFI:
-        # bProto.conn = bWSServer
-        bProto.conn = WebSocketServer(deviceIP, wsPort)
+        # bProto.conn1 = bWSServer
+        bProto.conn1 = WebSocketServer(deviceIP, wsPort)
+    elif bProto.conType == BLINKER_MQTT:
+        bProto.conn1 = MQTTClient()
+        bProto.conn2 = WebSocketServer(deviceIP, wsPort, BLINKER_DIY_MQTT)
 
-def begin():
+def debugLevel(level = BLINKER_DEBUG):
+    bProto.debug = level
+
+def begin(auth = None):
     if bProto.conType == BLINKER_BLE:
         return
     elif bProto.conType == BLINKER_WIFI:
-        bProto.conn.start()
+        wsProto.debug = bProto.debug
+        bProto.conn1.start()
+    elif bProto.conType == BLINKER_MQTT:
+        mProto.debug = bProto.debug
+        wsProto.debug = bProto.debug
+        bProto.conn2.start()
+        bProto.conn1.start(auth)
+        bProto.conn1.run()
 
 def run():
     if bProto.conType == BLINKER_BLE:
         return
     elif bProto.conType == BLINKER_WIFI:
         if wsProto.isRead is True:
-            bProto.msgBuf = wsProto.msgBuf
+            bProto.msgBuf = str(wsProto.msgBuf)
+            bProto.isRead = True
+            wsProto.isRead = False
+            parse()
+    elif bProto.conType == BLINKER_MQTT:
+        if mProto.isRead is True:
+            bProto.msgBuf = mProto.msgBuf
+            bProto.msgFrom = BLINKER_MQTT
+            bProto.isRead = True
+            mProto.isRead = False
+            parse()
+        if wsProto.isRead is True:
+            bProto.msgBuf = str(wsProto.msgBuf)
+            bProto.msgFrom = BLINKER_WIFI
             bProto.isRead = True
             wsProto.isRead = False
             parse()
@@ -90,10 +120,42 @@ def print(key, value = None, uint = None):
             if not uint is None:
                 value = str(value) + str(uint)
             data = json_encode(key, value)
+
         if len(data) > BLINKER_MAX_SEND_SIZE:
             BLINKER_ERR_LOG('SEND DATA BYTES MAX THAN LIMIT!')
             return
-        bProto.conn.broadcast(data)
+
+        bProto.conn1.broadcast(data)
+        BLINKER_LOG('Send data: ', data)
+    elif bProto.conType == BLINKER_MQTT and bProto.msgFrom == BLINKER_MQTT:
+        if value is None:
+            data = str(key)
+        else:
+            key = str(key)
+            if not uint is None:
+                value = str(value) + str(uint)
+            data = {}
+            data[key] = value
+
+        if len(data) > BLINKER_MAX_SEND_SIZE:
+            BLINKER_ERR_LOG('SEND DATA BYTES MAX THAN LIMIT!')
+            return
+
+        bProto.conn1.pub(data)
+    elif bProto.conType == BLINKER_MQTT and bProto.msgFrom == BLINKER_WIFI:
+        if value is None:
+            data = str(key)
+        else:
+            key = str(key)
+            if not uint is None:
+                value = str(value) + str(uint)
+            data = json_encode(key, value)
+
+        if len(data) > BLINKER_MAX_SEND_SIZE:
+            BLINKER_ERR_LOG('SEND DATA BYTES MAX THAN LIMIT!')
+            return
+
+        bProto.conn2.broadcast(data)
         BLINKER_LOG('Send data: ', data)
 
 def notify(msg):
@@ -136,7 +198,7 @@ def times():
     return now()
 
 def parse():
-    data = str(bProto.msgBuf)
+    data = bProto.msgBuf
     if data is '':
         return
     if check_json_format(data):
@@ -204,7 +266,8 @@ def parse():
                 print(BLINKER_CMD_VERSION, BLINKER_VERSION)
 
             elif key == BLINKER_CMD_GET and data[key] == BLINKER_CMD_STATE:
-                heartBeat()
+                bProto.isRead = False
+                heartbeat()
 
         if bProto.isRead:
             bProto.isAvail = True
@@ -214,7 +277,7 @@ def parse():
             bProto.isAvail = True
         return
 
-def heartBeat():
+def heartbeat():
     if bProto.conType is BLINKER_MQTT:
         print(BLINKER_CMD_STATE, BLINKER_CMD_ONLINE)
     else:
