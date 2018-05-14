@@ -370,7 +370,7 @@ def gps(axis):
     else:
         return "0.000000"
 
-def vibrate(time = 500):
+def vibrate(time = 200):
     if time > 1000:
         time = 1000
     print(BLINKER_CMD_VIBRATE, time)
