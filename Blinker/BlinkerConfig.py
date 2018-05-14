@@ -36,8 +36,8 @@ BLINKER_VERSION                 = '0.1.0'
 BLINKER_MAX_READ_SIZE           = 256
 BLINKER_MAX_SEND_SIZE           = 128
 
-BLINKER_DIY_WIFI                = '_DiyArduino'
-BLINKER_DIY_MQTT                = '_DiyArduinoMQTT'
+BLINKER_DIY_WIFI                = 'DiyArduino'
+BLINKER_DIY_MQTT                = 'DiyArduinoMQTT'
 
 BLINKER_CONNECT_TIMEOUT_MS      = 10000
 BLINKER_STREAM_TIMEOUT          = 100
