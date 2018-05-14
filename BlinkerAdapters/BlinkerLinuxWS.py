@@ -24,9 +24,8 @@ def isDebugAll():
         return False
 
 def mDNSinit(type):
-    deviceType = type # '_DiyArduino'
-    # deviceType = '_DiyLinux'
-    desc = {'deviceType': deviceType}
+    deviceType = '_' + type
+    desc = {'deviceType': type}
 
     info = ServiceInfo(deviceType + "._tcp.local.",
                        deviceName + "." + deviceType +"._tcp.local.",
