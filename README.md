@@ -28,7 +28,7 @@ Blinker python library for hardware. Works with Raspberry Pi, linux, windows.
 You should have the following ready before beginning with hardware:
 * [python3.x](https://www.python.org/downloads/) 
 * Install the [simple-websocket-server](https://github.com/dpallot/simple-websocket-server)  
-`pip3 install https://github.com/dpallot/simple-websocket-server.git`  
+`pip3 install git+https://github.com/dpallot/simple-websocket-server.git`  
 
 * Install the [python-zeroconf](https://github.com/jstasiak/python-zeroconf)  
 `pip3 install zeroconf`   
@@ -41,7 +41,7 @@ You should have the following ready before beginning with hardware:
 
 <!-- py2.7.x : `pip install https://github.com/jstasiak/python-zeroconf/archive/0.17.7.zip`   -->
 * Install the [blinker-py](https://github.com/blinker-iot/blinker-py)  
-`pip3 install https://github.com/blinker-iot/blinker-py.git`  
+`pip3 install git+https://github.com/blinker-iot/blinker-py.git`  
 
 
 
@@ -290,7 +290,7 @@ BLINKER_LOG("detail message 1", " 2")
 开始使用前你需要做好如下准备:
 * [python3.x](https://www.python.org/downloads/) 
 * Install the [simple-websocket-server](https://github.com/dpallot/simple-websocket-server)  
-`pip3 install https://github.com/dpallot/simple-websocket-server.git`  
+`pip3 install git+https://github.com/dpallot/simple-websocket-server.git`  
 
 * Install the [python-zeroconf](https://github.com/jstasiak/python-zeroconf)  
 `pip3 install zeroconf`   
@@ -303,7 +303,7 @@ BLINKER_LOG("detail message 1", " 2")
 
 <!-- py2.7.x : `pip install https://github.com/jstasiak/python-zeroconf/archive/0.17.7.zip`   -->
 * Install the [blinker-py](https://github.com/blinker-iot/blinker-py)  
-`pip3 install https://github.com/blinker-iot/blinker-py.git`  
+`pip3 install git+https://github.com/blinker-iot/blinker-py.git`  
 <!-- py2.7.x : `pip install https://github.com/jstasiak/python-zeroconf/archive/0.17.7.zip`  
 py3.x : `pip install zeroconf`  -->
 <!-- * 使用 Arduino IDE 的库管理器安装 [WebSockets](https://github.com/Links2004/arduinoWebSockets)     -->
