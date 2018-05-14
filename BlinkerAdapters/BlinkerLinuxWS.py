@@ -25,7 +25,7 @@ def isDebugAll():
 
 def mDNSinit(type):
     deviceType = '_' + type
-    desc = {'deviceType': deviceType}
+    desc = {'deviceType': type}
 
     info = ServiceInfo(deviceType + "._tcp.local.",
                        deviceName + "." + deviceType +"._tcp.local.",
