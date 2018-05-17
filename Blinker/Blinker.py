@@ -133,6 +133,9 @@ def print(key, value = None, uint = None):
         bProto.conn1.broadcast(data)
         # BLINKER_LOG('Send data: ', data)
     elif bProto.conType == BLINKER_MQTT and bProto.msgFrom == BLINKER_MQTT:
+        notify_state = (key == BLINKER_CMD_NOTICE)
+        BLINKER_ERR_LOG('key is:', key)
+        BLINKER_ERR_LOG('notify_state is:', notify_state)
         if value is None:
             data = str(key)
         else:
@@ -145,10 +148,8 @@ def print(key, value = None, uint = None):
         if len(data) > BLINKER_MAX_SEND_SIZE:
             BLINKER_ERR_LOG('SEND DATA BYTES MAX THAN LIMIT!')
             return
-        if key == BLINKER_CMD_NOTICE:
-            bProto.conn1.pub(data, True)
-        else:
-            bProto.conn1.pub(data)
+
+        bProto.conn1.pub(data, notify_state)
     elif bProto.conType == BLINKER_MQTT and bProto.msgFrom == BLINKER_WIFI:
         if value is None:
             data = str(key)

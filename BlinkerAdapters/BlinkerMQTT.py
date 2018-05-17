@@ -38,9 +38,10 @@ def checkKA():
         return False
 
 def checkCanPrint():
-    if mProto.state is CONNECTED:
-        return True
-    if (millis() - mProto.printTime) > BLINKER_MQTT_MSG_LIMIT:
+    if checkKA() is False:
+        BLINKER_ERR_LOG("MQTT NOT ALIVE OR MSG LIMIT")
+        return False
+    if (millis() - mProto.printTime) >= BLINKER_MQTT_MSG_LIMIT:
         return True
     BLINKER_ERR_LOG("MQTT NOT ALIVE OR MSG LIMIT")
     return False
