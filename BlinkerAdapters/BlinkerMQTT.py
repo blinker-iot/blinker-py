@@ -38,9 +38,10 @@ def checkKA():
         return False
 
 def checkCanPrint():
-    if mProto.state is CONNECTED:
-        return True
-    if (millis() - mProto.printTime) > BLINKER_MQTT_MSG_LIMIT:
+    if checkKA() is False:
+        BLINKER_ERR_LOG("MQTT NOT ALIVE OR MSG LIMIT")
+        return False
+    if (millis() - mProto.printTime) >= BLINKER_MQTT_MSG_LIMIT:
         return True
     BLINKER_ERR_LOG("MQTT NOT ALIVE OR MSG LIMIT")
     return False
@@ -127,9 +128,10 @@ class MQTTClient():
     def stop(self):
         self.client.loop_stop()
 
-    def pub(self, msg):
-        if checkCanPrint() is False:
-            return
+    def pub(self, msg, notify = False):
+        if notify is False:
+            if checkCanPrint() is False:
+                return
         payload = {'fromDevice':mProto.clientID, 'toDevice':mProto.uuid, 'data':msg}
         payload = json.dumps(payload)
         if isDebugAll() is True:
