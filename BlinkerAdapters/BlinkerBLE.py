@@ -8,19 +8,38 @@ import array
 
 try:
     from gi.repository import GObject
+    # from gi.repository import GLib
 except ImportError:
     import gobject as GObject
 
-from bluez_components import *
+from BlinkerAdapters.bluez_components import *
 from random import randint
-
-# mainloop = None
 
 import sys
 import re
 from optparse import OptionParser, make_option
-import bluezutils
+import BlinkerAdapters.bluezutils
 
+# from threading import Thread
+import threading
+from Blinker.BlinkerConfig import *
+from Blinker.BlinkerDebug import *
+from BlinkerUtility.BlinkerUtility import *
+
+class BLE_Proto():
+    msgBuf = ''
+    isRead = False
+    state = CONNECTED
+    debug = BLINKER_DEBUG
+    BLE_Response = None
+
+bleProto = BLE_Proto()
+
+def isDebugAll():
+    if bleProto.debug == BLINKER_DEBUG_ALL:
+        return True
+    else:
+        return False
 
 class CharacteristicUserDescriptionDescriptor(Descriptor):
     CUD_UUID = '2902'
@@ -36,7 +55,8 @@ class CharacteristicUserDescriptionDescriptor(Descriptor):
                 characteristic)
 
     def ReadValue(self, options):
-        print('2902 Read: ' + str(self.value))
+        if isDebugAll() is True:
+            BLINKER_LOG('2902 Read: ' + str(self.value))
         return self.value
 
     def WriteValue(self, value, options):
@@ -56,49 +76,48 @@ class BLEMessageService(Characteristic):
         self.notifying = False
         self.value = [0x00, 0x00]
         self.hr_ee_count = 0
+        bleProto.BLE_Response = self
 
     def ReadValue(self, options):
-        print('FFE1 Read: ' + str(self.value))
+        if isDebugAll() is True:
+            BLINKER_LOG('FFE1 Read: ' + str(self.value))
 
         option_list = [
                         make_option("-i", "--device", action="store",
                                 type="string", dest="dev_id"),
                         ]
         parser = OptionParser(option_list=option_list)
-        print(parser)
 
         return self.value
 
     def WriteValue(self, value, options):
-        print('FFE1 read: ' + str(value))
+        # BLINKER_LOG('FFE1 read: ' + str(value))
 
-        value = 'hello world'
+        bleProto.msgBuf = ''
         length = len(value)
-        a = []
-        b = []
+        
         for i in range(0, length):
-            a.append(dbus.Byte(ord(value[i])))
-            b.append(value[i])
-        print(len(value))
-        print(a)
-        print(b)
+            bleProto.msgBuf = bleProto.msgBuf + str(value[i])
 
-        value = dbus.Array(a, signature=dbus.Signature('y'))
-        print(value)
-        self.PropertiesChanged(GATT_CHRC_IFACE, { 'Value': value }, [])
-        print('FFE1 Write: ' + str(value))
+        if isDebugAll() is True:
+            BLINKER_LOG('FFE1 read: ' + bleProto.msgBuf)
+
+        bleProto.isRead = True
 
     def StartNotify(self):
         if self.notifying:
-            print('Already notifying, nothing to do')
+            if isDebugAll() is True:
+                BLINKER_LOG('Already notifying, nothing to do')
             return
         else:
-            print('Already notifying!')
+            if isDebugAll() is True:
+                BLINKER_LOG('Already notifying!')
         self.notifying = True
 
     def StopNotify(self):
         if not self.notifying:
-            print('Not notifying, nothing to do')
+            if isDebugAll() is True:
+                BLINKER_LOG('Not notifying, nothing to do')
             return
         self.notifying = False
 
@@ -139,14 +158,16 @@ def register_ad_cb():
     """
     Callback if registering advertisement was successful
     """
-    print('Advertisement registered')
+    if isDebugAll() is True:
+        BLINKER_LOG('Advertisement registered')
 
 
 def register_ad_error_cb(error):
     """
     Callback if registering advertisement failed
     """
-    print('Failed to register advertisement: ' + str(error))
+    if isDebugAll() is True:
+        BLINKER_LOG('Failed to register advertisement: ' + str(error))
     mainloop.quit()
 
 
@@ -154,18 +175,19 @@ def register_app_cb():
     """
     Callback if registering GATT application was successful
     """
-    print('GATT application registered')
+    if isDebugAll() is True:
+        BLINKER_LOG('GATT application registered')
 
 
 def register_app_error_cb(error):
     """
     Callback if registering GATT application failed.
     """
-    print('Failed to register application: ' + str(error))
+    if isDebugAll() is True:
+        BLINKER_LOG('Failed to register application: ' + str(error))
     mainloop.quit()
 
-
-def main():
+def mainInit():
     os.system('sudo service bluetooth stop')
 
     global mainloop
@@ -197,8 +219,70 @@ def main():
     try:
         mainloop.run()
     except KeyboardInterrupt:
-        print ("exit")
+        BLINKER_LOG ("exit")
 
+# class BlinkerBLEService(Thread):
+class BlinkerBLEService():
+    def __init__(self):
+        # Thread.__init__(self)
+        self._isClosed = False
+        self.thread = None
 
-if __name__ == '__main__':
-    main()
+        os.system('sudo service bluetooth stop')
+
+        global mainloop
+
+        dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+
+        bus = dbus.SystemBus()
+
+        service_manager = get_service_manager(bus)
+        ad_manager = get_ad_manager(bus)
+
+        app = BLEApplication(bus)
+
+        # Create advertisement
+        test_advertisement = BLEAdvertisement(bus, 0)
+
+        mainloop = GObject.MainLoop()
+        # mainloop = GLib.MainLoop()
+
+        # Register gatt services
+        service_manager.RegisterApplication(app.get_path(), {},
+                                            reply_handler=register_app_cb,
+                                            error_handler=register_app_error_cb)
+
+        # Register advertisement
+        ad_manager.RegisterAdvertisement(test_advertisement.get_path(), {},
+                                        reply_handler=register_ad_cb,
+                                        error_handler=register_ad_error_cb)
+
+    def start(self):
+        BLINKER_LOG('Blinker BLE service init')
+        
+
+    def run(self):
+        mainloop.run()
+
+    def stop(self):
+        self._isClosed = True
+
+    def response(self, msg):
+        if isDebugAll() is True:
+            BLINKER_LOG('FFE1 Write: ' + msg)
+        msg = msg + '\n'
+        length = len(msg)
+        a = []
+        b = []
+        for i in range(0, length):
+            a.append(dbus.Byte(ord(msg[i])))
+            b.append(msg[i])
+        # if isDebugAll() is True:
+        #     BLINKER_LOG(len(msg))
+        #     BLINKER_LOG(a)
+        #     BLINKER_LOG(b)
+
+        msg = dbus.Array(a, signature=dbus.Signature('y'))
+        bleProto.BLE_Response.PropertiesChanged(GATT_CHRC_IFACE, { 'Value': msg }, [])
+        # if isDebugAll() is True:
+        #     BLINKER_LOG('FFE1 Write: ' + str(msg))

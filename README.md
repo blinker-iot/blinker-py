@@ -38,6 +38,15 @@ You should have the following ready before beginning with hardware:
 
 * Install the [requests](https://github.com/requests/requests)  
 `pip3 install requests`  
+  
+* Install the [bluez](http://www.bluez.org/) 5.49 or newer  
+[Adafruit install-bluez-on-the-raspberry-pi](https://learn.adafruit.com/install-bluez-on-the-raspberry-pi/installation)  
+
+* Install the [dbus-python](https://pypi.org/project/dbus-python/#description)  
+`pip3 install dbus-python`  
+
+* Install the [PyGobject](https://pygobject.readthedocs.io/en/latest/)  
+`pip3 install pygobject`  
 
 <!-- py2.7.x : `pip install https://github.com/jstasiak/python-zeroconf/archive/0.17.7.zip`   -->
 * Install the [blinker-py](https://github.com/blinker-iot/blinker-py)  
@@ -51,7 +60,7 @@ You should have the following ready before beginning with hardware:
 ### Blinker.begin()
 Call **Blinker.begin()** to configure Blinker:
 ```
-Blinker.begin(...);
+Blinker.begin(...)
 ```
 Choose different parameters based on the type of connection you use  
   
@@ -283,7 +292,10 @@ BLINKER_LOG("detail message 1", " 2")
 [python-zeroconf](https://github.com/jstasiak/python-zeroconf) - for Blinker to build up a mDNS service  
 [paho.mqtt.python](https://github.com/eclipse/paho.mqtt.python) - for Blinker to build up a MQTT Client  
 [requests](https://github.com/requests/requests) - for Blinker to send a web request  
-  
+[bluez](http://www.bluez.org/)  
+[dbus-python](https://pypi.org/project/dbus-python/#description)  
+[PyGobject](https://pygobject.readthedocs.io/en/latest/)  - for Blinker to build up a BLE service  
+
 
 ---
 # 目前支持的硬件
@@ -313,6 +325,15 @@ BLINKER_LOG("detail message 1", " 2")
 * Install the [requests](https://github.com/requests/requests)  
 `pip3 install requests`  
 
+* Install the [bluez](http://www.bluez.org/) 5.49 or newer  
+[Adafruit install-bluez-on-the-raspberry-pi](https://learn.adafruit.com/install-bluez-on-the-raspberry-pi/installation)  
+
+* Install the [dbus-python](https://pypi.org/project/dbus-python/#description)  
+`pip3 install dbus-python`  
+
+* Install the [PyGobject](https://pygobject.readthedocs.io/en/latest/)  
+`pip3 install pygobject`  
+
 <!-- py2.7.x : `pip install https://github.com/jstasiak/python-zeroconf/archive/0.17.7.zip`   -->
 * Install the [blinker-py](https://github.com/blinker-iot/blinker-py)  
 `pip3 install git+https://github.com/blinker-iot/blinker-py.git`  
@@ -325,7 +346,7 @@ py3.x : `pip install zeroconf`  -->
 ### Blinker.begin()
 使用 **Blinker.begin()** 来配置 Blinker:
 ```
-Blinker.begin(...);
+Blinker.begin(...)
 ```
 根据你使用的连接方式选择不同的参数用于配置Blinker  
   
@@ -559,4 +580,7 @@ BLINKER_LOG("detail message 1", " 2")
 [python-zeroconf](https://github.com/jstasiak/python-zeroconf) - Blinker 用这个库建立了一个 mDNS 服务  
 [paho.mqtt.python](https://github.com/eclipse/paho.mqtt.python) - Blinker 用这个库建立了一个 MQTT Client  
 [requests](https://github.com/requests/requests) - Blinker 用这个库发送网络请求  
+[bluez](http://www.bluez.org/)  
+[dbus-python](https://pypi.org/project/dbus-python/#description)  
+[PyGobject](https://pygobject.readthedocs.io/en/latest/)  - Blinker 用这些库建立BLE服务  
 
