@@ -3,6 +3,7 @@ from Blinker import *
 BUTTON_1 = ('ButtonKey')
 
 Blinker.setMode(BLINKER_WIFI)
+Blinker.debugLevel(BLINKER_DEBUG_ALL)
 Blinker.begin()
 Blinker.wInit(BUTTON_1, W_BUTTON)
 
