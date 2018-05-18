@@ -1,5 +1,7 @@
 from Blinker import *
 
+TOGGLE_1 = ('ToggleKey')
+
 Blinker.setMode(BLINKER_WIFI)
 Blinker.begin()
 Blinker.wInit(TOGGLE_1, W_TOGGLE)
