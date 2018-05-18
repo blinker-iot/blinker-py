@@ -150,7 +150,19 @@ Blinker.print("temp", 30.2, "°C");
 ```
 >Json data can display in the Blinker TEXT widget  
 
-`*max send data bytes is 128bytes`
+`*max send data bytes is 128bytes`  
+
+### Blinker.notify()
+when use **notify** . Sending data begins with exclamation point, will send notification to app,  otherwise Json data will be sent to app.  
+
+send notify
+```
+Blinker.notify("!notify")
+```
+send Json data, eg: {"notice":"notify"}
+```
+Blinker.notify("notify")
+```  
 
 ## App Widgets
 ### Blinker.wInit()
@@ -411,6 +423,18 @@ Blinker.print("temp", 30.2, "°C")
 >发送的Json数据可以在 Blinker APP 的 TEXT 组件中显示  
 
 `*发送数据最大为 128 字节`
+
+### Blinker.notify()
+使用 **notify** 时, 发送数据以感叹号开始, 将会发送消息通知到app, 否则将会发送Json数据到app  
+
+发送通知
+```
+Blinker.notify("!notify")
+```
+发送Json数据, 如 {"notice":"notify"}
+```
+Blinker.notify("notify")
+```
 
 ## App Widgets
 ### Blinker.wInit()
