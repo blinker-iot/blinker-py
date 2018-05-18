@@ -1,9 +1,11 @@
 import sys
 import json
 import socket
+import threading
 from Blinker.BlinkerConfig import *
 from Blinker.BlinkerDebug import *
 from BlinkerUtility.BlinkerUtility import *
+from BlinkerAdapters.BlinkerBLE import *
 from BlinkerAdapters.BlinkerLinuxWS import *
 from BlinkerAdapters.BlinkerMQTT import *
 # from threading import Thread
@@ -17,6 +19,7 @@ class Protocol():
     state = CONNECTING
     isAvail = False
     isRead = False
+    isThreadStart = False
     msgBuf = ""
     msgFrom = None
     Buttons = {}
@@ -27,13 +30,15 @@ class Protocol():
     GPS = ["0.000000", "0.000000"]
     RGB = {}
     debug = BLINKER_DEBUG
+    thread = None
 
 bProto = Protocol()
 
 def setMode(setType = BLINKER_WIFI):
     bProto.conType = setType
     if bProto.conType == BLINKER_BLE:
-        return
+        # return
+        bProto.conn1 = BlinkerBLEService()
     elif bProto.conType == BLINKER_WIFI:
         # bProto.conn1 = bWSServer
         bProto.conn1 = WebSocketServer(deviceIP, wsPort)
@@ -46,7 +51,10 @@ def debugLevel(level = BLINKER_DEBUG):
 
 def begin(auth = None):
     if bProto.conType == BLINKER_BLE:
-        return
+        # return
+        bleProto.debug = bProto.debug
+        # bProto.conn1.run()
+        bProto.conn1.start()
     elif bProto.conType == BLINKER_WIFI:
         wsProto.debug = bProto.debug
         bProto.conn1.start()
@@ -58,9 +66,21 @@ def begin(auth = None):
         bProto.conn1.start(auth)
         bProto.conn1.run()
 
-def run():
+def thread_run():
     if bProto.conType == BLINKER_BLE:
-        return
+        bProto.conn1.run()
+    while True:
+        checkData()
+
+def checkData():
+    if bProto.conType == BLINKER_BLE:
+        # return
+        bProto.state = bleProto.state
+        if bleProto.isRead is True:
+            bProto.msgBuf = bleProto.msgBuf
+            bProto.isRead = True
+            bleProto.isRead = False
+            parse()
     elif bProto.conType == BLINKER_WIFI:
         bProto.state = wsProto.state
         if wsProto.isRead is True:
@@ -84,6 +104,15 @@ def run():
             bProto.isRead = True
             wsProto.isRead = False
             parse()
+
+def run():
+    if bProto.isThreadStart is False:
+        bProto.thread = threading.Thread(target=thread_run)
+        bProto.thread.daemon = True
+        bProto.thread.start()
+        bProto.isThreadStart = True
+    checkData()
+    
 
 def wInit(name, wType):
     if wType == W_BUTTON:
@@ -116,7 +145,20 @@ def wInit(name, wType):
 
 def print(key, value = None, uint = None):
     if bProto.conType == BLINKER_BLE:
-        return
+        # return
+        if value is None:
+            data = str(key)
+        else:
+            key = str(key)
+            if not uint is None:
+                value = str(value) + str(uint)
+            data = json_encode(key, value)
+
+        if len(data) > BLINKER_MAX_SEND_SIZE:
+            BLINKER_ERR_LOG('SEND DATA BYTES MAX THAN LIMIT!')
+            return
+
+        bProto.conn1.response(data)
     elif bProto.conType == BLINKER_WIFI:
         if value is None:
             data = str(key)
