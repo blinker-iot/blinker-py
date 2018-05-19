@@ -31,6 +31,8 @@ class Protocol():
     RGB = {}
     debug = BLINKER_DEBUG
     thread = None
+    isFormat = False
+    sendBuf = {}
 
 bProto = Protocol()
 
@@ -143,70 +145,121 @@ def wInit(name, wType):
             bProto.RGB[name] = rgb
         BLINKER_LOG(bProto.Toggles)
 
-def print(key, value = None, uint = None):
+def beginFormat():
+    bProto.isFormat = True
+    bProto.sendBuf.clear()
+
+def endFormat():
+    bProto.isFormat = False
+    _print(bProto.sendBuf)
+
+def checkLength(data):
+    if len(data) > BLINKER_MAX_SEND_SIZE:
+        BLINKER_ERR_LOG('SEND DATA BYTES MAX THAN LIMIT!')
+        return False
+    else:
+        return True
+
+def _print(data):
+    if checkLength(data) is False:
+        return
     if bProto.conType == BLINKER_BLE:
-        # return
-        if value is None:
-            data = str(key)
-        else:
-            key = str(key)
-            if not uint is None:
-                value = str(value) + str(uint)
-            data = json_encode(key, value)
-
-        if len(data) > BLINKER_MAX_SEND_SIZE:
-            BLINKER_ERR_LOG('SEND DATA BYTES MAX THAN LIMIT!')
-            return
-
         bProto.conn1.response(data)
     elif bProto.conType == BLINKER_WIFI:
-        if value is None:
-            data = str(key)
-        else:
-            key = str(key)
-            if not uint is None:
-                value = str(value) + str(uint)
-            data = json_encode(key, value)
-
-        if len(data) > BLINKER_MAX_SEND_SIZE:
-            BLINKER_ERR_LOG('SEND DATA BYTES MAX THAN LIMIT!')
-            return
-
         bProto.conn1.broadcast(data)
-        # BLINKER_LOG('Send data: ', data)
     elif bProto.conType == BLINKER_MQTT and bProto.msgFrom == BLINKER_MQTT:
-        notify_state = (key == BLINKER_CMD_NOTICE)
-        BLINKER_ERR_LOG('key is:', key)
-        BLINKER_ERR_LOG('notify_state is:', notify_state)
-        if value is None:
-            data = str(key)
+        if BLINKER_CMD_NOTICE in data:
+            notify_state = True
         else:
-            key = str(key)
-            if not uint is None:
-                value = str(value) + str(uint)
-            data = {}
-            data[key] = value
-
-        if len(data) > BLINKER_MAX_SEND_SIZE:
-            BLINKER_ERR_LOG('SEND DATA BYTES MAX THAN LIMIT!')
-            return
-
+            notify_state = False
         bProto.conn1.pub(data, notify_state)
     elif bProto.conType == BLINKER_MQTT and bProto.msgFrom == BLINKER_WIFI:
-        if value is None:
-            data = str(key)
-        else:
-            key = str(key)
-            if not uint is None:
-                value = str(value) + str(uint)
-            data = json_encode(key, value)
-
-        if len(data) > BLINKER_MAX_SEND_SIZE:
-            BLINKER_ERR_LOG('SEND DATA BYTES MAX THAN LIMIT!')
-            return
-
         bProto.conn2.broadcast(data)
-        # BLINKER_LOG('Send data: ', data)
+
+def print(key, value = None, uint = None):
+
+    if value is None:
+        if bProto.isFormat:
+            return
+        data = str(key)
+    else:
+        key = str(key)
+        if not uint is None:
+            value = str(value) + str(uint)
+        # data = json_encode(key, value)
+        data = {}
+        if bProto.isFormat:
+            bProto.sendBuf[key] = value
+        else:
+            data[key] = value
+
+    if bProto.isFormat is False:
+        _print(data)
+
+    # if bProto.conType == BLINKER_BLE:
+    #     # return
+    #     if value is None:
+    #         data = str(key)
+    #     else:
+    #         key = str(key)
+    #         if not uint is None:
+    #             value = str(value) + str(uint)
+    #         # data = json_encode(key, value)
+    #         data[key] = value
+
+    #     if len(data) > BLINKER_MAX_SEND_SIZE:
+    #         BLINKER_ERR_LOG('SEND DATA BYTES MAX THAN LIMIT!')
+    #         return
+
+    #     bProto.conn1.response(data)
+    # elif bProto.conType == BLINKER_WIFI:
+    #     if value is None:
+    #         data = str(key)
+    #     else:
+    #         key = str(key)
+    #         if not uint is None:
+    #             value = str(value) + str(uint)
+    #         # data = json_encode(key, value)
+    #         data[key] = value
+
+    #     if len(data) > BLINKER_MAX_SEND_SIZE:
+    #         BLINKER_ERR_LOG('SEND DATA BYTES MAX THAN LIMIT!')
+    #         return
+
+    #     bProto.conn1.broadcast(data)
+    # elif bProto.conType == BLINKER_MQTT and bProto.msgFrom == BLINKER_MQTT:
+    #     notify_state = (key == BLINKER_CMD_NOTICE)
+    #     BLINKER_ERR_LOG('key is:', key)
+    #     BLINKER_ERR_LOG('notify_state is:', notify_state)
+    #     if value is None:
+    #         data = str(key)
+    #     else:
+    #         key = str(key)
+    #         if not uint is None:
+    #             value = str(value) + str(uint)
+    #         data = {}
+    #         data[key] = value
+
+    #     if len(data) > BLINKER_MAX_SEND_SIZE:
+    #         BLINKER_ERR_LOG('SEND DATA BYTES MAX THAN LIMIT!')
+    #         return
+
+    #     bProto.conn1.pub(data, notify_state)
+    # elif bProto.conType == BLINKER_MQTT and bProto.msgFrom == BLINKER_WIFI:
+    #     if value is None:
+    #         data = str(key)
+    #     else:
+    #         key = str(key)
+    #         if not uint is None:
+    #             value = str(value) + str(uint)
+    #         # data = json_encode(key, value)
+    #         data[key] = value
+
+    #     if len(data) > BLINKER_MAX_SEND_SIZE:
+    #         BLINKER_ERR_LOG('SEND DATA BYTES MAX THAN LIMIT!')
+    #         return
+
+    #     bProto.conn2.broadcast(data)
 
 def notify(msg):
     print(BLINKER_CMD_NOTICE, msg)

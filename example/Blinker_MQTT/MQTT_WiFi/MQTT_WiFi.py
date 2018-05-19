@@ -13,13 +13,12 @@ if __name__ == '__main__':
         
         if Blinker.available() == True:
             BLINKER_LOG('Blinker.readString(): ', Blinker.readString())
+
+            Blinker.beginFormat()
             Blinker.print(Blinker.times())
-            Blinker.delay(1000)
             Blinker.vibrate()
-            Blinker.delay(1000)
-            Blinker.print('millis', millis())        
+            Blinker.print('millis', millis())
+            Blinker.endFormat()
 
         if Blinker.button(BUTTON_1):
             Blinker.print('Button pressed!')
-        
-        Blinker.delay(2000)

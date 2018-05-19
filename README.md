@@ -159,7 +159,27 @@ Blinker.print("temp", 30.2, "°C");
 ```
 >Json data can display in the Blinker TEXT widget  
 
-`*max send data bytes is 128bytes`  
+`*max send data bytes is 128bytes`
+```
+*max send data bytes is 128bytes  
+*when use MQTT, print interval need more than 1s   
+eg:  
+Blinker.print("hello");  
+Blinker.delay(1000);  
+Blinker.print("world);  
+```  
+
+### Blinker.beginFormat() && Blinker.endFormat()
+when use **beginFormat** , each data you **print** will format as Json data and save in send buffer. The buffer will send when use **endFormat**.
+```
+Blinker.beginFormat();  
+Blinker.print("Hello","Blinker");
+Blinker.print("start","end");
+Blinker.print("number",123);
+Blinker.endFormat();
+```
+>when endFormat, will send Json data {"Hello":"Blinker","start":"end","number":123}  
+
 
 ### Blinker.notify()
 when use **notify** . Sending data begins with exclamation point, will send notification to app,  otherwise Json data will be sent to app.  
@@ -443,7 +463,25 @@ Blinker.print("temp", 30.2, "°C")
 ```
 >发送的Json数据可以在 Blinker APP 的 TEXT 组件中显示  
 
-`*发送数据最大为 128 字节`
+```
+*发送数据最大为 128 字节  
+*MQTT方式接入时, print需间隔1s以上  
+例:  
+Blinker.print("hello");  
+Blinker.delay(1000);  
+Blinker.print("world);  
+```  
+
+### Blinker.beginFormat() && Blinker.endFormat()
+当使用 **beginFormat** 时, **print** 发送出的数据都将以 Json 格式存入发送数据中。 这个发送数据将在使用 **endFormat** 时发送出去。
+```
+Blinker.beginFormat();  
+Blinker.print("Hello","Blinker");
+Blinker.print("start","end");
+Blinker.print("number",123);
+Blinker.endFormat();
+```
+>使用 endFormat 后, 发送的 Json 数据: {"Hello":"Blinker","start":"end","number":123}  
 
 ### Blinker.notify()
 使用 **notify** 时, 发送数据以感叹号开始, 将会发送消息通知到app, 否则将会发送Json数据到app  
