@@ -87,6 +87,7 @@ class WebSocketServer(Thread):
         self._isClosed = True
 
     def broadcast(self, msg):
+        msg = json.dumps(msg)
         if isDebugAll() is True:
             BLINKER_LOG('Response data: ', msg)
         if len(clients) == 0:
