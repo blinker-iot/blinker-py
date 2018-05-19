@@ -150,7 +150,7 @@ class BLEAdvertisement(Advertisement):
         dbaddr = [add1, add2, add3, add4, add5, add6]
         self.add_service_uuid('FFE0')
         self.add_manufacturer_data(0xffff, dbaddr)
-        self.add_local_name('BlinkerRaspi')
+        self.add_local_name('BlinkerBLE')
         self.include_tx_power = True
 
 

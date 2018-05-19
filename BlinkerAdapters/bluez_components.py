@@ -21,6 +21,8 @@ GATT_DESC_IFACE = 'org.bluez.GattDescriptor1'
 
 LE_ADVERTISEMENT_IFACE = 'org.bluez.LEAdvertisement1'
 
+from Blinker.BlinkerDebug import *
+
 
 class InvalidArgsException(dbus.exceptions.DBusException):
     _dbus_error_name = 'org.freedesktop.DBus.Error.InvalidArgs'
@@ -57,7 +59,7 @@ class Application(dbus.service.Object):
     @dbus.service.method(DBUS_OM_IFACE, out_signature='a{oa{sa{sv}}}')
     def GetManagedObjects(self):
         response = {}
-        print('GetManagedObjects')
+        BLINKER_LOG('GetManagedObjects')
 
         for service in self.services:
             response[service.get_path()] = service.get_properties()
@@ -168,22 +170,22 @@ class Characteristic(dbus.service.Object):
                          in_signature='a{sv}',
                          out_signature='ay')
     def ReadValue(self, options):
-        print('Default ReadValue called, returning error')
+        BLINKER_LOG('Default ReadValue called, returning error')
         raise NotSupportedException()
 
     @dbus.service.method(GATT_CHRC_IFACE, in_signature='aya{sv}')
     def WriteValue(self, value, options):
-        print('Default WriteValue called, returning error')
+        BLINKER_LOG('Default WriteValue called, returning error')
         raise NotSupportedException()
 
     @dbus.service.method(GATT_CHRC_IFACE)
     def StartNotify(self):
-        print('Default StartNotify called, returning error')
+        BLINKER_LOG('Default StartNotify called, returning error')
         raise NotSupportedException()
 
     @dbus.service.method(GATT_CHRC_IFACE)
     def StopNotify(self):
-        print('Default StopNotify called, returning error')
+        BLINKER_LOG('Default StopNotify called, returning error')
         raise NotSupportedException()
 
     @dbus.service.signal(DBUS_PROP_IFACE,
@@ -226,12 +228,12 @@ class Descriptor(dbus.service.Object):
                          in_signature='a{sv}',
                          out_signature='ay')
     def ReadValue(self, options):
-        print('Default ReadValue called, returning error')
+        BLINKER_LOG('Default ReadValue called, returning error')
         raise NotSupportedException()
 
     @dbus.service.method(GATT_DESC_IFACE, in_signature='aya{sv}')
     def WriteValue(self, value, options):
-        print('Default WriteValue called, returning error')
+        BLINKER_LOG('Default WriteValue called, returning error')
         raise NotSupportedException()
 
 
@@ -265,10 +267,6 @@ class Advertisement(dbus.service.Object):
         if self.service_data is not None:
             properties['ServiceData'] = dbus.Dictionary(self.service_data,
                                                         signature='sv')
-        if self.include_tx_power is not None:
-            properties['IncludeTxPower'] = dbus.Boolean(self.include_tx_power)
-        return {LE_ADVERTISEMENT_IFACE: properties}
-
         if self.local_name is not None:
             properties['LocalName'] = dbus.String(self.local_name)
         if self.include_tx_power is not None:
@@ -313,17 +311,17 @@ class Advertisement(dbus.service.Object):
                          in_signature='s',
                          out_signature='a{sv}')
     def GetAll(self, interface):
-        print('GetAll')
+        BLINKER_LOG('GetAll')
         if interface != LE_ADVERTISEMENT_IFACE:
             raise InvalidArgsException()
-        print('returning props')
+        BLINKER_LOG('returning props')
         return self.get_properties()[LE_ADVERTISEMENT_IFACE]
 
     @dbus.service.method(LE_ADVERTISEMENT_IFACE,
                          in_signature='',
                          out_signature='')
     def Release(self):
-        print('%s: Released!' % self.path)
+        BLINKER_LOG('%s: Released!' % self.path)
 
 
 def find_adapter_gattmanager(bus):
@@ -354,7 +352,7 @@ def get_service_manager(bus):
     # Get the GattManager
     adapter_gattmanager = find_adapter_gattmanager(bus)
     if not adapter_gattmanager:
-        print('GattManager1 interface not found')
+        BLINKER_LOG('GattManager1 interface not found')
         return
 
     service_manager = dbus.Interface(
@@ -368,7 +366,7 @@ def get_ad_manager(bus):
     # Get the AdapterManager
     adapter_advertisingmanager = find_adapter_advertisingmanager(bus)
     if not adapter_advertisingmanager:
-        print('LEAdvertisingManager1 interface not found')
+        BLINKER_LOG('LEAdvertisingManager1 interface not found')
         return
 
     adapter_props = dbus.Interface(bus.get_object(BLUEZ_SERVICE_NAME, adapter_advertisingmanager),
