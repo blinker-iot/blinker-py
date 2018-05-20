@@ -46,6 +46,18 @@ def checkCanPrint():
     BLINKER_ERR_LOG("MQTT NOT ALIVE OR MSG LIMIT")
     return False
 
+def delay10s():
+    start = millis()
+    time_run = 0
+    while time_run < 10000:
+        time_run = millis() - start
+
+def checkAuthData(data):
+    if data['detail'] == BLINKER_CMD_NOTFOUND:
+        while True:
+            BLINKER_ERR_LOG("Please make sure you have put in the right AuthKey!")
+            delay10s()            
+
 def getInfo(auth):
 
     host = 'https://iotdev.clz.me'
@@ -59,6 +71,7 @@ def getInfo(auth):
         return
     else:
         data = r.json()
+        checkAuthData(data)
         if isDebugAll() is True:
             BLINKER_LOG('Device Auth Data: ', data)
 

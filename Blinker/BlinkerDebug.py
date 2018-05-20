@@ -5,7 +5,7 @@ def BLINKER_LOG(arg1, *vartuple):
     data = str(arg1)
     for var in vartuple:
         data = data + str(var)
-    data = '[' + now() + ']' + data
+    data = '[' + now() + '] ' + data
     print(data)
 
 def BLINKER_ERR_LOG(arg1, *vartuple):

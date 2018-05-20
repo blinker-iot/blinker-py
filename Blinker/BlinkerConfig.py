@@ -61,4 +61,5 @@ BLINKER_CMD_ONLINE              = 'online'
 BLINKER_CMD_CONNECTED           = 'connected'
 BLINKER_CMD_VERSION             = 'version'
 BLINKER_CMD_NOTICE              = 'notice'
+BLINKER_CMD_NOTFOUND            = 'device not found'
 BLINKER_JOYSTICK_VALUE_DEFAULT  = 128
