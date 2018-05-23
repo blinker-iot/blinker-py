@@ -23,14 +23,14 @@ def isDebugAll():
     else:
         return False
 
-def mDNSinit(type):
+def mDNSinit(type, name):
     deviceType = '_' + type
     desc = {'deviceType': type}
 
     info = ServiceInfo(deviceType + "._tcp.local.",
-                       deviceName + "." + deviceType +"._tcp.local.",
+                       name + "." + deviceType +"._tcp.local.",
                        socket.inet_aton(deviceIP), wsPort, 0, 0,
-                       desc, deviceName + ".local.")
+                       desc, name + ".local.")
 
     zeroconf = Zeroconf()
     zeroconf.register_service(info)
@@ -73,8 +73,8 @@ class WebSocketServer(Thread):
         self._isClosed = False
         self.setDaemon(True)
 
-    def start(self):
-        mDNSinit(self.type)
+    def start(self, name = deviceName):
+        mDNSinit(self.type , name)
         BLINKER_LOG('websocket Server init')
         BLINKER_LOG('ws://', self.name, ':', self.port)
         super(WebSocketServer, self).start()
