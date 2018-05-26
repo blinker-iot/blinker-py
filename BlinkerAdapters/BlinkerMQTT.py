@@ -6,6 +6,8 @@ from Blinker.BlinkerDebug import *
 from BlinkerUtility.BlinkerUtility import *
 
 class MQTT_Protol():
+    host = ''
+    port = ''
     subtopic = ''
     pubtopic = ''
     clientID = ''
@@ -80,6 +82,7 @@ def getInfo(auth):
     iotToken = data['detail']['iotToken']
     productKey = data['detail']['productKey']
     uuid = data['detail']['uuid']
+    broker = data['detail']['broker']
 
     if isDebugAll() is True:
         BLINKER_LOG('deviceName: ', deviceName)
@@ -87,13 +90,22 @@ def getInfo(auth):
         BLINKER_LOG('iotToken: ', iotToken)
         BLINKER_LOG('productKey: ', productKey)
         BLINKER_LOG('uuid: ', uuid)
+        BLINKER_LOG('broker: ', broker)
 
-    mProto.subtopic = '/' + productKey + '/' + deviceName + '/r'
-    mProto.pubtopic = '/' + productKey + '/' + deviceName + '/s'
+    if (broker == 'aliyun'):
+        mProto.host = BLINKER_MQTT_ALIYUN_HOST
+        mProto.port = BLINKER_MQTT_ALIYUN_PORT
+        mProto.subtopic = '/' + productKey + '/' + deviceName + '/r'
+        mProto.pubtopic = '/' + productKey + '/' + deviceName + '/s'
+
     mProto.clientID = deviceName
     mProto.userName = iotId
     mProto.password = iotToken
     mProto.uuid = uuid
+
+    if isDebugAll() is True:
+        BLINKER_LOG('subtopic: ', mProto.subtopic)
+        BLINKER_LOG('pubtopic: ', mProto.pubtopic)
 
 def on_connect(client, userdata, flags, rc):
     if isDebugAll() is True:
@@ -133,7 +145,7 @@ class MQTTClient():
         self.client.username_pw_set(mProto.userName, mProto.password)
         self.client.on_connect = on_connect
         self.client.on_message = on_message
-        self.client.connect('public.iot-as-mqtt.cn-shanghai.aliyuncs.com', 1883, 60)
+        self.client.connect(mProto.host, mProto.port, 60)
         
     def run(self):
         self.client.loop_start()

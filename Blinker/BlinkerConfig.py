@@ -63,3 +63,6 @@ BLINKER_CMD_VERSION             = 'version'
 BLINKER_CMD_NOTICE              = 'notice'
 BLINKER_CMD_NOTFOUND            = 'device not found'
 BLINKER_JOYSTICK_VALUE_DEFAULT  = 128
+
+BLINKER_MQTT_ALIYUN_HOST        = 'public.iot-as-mqtt.cn-shanghai.aliyuncs.com'
+BLINKER_MQTT_ALIYUN_PORT        = 1883
