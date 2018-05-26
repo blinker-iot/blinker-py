@@ -65,7 +65,7 @@ def begin(auth = None):
         wsProto.debug = bProto.debug
         bProto.msgFrom = BLINKER_MQTT
         bProto.conn1.start(auth)
-        bProto.conn2.start(mProto.clientID[0: 12])
+        bProto.conn2.start(mProto.deviceName[0: 12])
         bProto.conn1.run()
 
 def thread_run():

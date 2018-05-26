@@ -66,3 +66,6 @@ BLINKER_JOYSTICK_VALUE_DEFAULT  = 128
 
 BLINKER_MQTT_ALIYUN_HOST        = 'public.iot-as-mqtt.cn-shanghai.aliyuncs.com'
 BLINKER_MQTT_ALIYUN_PORT        = 1883
+
+BLINKER_MQTT_QCLOUD_HOST        = 'iotcloud-mqtt.gz.tencentdevices.com'
+BLINKER_MQTT_QCLOUD_PORT        = 1883
