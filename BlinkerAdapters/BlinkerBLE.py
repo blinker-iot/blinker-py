@@ -269,7 +269,7 @@ class BlinkerBLEService():
 
     def response(self, msg):
         if isDebugAll() is True:
-            BLINKER_LOG('FFE1 Write: ' + msg)
+            BLINKER_LOG('FFE1 Write: ' + str(msg))
 
         msg = json.dumps(msg)
         msg = msg + '\n'
