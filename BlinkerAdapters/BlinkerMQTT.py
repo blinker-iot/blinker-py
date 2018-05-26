@@ -10,6 +10,7 @@ class MQTT_Protol():
     port = ''
     subtopic = ''
     pubtopic = ''
+    deviceName = ''
     clientID = ''
     userName = ''
     password = ''
@@ -97,13 +98,24 @@ def getInfo(auth):
         mProto.port = BLINKER_MQTT_ALIYUN_PORT
         mProto.subtopic = '/' + productKey + '/' + deviceName + '/r'
         mProto.pubtopic = '/' + productKey + '/' + deviceName + '/s'
-
-    mProto.clientID = deviceName
-    mProto.userName = iotId
+        mProto.clientID = deviceName
+        mProto.userName = iotId
+    elif (broker == 'qcloud'):
+        mProto.host = BLINKER_MQTT_QCLOUD_HOST
+        mProto.port = BLINKER_MQTT_QCLOUD_PORT
+        mProto.subtopic = productKey + '/' + deviceName + '/r'
+        mProto.pubtopic = productKey + '/' + deviceName + '/s'
+        mProto.clientID = productKey + deviceName
+        mProto.userName =  mProto.clientID + ';' + iotId
+    
+    mProto.deviceName = deviceName
     mProto.password = iotToken
     mProto.uuid = uuid
 
     if isDebugAll() is True:
+        BLINKER_LOG('clientID: ', deviceName)
+        BLINKER_LOG('userName: ', iotId)
+        BLINKER_LOG('password: ', iotToken)
         BLINKER_LOG('subtopic: ', mProto.subtopic)
         BLINKER_LOG('pubtopic: ', mProto.pubtopic)
 
@@ -157,7 +169,7 @@ class MQTTClient():
         if notify is False:
             if checkCanPrint() is False:
                 return
-        payload = {'fromDevice':mProto.clientID, 'toDevice':mProto.uuid, 'data':msg}
+        payload = {'fromDevice':mProto.deviceName, 'toDevice':mProto.uuid, 'data':msg}
         payload = json.dumps(payload)
         if isDebugAll() is True:
             BLINKER_LOG('Publish topic: ', mProto.pubtopic)
