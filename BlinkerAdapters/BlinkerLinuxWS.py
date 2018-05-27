@@ -25,7 +25,8 @@ def isDebugAll():
 
 def mDNSinit(type, name):
     deviceType = '_' + type
-    desc = {'deviceType': type}
+    desc = {'deviceName': name}
+    # desc = {}
 
     info = ServiceInfo(deviceType + "._tcp.local.",
                        name + "." + deviceType +"._tcp.local.",
@@ -34,6 +35,10 @@ def mDNSinit(type, name):
 
     zeroconf = Zeroconf()
     zeroconf.register_service(info)
+
+    if isDebugAll() is True:
+        BLINKER_LOG('deviceIP: ', deviceIP)
+        BLINKER_LOG('mdns name: ', name)
 
     BLINKER_LOG('mDNS responder init!')
 
