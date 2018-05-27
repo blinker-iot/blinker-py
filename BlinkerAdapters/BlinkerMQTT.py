@@ -113,9 +113,9 @@ def getInfo(auth):
     mProto.uuid = uuid
 
     if isDebugAll() is True:
-        BLINKER_LOG('clientID: ', deviceName)
-        BLINKER_LOG('userName: ', iotId)
-        BLINKER_LOG('password: ', iotToken)
+        BLINKER_LOG('clientID: ', mProto.clientID)
+        BLINKER_LOG('userName: ', mProto.userName)
+        BLINKER_LOG('password: ', mProto.password)
         BLINKER_LOG('subtopic: ', mProto.subtopic)
         BLINKER_LOG('pubtopic: ', mProto.pubtopic)
 
