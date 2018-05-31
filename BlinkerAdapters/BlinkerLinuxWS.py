@@ -69,10 +69,11 @@ class HandleServer(WebSocket):
         #     freshState(DISCONNECTED)
 
 class WebSocketServer(Thread):
-    def __init__(self, name, port, type = BLINKER_DIY_WIFI):
+    # def __init__(self, name, port, type = BLINKER_DIY_WIFI):
+    def __init__(self, type = BLINKER_DIY_WIFI):
         Thread.__init__(self)
-        self.name = name
-        self.port = port
+        self.name = deviceIP
+        self.port = wsPort
         self.type = type
         self.server = SimpleWebSocketServer(self.name, self.port, HandleServer)
         self._isClosed = False
