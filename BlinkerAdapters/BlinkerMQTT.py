@@ -165,8 +165,8 @@ class MQTTClient():
     def stop(self):
         self.client.loop_stop()
 
-    def pub(self, msg, notify = False):
-        if notify is False:
+    def pub(self, msg, state = False):
+        if state is False:
             if checkCanPrint() is False:
                 return
         payload = {'fromDevice':mProto.deviceName, 'toDevice':mProto.uuid, 'data':msg}

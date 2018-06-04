@@ -182,10 +182,12 @@ def _print(data):
         bProto.conn1.broadcast(data)
     elif bProto.conType == BLINKER_MQTT and bProto.msgFrom == BLINKER_MQTT:
         if BLINKER_CMD_NOTICE in data:
-            notify_state = True
+            _state = True
+        elif BLINKER_CMD_STATE in data:
+            _state = True
         else:
-            notify_state = False
-        bProto.conn1.pub(data, notify_state)
+            _state = False
+        bProto.conn1.pub(data, _state)
     elif bProto.conType == BLINKER_MQTT and bProto.msgFrom == BLINKER_WIFI:
         bProto.conn2.broadcast(data)
 
