@@ -22,6 +22,7 @@ class MQTT_Protol():
     printTime = 0
     kaTime = 0
     debug = BLINKER_DEBUG
+    sendTime = 0
 
 mProto = MQTT_Protol()
 
@@ -44,7 +45,13 @@ def checkCanPrint():
     if checkKA() is False:
         BLINKER_ERR_LOG("MQTT NOT ALIVE OR MSG LIMIT")
         return False
-    if (millis() - mProto.printTime) >= BLINKER_MQTT_MSG_LIMIT:
+    if (millis() - mProto.printTime) >= BLINKER_MQTT_MSG_LIMIT or mProto.printTime == 0:
+        return True
+    BLINKER_ERR_LOG("MQTT NOT ALIVE OR MSG LIMIT")
+    return False
+
+def checkCanSend():
+    if (millis() - mProto.sendTime) >= BLINKER_SMS_MSG_LIMIT or mProto.sendTime == 0:
         return True
     BLINKER_ERR_LOG("MQTT NOT ALIVE OR MSG LIMIT")
     return False
@@ -176,3 +183,17 @@ class MQTTClient():
             BLINKER_LOG('payload: ', payload)
         self.client.publish(mProto.pubtopic, payload)
         mProto.printTime = millis()
+
+    def sendSMS(self, msg):
+        if checkCanSend() is False:
+            return
+        payload = json.dumps({'authKey':self.auth,'msg':msg})
+        response = requests.post('https://iotdev.clz.me/api/v1/user/device/sms',
+            data=payload,headers={'Content-Type':'application/json'})
+        
+        mProto.sendTime = millis()
+        data = response.json()
+        if isDebugAll() is True:
+            BLINKER_LOG('response: ', data)
+        if data[BLINKER_CMD_MESSAGE] != 1000:
+            BLINKER_ERR_LOG(data[BLINKER_CMD_DETAIL])

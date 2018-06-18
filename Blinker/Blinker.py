@@ -594,3 +594,9 @@ def yday():
 def dtime():
     localtime = _time.localtime(_time.time())
     return localtime.tm_hour * 60 * 60 + localtime.tm_min * 60 + localtime.tm_sec
+
+def sms(sms_msg):
+    if bProto.conType == BLINKER_MQTT:
+        bProto.conn1.sendSMS(sms_msg)
+    else:
+        BLINKER_ERR_LOG('This code is intended to run on the MQTT!')
