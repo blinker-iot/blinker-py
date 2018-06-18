@@ -1,5 +1,6 @@
 import sys
 import json
+import time as _time
 import socket
 import threading
 from Blinker.BlinkerConfig import *
@@ -554,3 +555,42 @@ def vibrate(time = 200):
     if time > 1000:
         time = 1000
     print(BLINKER_CMD_VIBRATE, time)
+
+def time():
+    return _time.time()
+
+def second():
+    localtime = _time.localtime(_time.time())
+    return localtime.tm_sec
+
+def minute():
+    localtime = _time.localtime(_time.time())
+    return localtime.tm_min
+
+def hour():
+    localtime = _time.localtime(_time.time())
+    return localtime.tm_hour
+
+def mday():
+    localtime = _time.localtime(_time.time())
+    return localtime.tm_mday
+
+def wday():
+    localtime = _time.localtime(_time.time())
+    return (localtime.tm_wday + 1) % 7
+
+def month():
+    localtime = _time.localtime(_time.time())
+    return localtime.tm_mon
+
+def year():
+    localtime = _time.localtime(_time.time())
+    return localtime.tm_year
+
+def yday():
+    localtime = _time.localtime(_time.time())
+    return localtime.tm_yday
+
+def dtime():
+    localtime = _time.localtime(_time.time())
+    return localtime.tm_hour * 60 * 60 + localtime.tm_min * 60 + localtime.tm_sec
