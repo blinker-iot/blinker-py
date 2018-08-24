@@ -1,23 +1,30 @@
 from Blinker import *
 
-RGB_1 = ('RGBKey')
+RGB_1 = 'RGBKey'
 
 Blinker.setMode(BLINKER_WIFI)
 Blinker.begin()
-Blinker.wInit(RGB_1, W_RGB)
+
+rgb1 = BlinkerRGB(RGB_1)
+
+
+def rgb1_callback(r_value, g_value, b_value, bright_value):
+    BLINKER_LOG("R value: ", r_value)
+    BLINKER_LOG("G value: ", g_value)
+    BLINKER_LOG("B value: ", b_value)
+    BLINKER_LOG("Brightness value: ", bright_value)
+
+
+rgb1.attach(rgb1_callback)
 
 if __name__ == '__main__':
     while True:
         Blinker.run()
-        
-        if Blinker.available() == True:
+
+        if Blinker.available() is True:
             BLINKER_LOG('Blinker.readString(): ', Blinker.readString())
             Blinker.print(Blinker.times())
             Blinker.vibrate()
-            Blinker.print('millis', millis())            
-
-        BLINKER_LOG("Red color: ", Blinker.rgb(RGB_1,R))
-        BLINKER_LOG("Green color: ", Blinker.rgb(RGB_1,G))
-        BLINKER_LOG("Blue color: ", Blinker.rgb(RGB_1,B))
+            Blinker.print('millis', millis())
 
         Blinker.delay(2000)

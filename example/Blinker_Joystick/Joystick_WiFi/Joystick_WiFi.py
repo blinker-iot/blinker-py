@@ -3,17 +3,24 @@ from Blinker import *
 Blinker.setMode(BLINKER_WIFI)
 Blinker.begin()
 
+joy1 = BlinkerJoystick('JOY_1')
+
+
+def joystick_callback(xAxis, yAxis):
+    BLINKER_LOG('Joystick1 X axis: ', xAxis)
+    BLINKER_LOG('Joystick1 Y axis: ', yAxis)
+
+
+joy1.attach(joystick_callback)
+
 if __name__ == '__main__':
     while True:
         Blinker.run()
-        
-        if Blinker.available() == True:
+
+        if Blinker.available() is True:
             BLINKER_LOG('Blinker.readString(): ', Blinker.readString())
             Blinker.print(Blinker.times())
             Blinker.vibrate()
-            Blinker.print('millis', millis())            
-
-        BLINKER_LOG("Joystick X axis: ", Blinker.joystick(J_Xaxis))
-        BLINKER_LOG("Joystick Y axis: ", Blinker.joystick(J_Yaxis))
+            Blinker.print('millis', millis())
 
         Blinker.delay(2000)

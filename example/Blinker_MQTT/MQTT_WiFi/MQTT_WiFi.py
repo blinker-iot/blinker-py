@@ -1,24 +1,24 @@
 from Blinker import *
 
-BUTTON_1 = ('ButtonKey')
-auth = ('Your AuthKey')
+BUTTON_1 = 'ButtonKey'
+auth = "57fcb3a53ab3"
 
-Blinker.setMode(BLINKER_MQTT)
-Blinker.begin(auth)
-Blinker.wInit(BUTTON_1, W_BUTTON)
+blinker = Blinker.setMode(BLINKER_MQTT)
+blinker.begin(auth)
+blinker.wInit(BUTTON_1, W_BUTTON)
 
 if __name__ == '__main__':
     while True:
-        Blinker.run()
+        blinker.run()
         
-        if Blinker.available() == True:
-            BLINKER_LOG('Blinker.readString(): ', Blinker.readString())
+        if blinker.available() is True:
+            BLINKER_LOG('Blinker.readString(): ', blinker.readString())
 
-            Blinker.beginFormat()
-            Blinker.print(Blinker.times())
-            Blinker.vibrate()
-            Blinker.print('millis', millis())
-            Blinker.endFormat()
+            blinker.beginFormat()
+            blinker.print(blinker.times())
+            blinker.vibrate()
+            blinker.print('millis', millis())
+            blinker.endFormat()
 
-        if Blinker.button(BUTTON_1):
-            Blinker.print('Button pressed!')
+        if blinker.button(BUTTON_1):
+            blinker.print('Button pressed!')

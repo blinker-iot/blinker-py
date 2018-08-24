@@ -159,7 +159,7 @@ def run():
         protocol.thread.daemon = True
         protocol.thread.start()
         protocol.isThreadStart = True
-    checkData()
+        checkData()
 
 
 # Data management
@@ -552,8 +552,8 @@ class BlinkerButton(object):
         if self.textClr:
             self.buttonData[BLINKER_CMD_TEXTCOLOR] = self.textClr
 
-        data = json.dumps(self.buttonData)
-        _print(data)
+        self.buttonData = json.dumps(self.buttonData)
+        _print(self.buttonData)
 
 
 class BlinkerRGB(object):
@@ -608,9 +608,9 @@ class BlinkerSlider(object):
         if self.textClr:
             self.sliderData[BLINKER_CMD_COLOR] = self.textClr
 
-        data = json.dumps(self.sliderData)
+        self.sliderData = json.dumps(self.sliderData)
 
-        _print(data)
+        _print(self.sliderData)
 
 
 class BlinkerNumber(object):
@@ -643,9 +643,9 @@ class BlinkerNumber(object):
         if self._unit:
             self.buttonData[BLINKER_CMD_UNIT] = self._unit
 
-        data = json.dumps(self.buttonData)
+        self.buttonData = json.dumps(self.buttonData)
 
-        _print(data)
+        _print(self.buttonData)
 
         self._icon = ""
         self._color = ""
@@ -666,9 +666,9 @@ class BlinkerText(object):
         if text2:
             self.textData[BLINKER_CMD_TEXT1] = text2
 
-        data = json.dumps(self.textData)
+        self.textData = json.dumps(self.textData)
 
-        _print(data)
+        _print(self.textData)
 
 
 class BlinkerJoystick(object):
