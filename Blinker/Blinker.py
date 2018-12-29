@@ -48,6 +48,8 @@ class Protocol():
         self.GPS = ["0.000000", "0.000000"]
         self.RGB = {}
 
+        self.dataFunc = None
+
 bProto = Protocol()
 
 def mode(setType = BLINKER_WIFI):
@@ -270,6 +272,9 @@ def delay(ms):
 def available():
     return bProto.isAvail
 
+def attachData(func):
+    bProto.dataFunc = func
+
 def readString():
     bProto.isRead = False
     bProto.isAvail = False
@@ -331,7 +336,10 @@ def parse():
         pass
     finally:
         if bProto.isRead:
-            bProto.isAvail = True
+            # bProto.isAvail = 
+            if bProto.dataFunc :
+                bProto.dataFunc(data)
+            # bProto.isAvail = False
 
 
 def _parse(data):
