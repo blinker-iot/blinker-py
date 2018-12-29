@@ -18,15 +18,15 @@ def button1_callback(state):
     button1.text('Your button name or describe')
     button1.print("on")
 
+def data_callback(data):
+    BLINKER_LOG("Blinker readString: ", data)
+    counter += 1
+    number1.print(counter)
 
 button1.attach(button1_callback)
+Blinker.attachData(data_callback)
 
 if __name__ == '__main__':
 
     while True:
         Blinker.run()
-
-        if Blinker.available() is True:
-            BLINKER_LOG("Blinker.readString(): ", Blinker.readString())
-            counter += 1
-            number1.print(counter)
