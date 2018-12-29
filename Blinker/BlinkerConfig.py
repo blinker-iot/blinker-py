@@ -36,8 +36,8 @@ BLINKER_VERSION                 = '0.1.0'
 BLINKER_MAX_READ_SIZE           = 256
 BLINKER_MAX_SEND_SIZE           = 128
 
-BLINKER_DIY_WIFI                = 'DiyLinux'
-BLINKER_DIY_MQTT                = 'DiyLinuxMQTT'
+BLINKER_DIY_WIFI                = 'blinker'
+BLINKER_DIY_MQTT                = 'blinker'
 
 BLINKER_CONNECT_TIMEOUT_MS      = 10000
 BLINKER_STREAM_TIMEOUT          = 100
@@ -62,6 +62,17 @@ BLINKER_CMD_CONNECTED           = 'connected'
 BLINKER_CMD_VERSION             = 'version'
 BLINKER_CMD_NOTICE              = 'notice'
 BLINKER_CMD_NOTFOUND            = 'device not found'
+BLINKER_CMD_SWITCH              = 'swi'
+BLINKER_CMD_VALUE               = 'val'
+BLINKER_CMD_ICON                = 'ico'
+BLINKER_CMD_COLOR               = 'col'
+BLINKER_CMD_TITLE               = 'tit'
+BLINKER_CMD_CONTENT             = 'con'
+BLINKER_CMD_TEXT                = 'tex'
+BLINKER_CMD_TEXT1               = 'tex1'
+BLINKER_CMD_TEXTCOLOR           = 'tco'
+BLINKER_CMD_UNIT                = 'uni'
+BLINKER_CMD_BUILTIN_SWITCH      = 'switch'
 BLINKER_JOYSTICK_VALUE_DEFAULT  = 128
 
 BLINKER_MQTT_ALIYUN_HOST        = 'public.iot-as-mqtt.cn-shanghai.aliyuncs.com'
