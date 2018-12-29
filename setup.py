@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='Blinker',
-    version='0.1.0',
+    version='0.2.0',
     author='i3water',
     packages=['Blinker', 'BlinkerAdapters', 'BlinkerUtility'],
     # package_dir={'Blinker':'', 'BlinkerAdapters':'', 'BlinkerUtility':''},
