@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
-
-import threading
+import sys
+import json
 import time as _time
-from .BlinkerConfig import *
-from .BlinkerDebug import *
-from BlinkerUtility import *
-
-
+import socket
+import threading
+from Blinker.BlinkerConfig import *
+from Blinker.BlinkerDebug import *
+from BlinkerUtility.BlinkerUtility import *
 # from BlinkerAdapters.BlinkerBLE import *
 # from BlinkerAdapters.BlinkerLinuxWS import *
 # from BlinkerAdapters.BlinkerMQTT import *
@@ -14,7 +13,7 @@ from BlinkerUtility import *
 # from zeroconf import ServiceInfo, Zeroconf
 # from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 
-class Protocol(object):
+class Protocol():
 
     def __init__(self):
         self.conType = BLINKER_WIFI
@@ -49,93 +48,336 @@ class Protocol(object):
         self.GPS = ["0.000000", "0.000000"]
         self.RGB = {}
 
+bProto = Protocol()
 
-protocol = Protocol()
-
-
-def mode(setType=BLINKER_WIFI):
-    protocol.conType = setType
-    if protocol.conType == BLINKER_BLE:
+def mode(setType = BLINKER_WIFI):
+    bProto.conType = setType
+    if bProto.conType == BLINKER_BLE:
         import BlinkerAdapters.BlinkerBLE as bBLE
 
-        protocol.proto1 = bBLE
-        protocol.conn1 = protocol.proto1.BlinkerBLEService()
-    elif protocol.conType == BLINKER_WIFI:
-        import BlinkerAdapters as bWS
+        bProto.proto1 = bBLE
+        bProto.conn1 = bProto.proto1.BlinkerBLEService()
+    # elif bProto.conType == BLINKER_WIFI:
+    #     import BlinkerAdapters.BlinkerLinuxWS as bWS
 
-        protocol.proto1 = bWS
-        protocol.conn1 = protocol.proto1.WebSocketServer()
-    elif protocol.conType == BLINKER_MQTT :#or protocol.conType == BLINKER_WIFI:
-        protocol.conType = BLINKER_MQTT
-        import BlinkerAdapters as bWS
+    #     bProto.proto1 = bWS
+    #     bProto.conn1 = bProto.proto1.WebSocketServer()
+    elif bProto.conType == BLINKER_MQTT or bProto.conType == BLINKER_WIFI:
+        bProto.conType = BLINKER_MQTT
+
+        import BlinkerAdapters.BlinkerLinuxWS as bWS
         import BlinkerAdapters as bMQTT
 
-        protocol.proto1 = bMQTT
-        protocol.proto2 = bWS
-        protocol.conn1 = protocol.proto1.MQTTClient()
-        protocol.conn2 = protocol.proto2.WebSocketServer(BLINKER_DIY_MQTT)
+        bProto.proto1 = bMQTT
+        bProto.proto2 = bWS
+        bProto.conn1 = bProto.proto1.MQTTClient()
+        bProto.conn2 = bProto.proto2.WebSocketServer(BLINKER_DIY_MQTT)
 
+# def debugLevel(level = BLINKER_DEBUG):
+#     bProto.debug = level
 
-# def debugLevel(level=BLINKER_DEBUG):
-#     protocol.debug = level
-
-
-def begin(auth=None):
-    if protocol.conType == BLINKER_BLE:
+def begin(auth = None):
+    if bProto.conType == BLINKER_BLE:
         # return
-        # protocol.proto1.bleProto.debug = protocol.debug
+        bProto.proto1.bleProto.debug = bProto.debug
         # bProto.conn1.run()
-        protocol.conn1.start()
-    elif protocol.conType == BLINKER_WIFI:
-        # protocol.proto1.wsProto.debug = protocol.debug
-        protocol.conn1.start()
-    elif protocol.conType == BLINKER_MQTT:
-        # protocol.conn1.mProto.debug = protocol.debug
-        # protocol.proto2.wsProto.debug = protocol.debug
-        protocol.msgFrom = BLINKER_MQTT
-        protocol.conn1.start(auth)
-        # BLINKER_LOG("deviceName: ", protocol.conn1.bmqtt.deviceName[0: 12])
-        protocol.conn2.start(protocol.conn1.bmqtt.deviceName)#[0: 12])
-        protocol.conn1.run()
+        bProto.conn1.start()
+    elif bProto.conType == BLINKER_WIFI:
+        # bProto.proto1.wsProto.debug = bProto.debug
+        bProto.conn1.start()
+    elif bProto.conType == BLINKER_MQTT:
+        # bProto.proto1.mProto.debug = bProto.debug
+        # bProto.proto2.wsProto.debug = bProto.debug
+        bProto.msgFrom = BLINKER_MQTT
+        bProto.conn1.start(auth)
+        bProto.conn2.start(bProto.conn1.bmqtt.deviceName)
+        bProto.conn1.run()
 
+def thread_run():
+    if bProto.conType == BLINKER_BLE:
+        bProto.conn1.run()
+    while True:
+        checkData()
+
+def checkData():
+    if bProto.conType == BLINKER_BLE:
+        # return
+        bProto.state = bProto.proto1.bleProto.state
+        if bProto.proto1.bleProto.isRead is True:
+            bProto.msgBuf = bProto.proto1.bleProto.msgBuf
+            bProto.isRead = True
+            bProto.proto1.bleProto.isRead = False
+            parse()
+    elif bProto.conType == BLINKER_WIFI:
+        bProto.state = bProto.proto1.wsProto.state
+        if bProto.proto1.wsProto.isRead is True:
+            bProto.msgBuf = str(bProto.proto1.wsProto.msgBuf)
+            bProto.isRead = True
+            bProto.proto1.wsProto.isRead = False
+            parse()
+    elif bProto.conType == BLINKER_MQTT:
+        bProto.state = bProto.conn1.bmqtt.state
+        if bProto.proto2.wsProto.state is CONNECTED:
+            bProto.state = bProto.proto2.wsProto.state
+        if bProto.conn1.bmqtt.isRead is True:
+            bProto.msgBuf = bProto.conn1.bmqtt.msgBuf
+            bProto.msgFrom = BLINKER_MQTT
+            bProto.isRead = True
+            bProto.conn1.bmqtt.isRead = False
+            parse()
+        if bProto.proto2.wsProto.isRead is True:
+            bProto.msgBuf = str(bProto.proto2.wsProto.msgBuf)
+            bProto.msgFrom = BLINKER_WIFI
+            bProto.isRead = True
+            bProto.proto2.wsProto.isRead = False
+            parse()
+
+def run():
+    if bProto.isThreadStart is False:
+        bProto.thread = threading.Thread(target=thread_run)
+        bProto.thread.daemon = True
+        bProto.thread.start()
+        bProto.isThreadStart = True
+    checkData()
+    checkAutoFormat()
+    
+
+# def wInit(name, wType):
+#     if wType == W_BUTTON:
+#         if name in bProto.Buttons:
+#             return
+#         else:
+#             bProto.Buttons[name] = BLINKER_CMD_BUTTON_RELEASED
+#         # BLINKER_LOG(bProto.Buttons)
+
+#     elif wType == W_SLIDER:
+#         if name in bProto.Sliders:
+#             return
+#         else:
+#             bProto.Sliders[name] = 0
+#         # BLINKER_LOG(bProto.Sliders)
+
+#     elif wType == W_TOGGLE:
+#         if name in bProto.Toggles:
+#             return
+#         else:
+#             bProto.Toggles[name] = False
+
+#     elif wType == W_RGB:
+#         if name in bProto.RGB:
+#             return
+#         else:
+#             rgb = [0, 0, 0]
+#             bProto.RGB[name] = rgb
+#         BLINKER_LOG(bProto.Toggles)
+
+# def beginFormat():
+#     bProto.isFormat = True
+#     bProto.sendBuf.clear()
+
+# def endFormat():
+#     bProto.isFormat = False
+#     _print(bProto.sendBuf)
+#     return checkLength(bProto.sendBuf)
+
+def checkLength(data):
+    if len(data) > BLINKER_MAX_SEND_SIZE:
+        BLINKER_ERR_LOG('SEND DATA BYTES MAX THAN LIMIT!')
+        return False
+    else:
+        return True
+
+def _print(data):
+    if checkLength(data) is False:
+        return
+    
+    if bProto.conType == BLINKER_BLE:
+        bProto.conn1.response(data)
+    elif bProto.conType == BLINKER_WIFI:
+        bProto.conn1.broadcast(data)
+    elif bProto.conType == BLINKER_MQTT and bProto.msgFrom == BLINKER_MQTT:
+        if BLINKER_CMD_NOTICE in data:
+            _state = True
+        elif BLINKER_CMD_STATE in data:
+            _state = True
+        else:
+            _state = False
+        bProto.conn1.pub(data, _state)
+    elif bProto.conType == BLINKER_MQTT and bProto.msgFrom == BLINKER_WIFI:
+        bProto.conn2.broadcast(data)
+
+    _parse(data)
+
+def print(key, value = None, uint = None):
+
+    if value is None:
+        if bProto.isFormat:
+            return
+        data = str(key)
+        _print(data)
+    else:
+        key = str(key)
+        # if not uint is None:
+        #     value = str(value) + str(uint)
+        # data = json_encode(key, value)
+        # data = {}
+        if bProto.isFormat == False:
+            bProto.isFormat = True
+        
+        if (millis() - bProto.autoFormatFreshTime) >= 100 :
+            bProto.autoFormatFreshTime = millis()
+
+        bProto.sendBuf[key] = value
+
+    # if bProto.isFormat is False:
+    #     _print(data)
+
+def checkAutoFormat():
+    if bProto.isFormat :
+        if (millis() - bProto.autoFormatFreshTime) >= 100 :
+            _print(bProto.sendBuf)
+            bProto.isFormat = False
+
+
+def notify(msg):
+    print(BLINKER_CMD_NOTICE, msg)
 
 def connected():
-    if protocol.state is CONNECTED:
+    if bProto.state is CONNECTED:
         return True
     else:
-        return False
+        return False 
 
-
-def connect(timeout=BLINKER_STREAM_TIMEOUT):
-    protocol.state = CONNECTING
+def connect(timeout = BLINKER_STREAM_TIMEOUT):
+    bProto.state = CONNECTING
     start_time = millis()
     while (millis() - start_time) < timeout:
         run()
-        if protocol.state is CONNECTED:
+        if bProto.state is CONNECTED:
             return True
     return False
 
-
 def disconnect():
-    protocol.state = DISCONNECTED
+    bProto.state = DISCONNECTED
+
+def delay(ms):
+    start = millis()
+    time_run = 0
+    while time_run < ms:
+        run()
+        time_run = millis() - start
+
+def available():
+    return bProto.isAvail
+
+def readString():
+    bProto.isRead = False
+    bProto.isAvail = False
+    return bProto.msgBuf
+
+def times():
+    return now()
+
+def parse():
+    data = bProto.msgBuf
+    if not data:
+        return
+    try:
+        data = json.loads(data)
+        BLINKER_LOG(data)
+        if not isinstance(data, dict):
+            raise TypeError()
+        for key, value in data.items():
+            if key in bProto.Buttons:
+                bProto.isRead = False
+                bProto.Buttons[key].func(data[key])
+            elif key in bProto.Sliders:
+                bProto.isRead = False
+                bProto.Sliders[key].func(data[key])
+            elif key in bProto.Toggles:
+                bProto.isRead = False
+                bProto.Toggles[key].func(data[key])
+            elif key in bProto.RGB:
+                bProto.isRead = False
+                BLINKER_LOG(bProto.RGB[key])
+                bProto.RGB[key].func(data[key][R], data[key][G], data[key][B], data[key][BR])
+            elif key in bProto.Joystick:
+                bProto.isRead = False
+                bProto.Joystick[key].func(data[key][J_Xaxis], data[key][J_Yaxis])
+            elif key == BLINKER_CMD_AHRS:
+                # bProto.isAvail = False
+                bProto.isRead = False
+                bProto.Ahrs[Yaw] = data[key][Yaw]
+                bProto.Ahrs[Pitch] = data[key][Pitch]
+                bProto.Ahrs[Roll] = data[key][Roll]
+                bProto.Ahrs[AHRS_state] = True
+                # BLINKER_LOG(bProto.Ahrs)
+            elif key == BLINKER_CMD_GPS:
+                bProto.isRead = False
+                bProto.GPS[LONG] = str(data[key][LONG])
+                bProto.GPS[LAT] = str(data[key][LAT])
+
+            elif key == BLINKER_CMD_GET and data[key] == BLINKER_CMD_VERSION:
+                bProto.isRead = False
+                print(BLINKER_CMD_VERSION, BLINKER_VERSION)
+
+            elif key == BLINKER_CMD_GET and data[key] == BLINKER_CMD_STATE:
+                bProto.isRead = False
+                heartbeat()
+
+    except ValueError:
+        pass
+    except TypeError:
+        pass
+    finally:
+        if bProto.isRead:
+            bProto.isAvail = True
 
 
-def stateData():
-    for tKey in protocol.Toggles:
-        tValue = ''
-        if protocol.Toggles[tKey]:
-            tValue = 'on'
-        else:
-            tValue = 'off'
-        print(tKey, tValue)
-    for sKey in protocol.Sliders:
-        print(sKey, protocol.Sliders[sKey])
-    for rgbKey in protocol.RGB:
-        print(rgbKey, protocol.RGB[rgbKey])
+def _parse(data):
+    if data is '':
+        return
+    if check_json_format(data):
+        data = json.loads(data)
+        for key in data.keys():
+            # BLINKER_LOG(key)
+            if key in bProto.Buttons:
+                # bProto.isAvail = False
+                bProto.isRead = False
+                if data[key] == BLINKER_CMD_BUTTON_TAP:
+                    bProto.Buttons[key] = BLINKER_CMD_BUTTON_TAP
+                elif data[key] == BLINKER_CMD_BUTTON_PRESSED:
+                    bProto.Buttons[key] = BLINKER_CMD_BUTTON_PRESSED
+                else:
+                    bProto.Buttons[key] = BLINKER_CMD_BUTTON_RELEASED
+                # if data[key] 
+                # BLINKER_LOG(bProto.Buttons)
 
+            elif key in bProto.Sliders:
+                # bProto.isAvail = False
+                bProto.isRead = False
+                bProto.Sliders[key] = data[key]
+                # BLINKER_LOG(bProto.Buttons)
+
+            elif key in bProto.Toggles:
+                # bProto.isAvail = False
+                bProto.isRead = False
+                if data[key] == BLINKER_CMD_ON:
+                    bProto.Toggles[key] = True
+                else:
+                    bProto.Toggles[key] = False
+                # BLINKER_LOG(bProto.Toggles)
+
+            elif key in bProto.RGB:
+                bProto.isRead = False
+                rgb = [0, 0, 0]
+                rgb[R] = data[key][R]
+                rgb[G] = data[key][G]
+                rgb[B] = data[key][B]
+                bProto.RGB[key] = rgb
 
 def heartbeat():
-    if protocol.conType is BLINKER_MQTT:
+    if bProto.conType is BLINKER_MQTT:
         # beginFormat()
         print(BLINKER_CMD_STATE, BLINKER_CMD_ONLINE)
         stateData()
@@ -148,341 +390,67 @@ def heartbeat():
         # if endFormat() is False:
         #     print(BLINKER_CMD_STATE, BLINKER_CMD_CONNECTED)
 
-
-def thread_run():
-    if protocol.conType == BLINKER_BLE:
-        protocol.conn1.run()
-    # else :
-    #     protocol.conn2.run()
-    while True:
-        checkData()
-
-
-def run():
-    if protocol.isThreadStart is False:
-        protocol.thread = threading.Thread(target=thread_run)
-        protocol.thread.daemon = True
-        protocol.thread.start()
-        protocol.isThreadStart = True
-    checkData()
-    checkAutoFormat()
-
-
-# Data management
-
-def parse():
-    data = protocol.msgBuf
-    if not data:
-        return
-    try:
-        data = json.loads(data)
-        BLINKER_LOG(data)
-        # BLINKER_LOG(protocol.Sliders)
-        if not isinstance(data, dict):
-            raise TypeError()
-        for key, value in data.items():
-            if key in protocol.Buttons:
-                protocol.isRead = False
-                protocol.Buttons[key].func(data[key])
-            elif key in protocol.Sliders:
-                protocol.isRead = False
-                protocol.Sliders[key].func(data[key])
-            elif key in protocol.Toggles:
-                protocol.isRead = False
-                protocol.Toggles[key].func(data[key])
-            elif key in protocol.RGB:
-                protocol.isRead = False
-                BLINKER_LOG(protocol.RGB[key])
-                protocol.RGB[key].func(data[key][R], data[key][G], data[key][B], data[key][BR])
-            elif key in protocol.Joystick:
-                protocol.isRead = False
-                protocol.Joystick[key].func(data[key][J_Xaxis], data[key][J_Yaxis])
-            elif key == BLINKER_CMD_AHRS:
-                # bProto.isAvail = False
-                protocol.isRead = False
-                protocol.Ahrs[Yaw] = data[key][Yaw]
-                protocol.Ahrs[Pitch] = data[key][Pitch]
-                protocol.Ahrs[Roll] = data[key][Roll]
-                protocol.Ahrs[AHRS_state] = True
-                # BLINKER_LOG(bProto.Ahrs)
-            elif key == BLINKER_CMD_GPS:
-                protocol.isRead = False
-                protocol.GPS[LONG] = str(data[key][LONG])
-                protocol.GPS[LAT] = str(data[key][LAT])
-
-            elif key == BLINKER_CMD_GET and data[key] == BLINKER_CMD_VERSION:
-                protocol.isRead = False
-                print(BLINKER_CMD_VERSION, BLINKER_VERSION)
-
-            elif key == BLINKER_CMD_GET and data[key] == BLINKER_CMD_STATE:
-                protocol.isRead = False
-                heartbeat()
-
-    except ValueError:
-        pass
-    except TypeError:
-        pass
-    finally:
-        if protocol.isRead:
-            protocol.isAvail = True
-
-
-def _parse(data):
-    if not data:
-        return
-    try:
-        data = json.loads(data)
-        if not isinstance(data, dict):
-            raise TypeError()
-        for key in data.keys():
-            # BLINKER_LOG(key)
-            if key in protocol.Buttons:
-                # bProto.isAvail = False
-                protocol.isRead = False
-                if data[key] == BLINKER_CMD_BUTTON_TAP:
-                    protocol.Buttons[key] = BLINKER_CMD_BUTTON_TAP
-                elif data[key] == BLINKER_CMD_BUTTON_PRESSED:
-                    protocol.Buttons[key] = BLINKER_CMD_BUTTON_PRESSED
-                else:
-                    protocol.Buttons[key] = BLINKER_CMD_BUTTON_RELEASED
-                # if data[key]
-                # BLINKER_LOG(bProto.Buttons)
-
-            elif key in protocol.Sliders:
-                # bProto.isAvail = False
-                protocol.isRead = False
-                protocol.Sliders[key] = data[key]
-                # BLINKER_LOG(bProto.Buttons)
-
-            elif key in protocol.Toggles:
-                # bProto.isAvail = False
-                protocol.isRead = False
-                if data[key] == BLINKER_CMD_ON:
-                    protocol.Toggles[key] = True
-                else:
-                    protocol.Toggles[key] = False
-                # BLINKER_LOG(bProto.Toggles)
-
-            elif key in protocol.RGB:
-                protocol.isRead = False
-                rgb = [0, 0, 0]
-                rgb[R] = data[key][R]
-                rgb[G] = data[key][G]
-                rgb[B] = data[key][B]
-                protocol.RGB[key] = rgb
-    except ValueError:
-        pass
-    except TypeError:
-        pass
-    finally:
-        if protocol.isRead:
-            protocol.isAvail = True
-
-
-def checkData():
-    if protocol.conType == BLINKER_BLE:
-        # return
-        protocol.state = protocol.proto1.bleProto.state
-        if protocol.proto1.bleProto.isRead is True:
-            protocol.msgBuf = protocol.proto1.bleProto.msgBuf
-            protocol.isRead = True
-            protocol.proto1.bleProto.isRead = False
-            parse()
-    # elif protocol.conType == BLINKER_WIFI:
-    #     protocol.state = protocol.proto1.wsProto.state
-    #     if protocol.proto1.wsProto.isRead is True:
-    #         protocol.msgBuf = str(protocol.proto1.wsProto.msgBuf)
-    #         protocol.isRead = True
-    #         protocol.proto1.wsProto.isRead = False
-    #         parse()
-    elif protocol.conType == BLINKER_MQTT:
-        protocol.state = protocol.conn1.bmqtt.state
-        if protocol.proto2.wsProto.state is CONNECTED:
-            protocol.state = protocol.proto2.wsProto.state
-        # if protocol.conn1.bmqtt.isRead is True:
-        #     protocol.msgBuf = protocol.conn1.bmqtt.msgBuf
-        #     protocol.msgFrom = BLINKER_MQTT
-        #     protocol.isRead = True
-        #     protocol.conn1.bmqtt.isRead = False
-        #     parse()
-        if protocol.proto2.wsProto.isRead is True:
-            protocol.msgBuf = str(protocol.proto2.wsProto.msgBuf)
-            protocol.msgFrom = BLINKER_WIFI
-            protocol.isRead = True
-            protocol.proto2.wsProto.isRead = False
-            parse()
-
-
-def available():
-    return protocol.isAvail
-
-
-def readString():
-    protocol.isRead = False
-    protocol.isAvail = False
-    return protocol.msgBuf
-
-
-def times():
-    return now()
-
-
-def checkLength(data):
-    if len(data) > BLINKER_MAX_SEND_SIZE:
-        BLINKER_ERR_LOG('SEND DATA BYTES MAX THAN LIMIT!')
-        return False
-    else:
-        return True
-
-
-def _print(data):
-    if checkLength(data) is False:
-        return
-
-    if protocol.conType == BLINKER_BLE:
-        protocol.conn1.response(data)
-    elif protocol.conType == BLINKER_WIFI:
-        protocol.conn1.broadcast(data)
-    elif protocol.conType == BLINKER_MQTT and protocol.msgFrom == BLINKER_MQTT:
-        if BLINKER_CMD_NOTICE in data:
-            _state = True
-        elif BLINKER_CMD_STATE in data:
-            _state = True
+def stateData():
+    for tKey in bProto.Toggles:
+        tValue = ''
+        if bProto.Toggles[tKey]:
+            tValue = 'on'
         else:
-            _state = False
-        protocol.conn1.pub(data, _state)
-    elif protocol.conType == BLINKER_MQTT and protocol.msgFrom == BLINKER_WIFI:
-        protocol.conn2.broadcast(data)
-
-    _parse(data)
-
-
-def print(key, value=None):
-    if value is None:
-        if protocol.isFormat:
-            return
-        data = str(key)
-        _print(data)
-    else:
-        key = str(key)
-        # if uint is not None:
-            # value = str(value) + str(uint)
-        # data = json_encode(key, value)
-        # data = {}
-        if protocol.isFormat == False:
-            protocol.isFormat = True
-
-        if (millis() - protocol.autoFormatFreshTime) >= 100 :
-            protocol.autoFormatFreshTime = millis()
-
-        protocol.sendBuf[key] = value
-
-    #     else:
-    #         data[key] = value
-
-    # if protocol.isFormat is False:
-    #     _print(data)
-
-# def checkFormat():
-
-def checkAutoFormat():
-    if protocol.isFormat :
-        if (millis() - protocol.autoFormatFreshTime) >= 100 :
-            _print(protocol.sendBuf)
-            protocol.isFormat = False
+            tValue = 'off'
+        print(tKey, tValue)
+    for sKey in bProto.Sliders:
+        print(sKey, bProto.Sliders[sKey])
+    for rgbKey in bProto.RGB:
+        print(rgbKey, bProto.RGB[rgbKey])
 
 
-# def beginFormat():
-#     protocol.isFormat = True
-#     protocol.sendBuf.clear()
-
-
-# def endFormat():
-#     protocol.isFormat = False
-#     _print(protocol.sendBuf)
-#     return checkLength(protocol.sendBuf)
-
-
-def notify(msg):
-    print(BLINKER_CMD_NOTICE, msg)
-
-
-def delay(ms):
-    start = millis()
-    time_run = 0
-    while time_run < ms:
+def button(name):
+    if not name in bProto.Buttons:
+        wInit(name, W_BUTTON)
         run()
-        time_run = millis() - start
 
+    if bProto.Buttons[name] is BLINKER_CMD_BUTTON_RELEASED:
+        return False
+    
+    if bProto.Buttons[name] is BLINKER_CMD_BUTTON_TAP:
+        bProto.Buttons[name] = BLINKER_CMD_BUTTON_RELEASED
+    return True
 
-def vibrate(t=200):
-    if t > 1000:
-        t = 1000
-    print(BLINKER_CMD_VIBRATE, t)
-
-
-def time():
-    return _time.time()
-
-
-def second():
-    localtime = _time.localtime(_time.time())
-    return localtime.tm_sec
-
-
-def minute():
-    localtime = _time.localtime(_time.time())
-    return localtime.tm_min
-
-
-def hour():
-    localtime = _time.localtime(_time.time())
-    return localtime.tm_hour
-
-
-def mday():
-    localtime = _time.localtime(_time.time())
-    return localtime.tm_mday
-
-
-def wday():
-    localtime = _time.localtime(_time.time())
-    return (localtime.tm_wday + 1) % 7
-
-
-def month():
-    localtime = _time.localtime(_time.time())
-    return localtime.tm_mon
-
-
-def year():
-    localtime = _time.localtime(_time.time())
-    return localtime.tm_year
-
-
-def yday():
-    localtime = _time.localtime(_time.time())
-    return localtime.tm_yday
-
-
-def dtime():
-    localtime = _time.localtime(_time.time())
-    return localtime.tm_hour * 60 * 60 + localtime.tm_min * 60 + localtime.tm_sec
-
-
-def sms(sms_msg):
-    if protocol.conType == BLINKER_MQTT:
-        protocol.conn1.sendSMS(sms_msg)
+def slider(name):
+    if name in bProto.Sliders:
+        return bProto.Sliders[name]
     else:
-        BLINKER_ERR_LOG('This code is intended to run on the MQTT!')
+        wInit(name, W_SLIDER)
+        run()
+        return bProto.Sliders[name]
 
+def toggle(name):
+    if name in bProto.Toggles:
+        return bProto.Toggles[name]
+    else:
+        wInit(name, W_TOGGLE)
+        run()
+        return bProto.Toggles[name]
+
+def rgb(name, color):
+    if name in bProto.RGB:
+        return bProto.RGB[name][color]
+    else:
+        wInit(name, W_RGB)
+        run()
+        return bProto.RGB[name][color]
+
+def joystick(axis):
+    if axis >= J_Xaxis and axis <= J_Yaxis:
+        return bProto.Joystick[axis]
+    else:
+        return BLINKER_JOYSTICK_VALUE_DEFAULT
 
 def ahrs(axis):
-    if Yaw <= axis <= Roll:
-        return protocol.Ahrs[axis]
+    if axis >= Yaw and axis <= Roll:
+        return bProto.Ahrs[axis]
     else:
         return 0
-
 
 def attachAhrs():
     state = False
@@ -492,7 +460,7 @@ def attachAhrs():
     delay(100)
     run()
     start_time = millis()
-    state = protocol.Ahrs[AHRS_state]
+    state = bProto.Ahrs[AHRS_state]
     while state is False:
         if (millis() - start_time) > BLINKER_CONNECT_TIMEOUT_MS:
             BLINKER_LOG("AHRS attach failed...Try again")
@@ -500,27 +468,74 @@ def attachAhrs():
             print(BLINKER_CMD_AHRS, BLINKER_CMD_ON)
             delay(100)
             run()
-        state = protocol.Ahrs[AHRS_state]
+        state = bProto.Ahrs[AHRS_state]
     BLINKER_LOG("AHRS attach sucessed...")
-
 
 def detachAhrs():
     print(BLINKER_CMD_AHRS, BLINKER_CMD_OFF)
-    protocol.Ahrs[Yaw] = 0
-    protocol.Ahrs[Roll] = 0
-    protocol.Ahrs[Pitch] = 0
-    protocol.Ahrs[AHRS_state] = False
-
+    bProto.Ahrs[Yaw] = 0
+    bProto.Ahrs[Roll] = 0
+    bProto.Ahrs[Pitch] = 0
+    bProto.Ahrs[AHRS_state] = False
 
 def gps(axis):
     print(BLINKER_CMD_GET, BLINKER_CMD_GPS)
     delay(100)
     run()
-    if LONG <= axis <= LAT:
-        return protocol.GPS[axis]
+    if axis >= LONG and axis <= LAT:
+        return bProto.GPS[axis]
     else:
         return "0.000000"
 
+def vibrate(time = 200):
+    if time > 1000:
+        time = 1000
+    print(BLINKER_CMD_VIBRATE, time)
+
+def time():
+    return _time.time()
+
+def second():
+    localtime = _time.localtime(_time.time())
+    return localtime.tm_sec
+
+def minute():
+    localtime = _time.localtime(_time.time())
+    return localtime.tm_min
+
+def hour():
+    localtime = _time.localtime(_time.time())
+    return localtime.tm_hour
+
+def mday():
+    localtime = _time.localtime(_time.time())
+    return localtime.tm_mday
+
+def wday():
+    localtime = _time.localtime(_time.time())
+    return (localtime.tm_wday + 1) % 7
+
+def month():
+    localtime = _time.localtime(_time.time())
+    return localtime.tm_mon
+
+def year():
+    localtime = _time.localtime(_time.time())
+    return localtime.tm_year
+
+def yday():
+    localtime = _time.localtime(_time.time())
+    return localtime.tm_yday
+
+def dtime():
+    localtime = _time.localtime(_time.time())
+    return localtime.tm_hour * 60 * 60 + localtime.tm_min * 60 + localtime.tm_sec
+
+def sms(sms_msg):
+    if bProto.conType == BLINKER_MQTT:
+        bProto.conn1.sendSMS(sms_msg)
+    else:
+        BLINKER_ERR_LOG('This code is intended to run on the MQTT!')
 
 class BlinkerButton(object):
     """ """
@@ -536,7 +551,7 @@ class BlinkerButton(object):
         self.textClr = None
         self.buttonData = None
 
-        protocol.Buttons[name] = self
+        bProto.Buttons[name] = self
 
     def icon(self, _icon):
         self._icon = _icon
@@ -591,7 +606,7 @@ class BlinkerRGB(object):
         self.rgbData = []
         self.registered = False
 
-        protocol.RGB[name] = self
+        bProto.RGB[name] = self
 
     def attach(self, func):
         self.func = func
@@ -622,7 +637,7 @@ class BlinkerSlider(object):
         self.textClr = ""
         self.sliderData = {}
 
-        protocol.Sliders[name] = self
+        bProto.Sliders[name] = self
 
     def attach(self, func):
         self.func = func
@@ -650,7 +665,7 @@ class BlinkerNumber(object):
         self._unit = ""
         self.buttonData = {}
 
-        protocol.Numbers[name] = self
+        bProto.Numbers[name] = self
 
     def icon(self, _icon):
         self._icon = _icon
@@ -686,7 +701,7 @@ class BlinkerText(object):
         self.name = name
         self.textData = {}
 
-        protocol.Texts[name] = self
+        bProto.Texts[name] = self
 
     def print(self, text1, text2=None):
         self.textData[BLINKER_CMD_TEXT] = text1
@@ -705,7 +720,7 @@ class BlinkerJoystick(object):
         self.name = name
         self.func = func
 
-        protocol.Joystick[name] = self
+        bProto.Joystick[name] = self
 
     def attach(self, _func):
         self.func = _func
@@ -718,7 +733,7 @@ class BlinkerSwitch(object):
         self.name = name
         self.func = func
 
-        protocol.Toggles[name] = self
+        bProto.Toggles[name] = self
 
     def attach(self, _func):
         self.func = _func

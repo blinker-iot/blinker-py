@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-
-from BlinkerUtility import *
+from BlinkerUtility.BlinkerUtility import *
 
 class BlinkerDebug():
     def __init__(self):
@@ -28,7 +26,6 @@ def BLINKER_LOG(arg1, *vartuple):
     data = '[' + now() + '] ' + data
     print(data)
 
-
 def BLINKER_ERR_LOG(arg1, *vartuple):
     # timeInfo = time.strftime("%H:%M:%S %Y", time.localtime())
     if BLINKER_DEBUG.isDebug == False :
@@ -39,18 +36,17 @@ def BLINKER_ERR_LOG(arg1, *vartuple):
         data = data + str(var)
     data = '[' + now() + '] Error: ' + data
     print(data)
-
+    
 def BLINKER_LOG_ALL(arg1, *vartuple):
     # timeInfo = time.strftime("%H:%M:%S %Y", time.localtime())
     if BLINKER_DEBUG.isDebugAll == False :
         return
-
+        
     data = str(arg1)
     for var in vartuple:
         data = data + str(var)
     data = '[' + now() + '] ' + data
     print(data)
-
 
 def BLINKER_ERR_LOG_ALL(arg1, *vartuple):
     # timeInfo = time.strftime("%H:%M:%S %Y", time.localtime())
@@ -62,3 +58,4 @@ def BLINKER_ERR_LOG_ALL(arg1, *vartuple):
         data = data + str(var)
     data = '[' + now() + '] Error: ' + data
     print(data)
+    

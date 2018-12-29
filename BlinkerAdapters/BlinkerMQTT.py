@@ -141,7 +141,7 @@ class MQTTClient():
         self._isClosed = False
         self.client = None
         self.bmqtt = None
-        self.mProto = BlinkerMQTT
+        self.mProto = BlinkerMQTT()
 
     def on_connect(self, client, userdata, flags, rc):
         # if self.bmqtt.isDebugAll() is True:

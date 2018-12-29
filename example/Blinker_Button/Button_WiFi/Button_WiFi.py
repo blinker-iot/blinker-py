@@ -1,17 +1,16 @@
 from Blinker import *
 
-auth = 'bc5a991c7ec4'
+auth = 'Your Device Secret Key'
 
 BLINKER_DEBUG.debugAll()
 
 Blinker.mode(BLINKER_WIFI)
-# Blinker.debugLevel(BLINKER_DEBUG_ALL)
 Blinker.begin(auth)
 
-BUTTON_1 = 'btn-abc'
+button1 = BlinkerButton("btn-abc")
+number1 = BlinkerNumber("num-abc")
 
-button1 = BlinkerButton(BUTTON_1)
-
+counter = 0
 
 def button1_callback(state):
     """ """
@@ -32,12 +31,6 @@ if __name__ == '__main__':
         Blinker.run()
 
         if Blinker.available() is True:
-            BLINKER_LOG('Blinker.readString(): ', Blinker.readString())
-            Blinker.print(Blinker.times())
-            # Blinker.vibrate()
-            # Blinker.print('millis', millis())
-
-        # if Blinker.button(BUTTON_1):
-        #     Blinker.print('Button pressed!')
-
-        # Blinker.delay(2000)
+            BLINKER_LOG("Blinker.readString(): ", Blinker.readString())
+            counter += 1
+            number1.print(counter)

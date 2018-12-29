@@ -1,13 +1,12 @@
 from Blinker import *
 
-BUTTON_1 = 'ButtonKey'
-auth = "bc5a991c7ec4"
-
 Blinker.mode(BLINKER_BLE)
-Blinker.begin(auth)
+Blinker.begin()
 
-button1 = BlinkerButton(BUTTON_1)
+button1 = BlinkerButton("btn-abc")
+number1 = BlinkerNumber("num-abc")
 
+counter = 0
 
 def button1_callback(state):
     """ """
@@ -23,13 +22,11 @@ def button1_callback(state):
 button1.attach(button1_callback)
 
 if __name__ == '__main__':
+
     while True:
         Blinker.run()
 
         if Blinker.available() is True:
-            BLINKER_LOG('Blinker.readString(): ', Blinker.readString())
-            Blinker.print(Blinker.times())
-            Blinker.vibrate()
-            Blinker.print('millis', millis())
-
-        Blinker.delay(2000)
+            BLINKER_LOG("Blinker.readString(): ", Blinker.readString())
+            counter += 1
+            number1.print(counter)

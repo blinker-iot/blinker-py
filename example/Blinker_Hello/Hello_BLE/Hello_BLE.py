@@ -1,11 +1,7 @@
 from Blinker import *
 
-auth = 'Your Device Secret Key'
-
-BLINKER_DEBUG.debugAll()
-
-Blinker.mode(BLINKER_WIFI)
-Blinker.begin(auth)
+Blinker.mode(BLINKER_BLE)
+Blinker.begin()
 
 button1 = BlinkerButton("btn-abc")
 number1 = BlinkerNumber("num-abc")
@@ -20,7 +16,7 @@ def button1_callback(state):
     button1.icon('icon_1')
     button1.color('#FFFFFF')
     button1.text('Your button name or describe')
-    button1.print(state)
+    button1.print("on")
 
 
 button1.attach(button1_callback)
