@@ -52,7 +52,7 @@ class Protocol(object):
 protocol = Protocol()
 
 
-def setMode(setType=BLINKER_WIFI):
+def mode(setType=BLINKER_WIFI):
     protocol.conType = setType
     if protocol.conType == BLINKER_BLE:
         import BlinkerAdapters.BlinkerBLE as bBLE

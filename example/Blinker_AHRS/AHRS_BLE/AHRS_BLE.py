@@ -1,6 +1,6 @@
 from Blinker import *
 
-Blinker.setMode(BLINKER_BLE)
+Blinker.mode(BLINKER_BLE)
 Blinker.begin()
 Blinker.attachAhrs()
 

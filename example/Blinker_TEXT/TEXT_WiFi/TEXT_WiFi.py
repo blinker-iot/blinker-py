@@ -11,7 +11,7 @@ from Blinker import millis
 
 TEXT_1 = "tex-pmi"
 
-Blinker.setMode(BLINKER_WIFI)
+Blinker.mode(BLINKER_WIFI)
 Blinker.begin()
 
 text1 = BlinkerText(TEXT_1)

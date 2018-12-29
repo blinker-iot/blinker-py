@@ -8,7 +8,7 @@ __author__ = 'stao'
 from Blinker import Blinker, BlinkerButton, BlinkerNumber
 from Blinker import BLINKER_LOG, BLINKER_WIFI
 
-Blinker.setMode(BLINKER_WIFI)
+Blinker.mode(BLINKER_WIFI)
 Blinker.begin()
 
 button1 = BlinkerButton("btn-abc")

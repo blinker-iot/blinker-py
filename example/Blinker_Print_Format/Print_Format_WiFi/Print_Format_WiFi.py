@@ -4,7 +4,7 @@ SLIDER_1 = ('SliderKey')
 TOGGLE_1 = ('ToggleKey')
 TEXT_1 = ('millis')
 
-Blinker.setMode(BLINKER_WIFI)
+Blinker.mode(BLINKER_WIFI)
 Blinker.begin()
 Blinker.wInit(SLIDER_1, W_SLIDER)
 Blinker.wInit(TOGGLE_1, W_TOGGLE)

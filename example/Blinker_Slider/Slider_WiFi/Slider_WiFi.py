@@ -2,7 +2,7 @@ from Blinker import *
 
 SLIDER_1 = 'SliderKey'
 
-Blinker.setMode(BLINKER_WIFI)
+Blinker.mode(BLINKER_WIFI)
 Blinker.begin()
 
 slider1 = BlinkerSlider(SLIDER_1)

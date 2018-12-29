@@ -6,7 +6,6 @@ from Blinker.BlinkerConfig import *
 from Blinker.BlinkerDebug import *
 from BlinkerUtility import *
 
-
 class MQTTProtocol(object):
     host = ''
     port = ''
@@ -26,15 +25,16 @@ class MQTTProtocol(object):
     debug = BLINKER_DEBUG
     sendTime = 0
 
+# mProto = MQTTProtocol()
 
 class BlinkerMQTT(MQTTProtocol):
     """ """
 
-    def isDebugAll(self):
-        if self.debug == BLINKER_DEBUG_ALL:
-            return True
-        else:
-            return False
+    # def isDebugAll(self):
+    #     if self.debug == BLINKER_DEBUG_ALL:
+    #         return True
+    #     else:
+    #         return False
 
     def checkKA(self):
         if self.isAlive is False:
@@ -86,8 +86,8 @@ class BlinkerMQTT(MQTTProtocol):
         else:
             data = r.json()
             cls().checkAuthData(data)
-            if cls().isDebugAll() is True:
-                BLINKER_LOG('Device Auth Data: ', data)
+            # if cls().isDebugAll() is True:
+            BLINKER_LOG_ALL('Device Auth Data: ', data)
 
         deviceName = data['detail']['deviceName']
         iotId = data['detail']['iotId']
@@ -98,13 +98,13 @@ class BlinkerMQTT(MQTTProtocol):
 
         bmt = cls()
 
-        if bmt.isDebugAll() is True:
-            BLINKER_LOG('deviceName: ', deviceName)
-            BLINKER_LOG('iotId: ', iotId)
-            BLINKER_LOG('iotToken: ', iotToken)
-            BLINKER_LOG('productKey: ', productKey)
-            BLINKER_LOG('uuid: ', uuid)
-            BLINKER_LOG('broker: ', broker)
+        # if bmt.isDebugAll() is True:
+        BLINKER_LOG_ALL('deviceName: ', deviceName)
+        BLINKER_LOG_ALL('iotId: ', iotId)
+        BLINKER_LOG_ALL('iotToken: ', iotToken)
+        BLINKER_LOG_ALL('productKey: ', productKey)
+        BLINKER_LOG_ALL('uuid: ', uuid)
+        BLINKER_LOG_ALL('broker: ', broker)
 
         if broker == 'aliyun':
             bmt.host = BLINKER_MQTT_ALIYUN_HOST
@@ -125,12 +125,12 @@ class BlinkerMQTT(MQTTProtocol):
         bmt.password = iotToken
         bmt.uuid = uuid
 
-        if bmt.isDebugAll() is True:
-            BLINKER_LOG('clientID: ', bmt.clientID)
-            BLINKER_LOG('userName: ', bmt.userName)
-            BLINKER_LOG('password: ', bmt.password)
-            BLINKER_LOG('subtopic: ', bmt.subtopic)
-            BLINKER_LOG('pubtopic: ', bmt.pubtopic)
+        # if bmt.isDebugAll() is True:
+        BLINKER_LOG_ALL('clientID: ', bmt.clientID)
+        BLINKER_LOG_ALL('userName: ', bmt.userName)
+        BLINKER_LOG_ALL('password: ', bmt.password)
+        BLINKER_LOG_ALL('subtopic: ', bmt.subtopic)
+        BLINKER_LOG_ALL('pubtopic: ', bmt.pubtopic)
 
         return bmt
 
@@ -141,10 +141,11 @@ class MQTTClient():
         self._isClosed = False
         self.client = None
         self.bmqtt = None
+        self.mProto = BlinkerMQTT
 
     def on_connect(self, client, userdata, flags, rc):
-        if self.bmqtt.isDebugAll() is True:
-            BLINKER_LOG('Connected with result code ' + str(rc))
+        # if self.bmqtt.isDebugAll() is True:
+        BLINKER_LOG_ALL('Connected with result code ' + str(rc))
         if rc == 0:
             self.bmqtt.state = CONNECTED
             BLINKER_LOG("MQTT connected")
@@ -154,9 +155,9 @@ class MQTTClient():
         client.subscribe(self.bmqtt.subtopic)
 
     def on_message(self, client, userdata, msg):
-        if self.bmqtt.isDebugAll() is True:
-            BLINKER_LOG('Subscribe topic: ', msg.topic)
-            BLINKER_LOG('payload: ', msg.payload)
+        # if self.bmqtt.isDebugAll() is True:
+        BLINKER_LOG_ALL('Subscribe topic: ', msg.topic)
+        BLINKER_LOG_ALL('payload: ', msg.payload)
         data = msg.payload
         data = data.decode('utf-8')
         # BLINKER_LOG('data: ', data)
@@ -170,7 +171,7 @@ class MQTTClient():
 
     def start(self, auth):
         self.auth = auth
-        self.bmqtt = BlinkerMQTT.getInfo(auth)
+        self.bmqtt = self.mProto.getInfo(auth)
         self.client = mqtt.Client(client_id=self.bmqtt.clientID)
         self.client.username_pw_set(self.bmqtt.userName, self.bmqtt.password)
         self.client.on_connect = self.on_connect
@@ -187,11 +188,11 @@ class MQTTClient():
         if state is False:
             if self.bmqtt.checkCanPrint() is False:
                 return
-        payload = {'fromDevice': self.bmqtt.deviceName, 'toDevice': self.bmqtt.uuid, 'data': msg}
+        payload = {'fromDevice': self.bmqtt.deviceName, 'toDevice': self.bmqtt.uuid, 'data': msg , 'deviceType': 'OwnApp'}
         payload = json.dumps(payload)
-        if self.bmqtt.isDebugAll() is True:
-            BLINKER_LOG('Publish topic: ', self.bmqtt.pubtopic)
-            BLINKER_LOG('payload: ', payload)
+        # if self.bmqtt.isDebugAll() is True:
+        BLINKER_LOG_ALL('Publish topic: ', self.bmqtt.pubtopic)
+        BLINKER_LOG_ALL('payload: ', payload)
         self.client.publish(self.bmqtt.pubtopic, payload)
         self.bmqtt.printTime = millis()
 
@@ -204,7 +205,7 @@ class MQTTClient():
 
         self.bmqtt.sendTime = millis()
         data = response.json()
-        if self.bmqtt.isDebugAll() is True:
-            BLINKER_LOG('response: ', data)
+        # if self.bmqtt.isDebugAll() is True:
+        BLINKER_LOG_ALL('response: ', data)
         if data[BLINKER_CMD_MESSAGE] != 1000:
             BLINKER_ERR_LOG(data[BLINKER_CMD_DETAIL])

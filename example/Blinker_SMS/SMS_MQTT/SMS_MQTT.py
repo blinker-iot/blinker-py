@@ -3,7 +3,7 @@ from Blinker import *
 BUTTON_1 = ('ButtonKey')
 auth = ('Your AuthKey')
 
-Blinker.setMode(BLINKER_MQTT)
+Blinker.mode(BLINKER_MQTT)
 Blinker.begin(auth)
 Blinker.wInit(BUTTON_1, W_BUTTON)
 

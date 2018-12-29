@@ -17,11 +17,11 @@ class WS_Protol():
 
 wsProto = WS_Protol()
 
-def isDebugAll():
-    if wsProto.debug == BLINKER_DEBUG_ALL:
-        return True
-    else:
-        return False
+# def isDebugAll():
+#     if wsProto.debug == BLINKER_DEBUG_ALL:
+#         return True
+#     else:
+#         return False
 
 def mDNSinit(type, name):
     deviceType = '_' + type
@@ -36,9 +36,9 @@ def mDNSinit(type, name):
     zeroconf = Zeroconf()
     zeroconf.register_service(info)
 
-    if isDebugAll() is True:
-        BLINKER_LOG('deviceIP: ', deviceIP)
-        BLINKER_LOG('mdns name: ', name)
+    # if isDebugAll() is True:
+    BLINKER_LOG_ALL('deviceIP: ', deviceIP)
+    BLINKER_LOG_ALL('mdns name: ', name)
 
     BLINKER_LOG('mDNS responder init!')
 
@@ -47,8 +47,8 @@ class HandleServer(WebSocket):
     def handleMessage(self):
         wsProto.msgBuf = self.data
         wsProto.isRead = True
-        if isDebugAll() is True:
-            BLINKER_LOG('Read data: ', self.data)
+        # if isDebugAll() is True:
+        BLINKER_LOG_ALL('Read data: ', self.data)
         
     def handleConnected(self):
         clients.append(self)
@@ -94,15 +94,15 @@ class WebSocketServer(Thread):
 
     def broadcast(self, msg):
         msg = json.dumps(msg)
-        if isDebugAll() is True:
-            BLINKER_LOG('Response data: ', msg)
+        # if isDebugAll() is True:
+        BLINKER_LOG_ALL('Response data: ', msg)
         if len(clients) == 0:
             wsProto.state = DISCONNECTED
-            if isDebugAll() is True:
-                BLINKER_ERR_LOG('Faile... Disconnected')
+            # if isDebugAll() is True:
+            BLINKER_ERR_LOG_ALL('Faile... Disconnected')
             return
-        if isDebugAll() is True:
-            BLINKER_LOG('Succese...')
+        # if isDebugAll() is True:
+        BLINKER_LOG_ALL('Succese...')
         if isinstance(msg, str):
             msg = msg.encode('utf-8').decode("utf-8")
         for client in clients:

@@ -11,7 +11,7 @@ from Blinker import millis
 
 NUMBER_1 = "NUMKey"
 
-Blinker.setMode(BLINKER_WIFI)
+Blinker.mode(BLINKER_WIFI)
 Blinker.begin()
 
 number1 = BlinkerNumber(NUMBER_1)

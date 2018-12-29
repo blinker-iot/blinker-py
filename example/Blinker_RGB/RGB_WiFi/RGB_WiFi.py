@@ -2,7 +2,7 @@ from Blinker import *
 
 RGB_1 = 'RGBKey'
 
-Blinker.setMode(BLINKER_WIFI)
+Blinker.mode(BLINKER_WIFI)
 Blinker.begin()
 
 rgb1 = BlinkerRGB(RGB_1)

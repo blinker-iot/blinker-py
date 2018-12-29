@@ -1,22 +1,27 @@
 from Blinker import *
 
-BUTTON_1 = 'ButtonKey'
+auth = 'bc5a991c7ec4'
 
-Blinker.setMode(BLINKER_WIFI)
-Blinker.begin()
+BLINKER_DEBUG.debugAll()
+
+Blinker.mode(BLINKER_WIFI)
+# Blinker.debugLevel(BLINKER_DEBUG_ALL)
+Blinker.begin(auth)
+
+BUTTON_1 = 'btn-abc'
 
 button1 = BlinkerButton(BUTTON_1)
 
 
-def button1_callback(btn, state):
+def button1_callback(state):
     """ """
 
     BLINKER_LOG('get button state: ', state)
 
-    btn.icon('icon_1')
-    btn.color('#FFFFFF')
-    btn.text('Your button name or describe')
-    btn.print("on")
+    button1.icon('icon_1')
+    button1.color('#FFFFFF')
+    button1.text('Your button name or describe')
+    button1.print(state)
 
 
 button1.attach(button1_callback)
@@ -29,10 +34,10 @@ if __name__ == '__main__':
         if Blinker.available() is True:
             BLINKER_LOG('Blinker.readString(): ', Blinker.readString())
             Blinker.print(Blinker.times())
-            Blinker.vibrate()
-            Blinker.print('millis', millis())
+            # Blinker.vibrate()
+            # Blinker.print('millis', millis())
 
         # if Blinker.button(BUTTON_1):
         #     Blinker.print('Button pressed!')
 
-        Blinker.delay(2000)
+        # Blinker.delay(2000)

@@ -2,7 +2,7 @@ from Blinker import *
 
 RGB_1 = ('RGBKey')
 
-Blinker.setMode(BLINKER_BLE)
+Blinker.mode(BLINKER_BLE)
 Blinker.begin()
 Blinker.wInit(RGB_1, W_RGB)
 

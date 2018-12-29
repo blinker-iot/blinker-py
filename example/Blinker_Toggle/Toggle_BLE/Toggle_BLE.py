@@ -2,7 +2,7 @@ from Blinker import *
 
 TOGGLE_1 = ('ToggleKey')
 
-Blinker.setMode(BLINKER_BLE)
+Blinker.mode(BLINKER_BLE)
 Blinker.begin()
 Blinker.wInit(TOGGLE_1, W_TOGGLE)
 

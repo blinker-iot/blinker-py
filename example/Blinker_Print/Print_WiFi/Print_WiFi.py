@@ -5,7 +5,7 @@ from Blinker import millis
 SLIDER_1 = 'SliderKey'
 TEXT_1 = 'millis'
 
-Blinker.setMode(BLINKER_WIFI)
+Blinker.mode(BLINKER_WIFI)
 Blinker.begin()
 # Blinker.wInit(SLIDER_1, W_SLIDER)
 # Blinker.wInit(TOGGLE_1, W_TOGGLE)

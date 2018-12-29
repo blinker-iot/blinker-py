@@ -2,7 +2,7 @@ from Blinker import *
 
 BUTTON_1 = ('ButtonKey')
 
-Blinker.setMode(BLINKER_BLE)
+Blinker.mode(BLINKER_BLE)
 Blinker.begin()
 Blinker.wInit(BUTTON_1, W_BUTTON)
 

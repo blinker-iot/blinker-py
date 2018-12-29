@@ -1,6 +1,6 @@
 from Blinker import *
 
-Blinker.setMode(BLINKER_WIFI)
+Blinker.mode(BLINKER_WIFI)
 Blinker.begin()
 
 if __name__ == '__main__':

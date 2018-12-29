@@ -1,6 +1,6 @@
 from Blinker import *
 
-Blinker.setMode(BLINKER_WIFI)
+Blinker.mode(BLINKER_WIFI)
 Blinker.begin()
 
 joy1 = BlinkerJoystick('JOY_1')

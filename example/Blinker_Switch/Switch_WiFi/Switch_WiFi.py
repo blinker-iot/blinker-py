@@ -9,7 +9,7 @@ from Blinker import Blinker, BUILTIN_SWITCH
 from Blinker import BLINKER_LOG, BLINKER_WIFI, BLINKER_CMD_ON
 from Blinker import millis
 
-Blinker.setMode(BLINKER_WIFI)
+Blinker.mode(BLINKER_WIFI)
 Blinker.begin()
 
 
