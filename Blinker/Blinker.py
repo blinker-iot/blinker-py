@@ -550,9 +550,33 @@ def dtime():
     localtime = _time.localtime(_time.time())
     return localtime.tm_hour * 60 * 60 + localtime.tm_min * 60 + localtime.tm_sec
 
-def sms(sms_msg):
+def sms(msg):
     if bProto.conType == BLINKER_MQTT:
-        bProto.conn1.sendSMS(sms_msg)
+        bProto.conn1.sms(msg)
+    else:
+        BLINKER_ERR_LOG('This code is intended to run on the MQTT!')
+
+def push(msg):
+    if bProto.conType == BLINKER_MQTT:
+        bProto.conn1.push(msg)
+    else:
+        BLINKER_ERR_LOG('This code is intended to run on the MQTT!')
+
+def wechat(title, state, msg):
+    if bProto.conType == BLINKER_MQTT:
+        bProto.conn1.wechat(title, state, msg)
+    else:
+        BLINKER_ERR_LOG('This code is intended to run on the MQTT!')
+
+def weather(city = 'default'):
+    if bProto.conType == BLINKER_MQTT:
+        return bProto.conn1.weather(city)
+    else:
+        BLINKER_ERR_LOG('This code is intended to run on the MQTT!')
+
+def aqi(city = 'default'):
+    if bProto.conType == BLINKER_MQTT:
+        return bProto.conn1.aqi(city)
     else:
         BLINKER_ERR_LOG('This code is intended to run on the MQTT!')
 
