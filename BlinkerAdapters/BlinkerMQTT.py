@@ -23,7 +23,11 @@ class MQTTProtocol(object):
     printTime = 0
     kaTime = 0
     debug = BLINKER_DEBUG
-    sendTime = 0
+    smsTime = 0
+    pushTime = 0
+    wechatTime = 0
+    weatherTime = 0
+    aqiTime = 0
 
 # mProto = MQTTProtocol()
 
@@ -54,10 +58,34 @@ class BlinkerMQTT(MQTTProtocol):
         BLINKER_ERR_LOG("MQTT NOT ALIVE OR MSG LIMIT")
         return False
 
-    def checkCanSend(self):
-        if (millis() - self.sendTime) >= BLINKER_SMS_MSG_LIMIT or self.sendTime == 0:
+    def checkSMS(self):
+        if (millis() - self.smsTime) >= BLINKER_SMS_MSG_LIMIT or self.smsTime == 0:
             return True
-        BLINKER_ERR_LOG("MQTT NOT ALIVE OR MSG LIMIT")
+        BLINKER_ERR_LOG("SMS MSG LIMIT")
+        return False
+
+    def checkPUSH(self):
+        if (millis() - self.pushTime) >= BLINKER_PUSH_MSG_LIMIT or self.pushTime == 0:
+            return True
+        BLINKER_ERR_LOG("PUSH MSG LIMIT")
+        return False
+
+    def checkWECHAT(self):
+        if (millis() - self.wechatTime) >= BLINKER_PUSH_MSG_LIMIT or self.wechatTime == 0:
+            return True
+        BLINKER_ERR_LOG("WECHAT MSG LIMIT")
+        return False
+
+    def checkWEATHER(self):
+        if (millis() - self.weatherTime) >= BLINKER_WEATHER_MSG_LIMIT or self.weatherTime == 0:
+            return True
+        BLINKER_ERR_LOG("WEATHER MSG LIMIT")
+        return False
+
+    def checkAQI(self):
+        if (millis() - self.aqiTime) >= BLINKER_AQI_MSG_LIMIT or self.aqiTime == 0:
+            return True
+        BLINKER_ERR_LOG("AQI MSG LIMIT")
         return False
 
     def delay10s(self):
@@ -196,16 +224,92 @@ class MQTTClient():
         self.client.publish(self.bmqtt.pubtopic, payload)
         self.bmqtt.printTime = millis()
 
-    def sendSMS(self, msg):
-        if self.bmqtt.checkCanSend() is False:
+    def sms(self, msg):
+        if self.bmqtt.checkSMS() is False:
             return
-        payload = json.dumps({'authKey': self.auth, 'msg': msg})
+        payload = json.dumps({'deviceName':self.bmqtt.deviceName, 'key': self.auth, 'msg': msg})
         response = requests.post('https://iotdev.clz.me/api/v1/user/device/sms',
                                  data=payload, headers={'Content-Type': 'application/json'})
 
-        self.bmqtt.sendTime = millis()
+        self.bmqtt.smsTime = millis()
         data = response.json()
         # if self.bmqtt.isDebugAll() is True:
         BLINKER_LOG_ALL('response: ', data)
         if data[BLINKER_CMD_MESSAGE] != 1000:
             BLINKER_ERR_LOG(data[BLINKER_CMD_DETAIL])
+
+    def push(self, msg):
+        if self.bmqtt.checkPUSH() is False:
+            return
+        payload = json.dumps({'deviceName':self.bmqtt.deviceName, 'key': self.auth, 'msg': msg})
+        response = requests.post('https://iotdev.clz.me/api/v1/user/device/push',
+                                 data=payload, headers={'Content-Type': 'application/json'})
+
+        self.bmqtt.pushTime = millis()
+        data = response.json()
+        # if self.bmqtt.isDebugAll() is True:
+        BLINKER_LOG_ALL('response: ', data)
+        if data[BLINKER_CMD_MESSAGE] != 1000:
+            BLINKER_ERR_LOG(data[BLINKER_CMD_DETAIL])
+
+    def wechat(self, title, state, msg):
+        if self.bmqtt.checkWECHAT() is False:
+            return
+        payload = json.dumps({'deviceName':self.bmqtt.deviceName, 'key': self.auth, 'title':title, 'state':state, 'msg': msg})
+        response = requests.post('https://iotdev.clz.me/api/v1/user/device/wxMsg/',
+                                 data=payload, headers={'Content-Type': 'application/json'})
+
+        self.bmqtt.pushTime = millis()
+        data = response.json()
+        # if self.bmqtt.isDebugAll() is True:
+        BLINKER_LOG_ALL('response: ', data)
+        if data[BLINKER_CMD_MESSAGE] != 1000:
+            BLINKER_ERR_LOG(data[BLINKER_CMD_DETAIL])
+
+    def weather(self, city):
+        if self.bmqtt.checkWEATHER() is False:
+            return
+        host = 'https://iotdev.clz.me'
+        url = '/api/v1/user/device/weather/now?deviceName=' + self.bmqtt.deviceName + '&key=' + self.auth + '&location=' + city
+
+        r = requests.get(url=host + url)
+        data = ''
+
+        self.bmqtt.weatherTime = millis()
+
+        if r.status_code != 200:
+            BLINKER_ERR_LOG('Device Auth Error!')
+            return
+        else:
+            data = r.json()
+            return data['detail']
+
+    def aqi(self, city):
+        if self.bmqtt.checkAQI() is False:
+            return
+        host = 'https://iotdev.clz.me'
+        url = '/api/v1/user/device/weather/now?deviceName=' + self.bmqtt.deviceName + '&key=' + self.auth + '&location=' + city
+
+        r = requests.get(url=host + url)
+        data = ''       
+
+        self.bmqtt.aqiTime = millis()
+
+        if r.status_code != 200:
+            BLINKER_ERR_LOG('Device Auth Error!')
+            return
+        else:
+            data = r.json()
+            return data['detail']
+
+
+        # payload = json.dumps({'deviceName':self.bmqtt.deviceName, 'key': self.auth, 'title':title, 'state':state, 'msg': msg})
+        # response = requests.post('https://iotdev.clz.me/api/v1/user/device/wxMsg/',
+        #                          data=payload, headers={'Content-Type': 'application/json'})
+
+        # self.bmqtt.pushTime = millis()
+        # data = response.json()
+        # # if self.bmqtt.isDebugAll() is True:
+        # BLINKER_LOG_ALL('response: ', data)
+        # if data[BLINKER_CMD_MESSAGE] != 1000:
+        #     BLINKER_ERR_LOG(data[BLINKER_CMD_DETAIL])
