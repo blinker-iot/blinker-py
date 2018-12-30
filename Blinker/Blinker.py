@@ -49,7 +49,8 @@ class Protocol():
         self.RGB = {}
 
         self.dataFunc = None
-        self.heartbeatFunc = None
+        self.heartbeatFunc = None        
+        self.summaryFunc = None
 
 bProto = Protocol()
 
@@ -282,6 +283,9 @@ def attachData(func):
 def attachHeartbeat(func):
     bProto.heartbeatFunc = func
 
+def attachSummary(func):
+    bProto.summaryFunc = func
+
 def readString():
     bProto.isRead = False
     bProto.isAvail = False
@@ -397,6 +401,8 @@ def heartbeat():
         print(BLINKER_CMD_STATE, BLINKER_CMD_ONLINE)
         if bProto.heartbeatFunc :
             bProto.heartbeatFunc()
+        if bProto.summaryFunc :
+            bProto.summaryFunc()
         # stateData()
         # if endFormat() is False:
         #     print(BLINKER_CMD_STATE, BLINKER_CMD_ONLINE)
@@ -405,6 +411,8 @@ def heartbeat():
         print(BLINKER_CMD_STATE, BLINKER_CMD_CONNECTED)
         if bProto.heartbeatFunc :
             bProto.heartbeatFunc()
+        if bProto.summaryFunc :
+            bProto.summaryFunc()
         # stateData()
         # if endFormat() is False:
         #     print(BLINKER_CMD_STATE, BLINKER_CMD_CONNECTED)
