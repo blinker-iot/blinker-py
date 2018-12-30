@@ -49,6 +49,7 @@ class Protocol():
         self.RGB = {}
 
         self.dataFunc = None
+        self.heartbeatFunc = None
 
 bProto = Protocol()
 
@@ -90,10 +91,13 @@ def begin(auth = None):
     elif bProto.conType == BLINKER_MQTT:
         # bProto.proto1.mProto.debug = bProto.debug
         # bProto.proto2.wsProto.debug = bProto.debug
-        bProto.msgFrom = BLINKER_MQTT
-        bProto.conn1.start(auth)
-        bProto.conn2.start(bProto.conn1.bmqtt.deviceName)
-        bProto.conn1.run()
+        if auth :
+            bProto.msgFrom = BLINKER_MQTT
+            bProto.conn1.start(auth)
+            bProto.conn2.start(bProto.conn1.bmqtt.deviceName)
+            bProto.conn1.run()
+        else :
+            BLINKER_ERR_LOG('Please input your device secret key!')
 
 def thread_run():
     if bProto.conType == BLINKER_BLE:
@@ -275,6 +279,9 @@ def available():
 def attachData(func):
     bProto.dataFunc = func
 
+def attachHeartbeat(func):
+    bProto.heartbeatFunc = func
+
 def readString():
     bProto.isRead = False
     bProto.isAvail = False
@@ -299,9 +306,9 @@ def parse():
             elif key in bProto.Sliders:
                 bProto.isRead = False
                 bProto.Sliders[key].func(data[key])
-            elif key in bProto.Toggles:
-                bProto.isRead = False
-                bProto.Toggles[key].func(data[key])
+            # elif key in bProto.Toggles:
+            #     bProto.isRead = False
+            #     bProto.Toggles[key].func(data[key])
             elif key in bProto.RGB:
                 bProto.isRead = False
                 BLINKER_LOG(bProto.RGB[key])
@@ -388,13 +395,17 @@ def heartbeat():
     if bProto.conType is BLINKER_MQTT:
         # beginFormat()
         print(BLINKER_CMD_STATE, BLINKER_CMD_ONLINE)
-        stateData()
+        if bProto.heartbeatFunc :
+            bProto.heartbeatFunc()
+        # stateData()
         # if endFormat() is False:
         #     print(BLINKER_CMD_STATE, BLINKER_CMD_ONLINE)
     else:
         # beginFormat()
         print(BLINKER_CMD_STATE, BLINKER_CMD_CONNECTED)
-        stateData()
+        if bProto.heartbeatFunc :
+            bProto.heartbeatFunc()
+        # stateData()
         # if endFormat() is False:
         #     print(BLINKER_CMD_STATE, BLINKER_CMD_CONNECTED)
 
@@ -551,13 +562,13 @@ class BlinkerButton(object):
     def __init__(self, name, func=None):
         self.name = name
         self.func = func
-        self._icon = None
-        self.iconClr = None
-        self._content = None
-        self._text = None
-        self._text1 = None
-        self.textClr = None
-        self.buttonData = None
+        self._icon = ""
+        self.iconClr = ""
+        self._content = ""
+        self._text = ""
+        self._text1 = ""
+        self.textClr = ""
+        self.buttonData = {}
 
         bProto.Buttons[name] = self
 
@@ -584,8 +595,7 @@ class BlinkerButton(object):
     def print(self, state=None):
 
         if state :
-            self.buttonData = {BLINKER_CMD_SWITCH: state}
-
+            self.buttonData[BLINKER_CMD_SWITCH] = state
         if self._icon:
             self.buttonData[BLINKER_CMD_ICON] = self._icon
         if self.iconClr:
@@ -599,9 +609,69 @@ class BlinkerButton(object):
         if self.textClr:
             self.buttonData[BLINKER_CMD_TEXTCOLOR] = self.textClr
 
-        # data = json.dumps(self.buttonData)
-        data = {self.name: self.buttonData}
-        _print(data)
+        if len(self.buttonData) :
+            # data = json.dumps(self.buttonData)
+            data = {self.name: self.buttonData}
+            _print(data)
+
+            self.buttonData.clear()
+
+            self._icon = ""
+            self.iconClr = ""
+            self._content = ""
+            self._text = ""
+            self._text1 = ""
+            self.textClr = ""
+
+
+class BlinkerNumber(object):
+    """ """
+
+    def __init__(self, name):
+        self.name = name
+        self._icon = ""
+        self._color = ""
+        self._unit = ""
+        self._text = ""
+        self.numberData = {}
+
+        bProto.Numbers[name] = self
+
+    def icon(self, _icon):
+        self._icon = _icon
+
+    def color(self, _clr):
+        self._color = _clr
+
+    def unit(self, _unit):
+        self._unit = _unit
+    
+    def text(self, _text):
+        self._text = _text
+
+    def print(self, value = None):
+        if value:
+            self.numberData[BLINKER_CMD_VALUE] = value
+        if self._icon:
+            self.numberData[BLINKER_CMD_ICON] = self._icon
+        if self._color:
+            self.numberData[BLINKER_CMD_COLOR] = self._color
+        if self._unit:
+            self.numberData[BLINKER_CMD_UNIT] = self._unit
+        if self._text:
+            self.numberData[BLINKER_CMD_TEXT] = self._text
+
+        if len(self.numberData) :
+            # data = json.dumps(self.numberData)
+            data = {self.name: self.numberData}
+            _print(data)
+
+            self.numberData.clear()
+
+            self._icon = ""
+            self._color = ""
+            self._unit = ""
+            self._text = ""
 
 
 class BlinkerRGB(object):
@@ -661,45 +731,6 @@ class BlinkerSlider(object):
         # data = json.dumps(self.sliderData)
         data = {self.name: self.sliderData}
         _print(data)
-
-
-class BlinkerNumber(object):
-    """ """
-
-    def __init__(self, name):
-        self.name = name
-        self._icon = ""
-        self._color = ""
-        self._unit = ""
-        self.buttonData = {}
-
-        bProto.Numbers[name] = self
-
-    def icon(self, _icon):
-        self._icon = _icon
-
-    def color(self, _clr):
-        self._color = _clr
-
-    def unit(self, _unit):
-        self._unit = _unit
-
-    def print(self, value):
-        self.buttonData[BLINKER_CMD_VALUE] = value
-        if self._icon:
-            self.buttonData[BLINKER_CMD_ICON] = self._icon
-        if self._color:
-            self.buttonData[BLINKER_CMD_COLOR] = self._color
-        if self._unit:
-            self.buttonData[BLINKER_CMD_UNIT] = self._unit
-
-        # data = json.dumps(self.buttonData)
-        data = {self.name: self.buttonData}
-        _print(data)
-
-        self._icon = ""
-        self._color = ""
-        self._unit = ""
 
 
 class BlinkerText(object):

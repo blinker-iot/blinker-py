@@ -1,8 +1,8 @@
 from Blinker import *
 
-auth = 'Your Device Secret Key'
-
 BLINKER_DEBUG.debugAll()
+
+auth = 'Your Device Secret Key'
 
 Blinker.mode(BLINKER_WIFI)
 Blinker.begin(auth)

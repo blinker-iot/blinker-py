@@ -1,5 +1,7 @@
 from Blinker import *
 
+BLINKER_DEBUG.debugAll()
+
 Blinker.mode(BLINKER_BLE)
 Blinker.begin()
 
@@ -19,6 +21,8 @@ def button1_callback(state):
     button1.print("on")
 
 def data_callback(data):
+    global counter
+    
     BLINKER_LOG("Blinker readString: ", data)
     counter += 1
     number1.print(counter)
