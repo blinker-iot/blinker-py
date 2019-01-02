@@ -4,7 +4,7 @@ auth = 'Your Device Secret Key'
 
 BLINKER_DEBUG.debugAll()
 
-Blinker.mode(BLINKER_BLE)
+Blinker.mode(BLINKER_WIFI)
 Blinker.begin(auth)
 
 rgb1 = BlinkerRGB("RGBKey")
