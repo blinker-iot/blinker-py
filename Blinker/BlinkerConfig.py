@@ -85,3 +85,10 @@ BLINKER_MQTT_ALIYUN_PORT        = 1883
 
 BLINKER_MQTT_QCLOUD_HOST        = 'iotcloud-mqtt.gz.tencentdevices.com'
 BLINKER_MQTT_QCLOUD_PORT        = 1883
+
+BLINKER_ALIGENIE_LIGHT          = 'light'
+BLINKER_ALIGENIE_OUTLET         = 'outlet'
+BLINKER_ALIGENIE_SENSOR         = 'sensor'
+BLINKER_DUEROS_LIGHT            = 'LIGHT'
+BLINKER_DUEROS_OUTLET           = 'SOCKET'
+BLINKER_DUEROS_SENSOR           = 'AIR_MONITOR'
