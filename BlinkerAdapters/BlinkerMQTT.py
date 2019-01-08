@@ -101,9 +101,15 @@ class BlinkerMQTT(MQTTProtocol):
                 self.delay10s()
 
     @classmethod
-    def getInfo(cls, auth):
+    def getInfo(cls, auth, aliType, duerType):
         host = 'https://iotdev.clz.me'
         url = '/api/v1/user/device/diy/auth?authKey=' + auth
+
+        if aliType not None :
+            url = url + '&aliType=' + aliType
+
+        if duerType not None :
+            url = url + '&duerType=' + duerType
 
         r = requests.get(url=host + url)
         data = ''
@@ -197,9 +203,9 @@ class MQTTClient():
         self.bmqtt.isAlive = True
         self.bmqtt.kaTime = millis()
 
-    def start(self, auth):
+    def start(self, auth, aliType, duerType):
         self.auth = auth
-        self.bmqtt = self.mProto.getInfo(auth)
+        self.bmqtt = self.mProto.getInfo(auth, aliType, duerType)
         self.client = mqtt.Client(client_id=self.bmqtt.clientID)
         self.client.username_pw_set(self.bmqtt.userName, self.bmqtt.password)
         self.client.on_connect = self.on_connect
@@ -223,6 +229,22 @@ class MQTTClient():
         BLINKER_LOG_ALL('payload: ', payload)
         self.client.publish(self.bmqtt.pubtopic, payload)
         self.bmqtt.printTime = millis()
+
+    def aliPrint(self, msg):
+        payload = {'fromDevice': self.bmqtt.deviceName, 'toDevice': 'AliGenie_r', 'data': msg , 'deviceType': 'vAssistant'}
+        payload = json.dumps(payload)
+        # if self.bmqtt.isDebugAll() is True:
+        BLINKER_LOG_ALL('Publish topic: ', self.bmqtt.pubtopic)
+        BLINKER_LOG_ALL('payload: ', payload)
+        self.client.publish(self.bmqtt.pubtopic, payload)
+
+    def duerPrint(self, msg):
+        payload = {'fromDevice': self.bmqtt.deviceName, 'toDevice': 'DuerOS_r', 'data': msg , 'deviceType': 'vAssistant'}
+        payload = json.dumps(payload)
+        # if self.bmqtt.isDebugAll() is True:
+        BLINKER_LOG_ALL('Publish topic: ', self.bmqtt.pubtopic)
+        BLINKER_LOG_ALL('payload: ', payload)
+        self.client.publish(self.bmqtt.pubtopic, payload)
 
     def sms(self, msg):
         if self.bmqtt.checkSMS() is False:

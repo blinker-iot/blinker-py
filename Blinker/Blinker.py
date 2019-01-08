@@ -52,6 +52,9 @@ class Protocol():
         self.heartbeatFunc = None        
         self.summaryFunc = None
 
+        self.aliType = None
+        self.duerType = None
+
 bProto = Protocol()
 
 def mode(setType = BLINKER_WIFI):
@@ -77,6 +80,17 @@ def mode(setType = BLINKER_WIFI):
         bProto.conn1 = bProto.proto1.MQTTClient()
         bProto.conn2 = bProto.proto2.WebSocketServer(BLINKER_DIY_MQTT)
 
+def aliTye(_type):
+    if _type == BLINKER_ALIGENIE_LIGHT or 
+        _type == BLINKER_ALIGENIE_OUTLET or
+        _type == BLINKER_ALIGENIE_SENSOR :
+        bProto.aliType = _type
+
+def duerType(_type):
+    if _type == BLINKER_DUEROS_LIGHT or 
+        _type == BLINKER_DUEROS_OUTLET or
+        _type == BLINKER_DUEROS_SENSOR :
+        bProto.duerType = _type
 # def debugLevel(level = BLINKER_DEBUG):
 #     bProto.debug = level
 
@@ -94,7 +108,7 @@ def begin(auth = None):
         # bProto.proto2.wsProto.debug = bProto.debug
         if auth :
             bProto.msgFrom = BLINKER_MQTT
-            bProto.conn1.start(auth)
+            bProto.conn1.start(auth, bProto.aliType, bProto.duerType)
             bProto.conn2.start(bProto.conn1.bmqtt.deviceName)
             bProto.conn1.run()
         else :
