@@ -105,10 +105,10 @@ class BlinkerMQTT(MQTTProtocol):
         host = 'https://iotdev.clz.me'
         url = '/api/v1/user/device/diy/auth?authKey=' + auth
 
-        if aliType not None :
+        if aliType :
             url = url + '&aliType=' + aliType
 
-        if duerType not None :
+        if duerType :
             url = url + '&duerType=' + duerType
 
         r = requests.get(url=host + url)
