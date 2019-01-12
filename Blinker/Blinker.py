@@ -81,15 +81,11 @@ def mode(setType = BLINKER_WIFI):
         bProto.conn2 = bProto.proto2.WebSocketServer(BLINKER_DIY_MQTT)
 
 def aliTye(_type):
-    if _type == BLINKER_ALIGENIE_LIGHT or 
-        _type == BLINKER_ALIGENIE_OUTLET or
-        _type == BLINKER_ALIGENIE_SENSOR :
+    if _type == BLINKER_ALIGENIE_LIGHT or _type == BLINKER_ALIGENIE_OUTLET or _type == BLINKER_ALIGENIE_SENSOR :
         bProto.aliType = _type
 
 def duerType(_type):
-    if _type == BLINKER_DUEROS_LIGHT or 
-        _type == BLINKER_DUEROS_OUTLET or
-        _type == BLINKER_DUEROS_SENSOR :
+    if _type == BLINKER_DUEROS_LIGHT or _type == BLINKER_DUEROS_OUTLET or _type == BLINKER_DUEROS_SENSOR :
         bProto.duerType = _type
 # def debugLevel(level = BLINKER_DEBUG):
 #     bProto.debug = level
