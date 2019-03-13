@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from Blinker import *
 
 BLINKER_DEBUG.debugAll()

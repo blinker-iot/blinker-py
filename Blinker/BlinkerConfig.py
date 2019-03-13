@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 wsPort                          = 81
 
 BLINKER_BLE                     = 0

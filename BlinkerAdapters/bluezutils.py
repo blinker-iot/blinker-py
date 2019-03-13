@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import dbus
 
 SERVICE_NAME = "org.bluez"

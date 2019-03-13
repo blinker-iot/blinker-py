@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from threading import Thread
 from zeroconf import ServiceInfo, Zeroconf
 from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
