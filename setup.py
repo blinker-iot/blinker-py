@@ -16,6 +16,14 @@ setup(
     zip_safe=False,
     include_package_data=True,
     platforms='any',
+    install_requires=[
+        'SimpleWebSocketServer',
+        'zeroconf',
+        'paho-mqtt',
+        'requests',
+        'dbus-python',
+        'pygobject',
+    ],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
