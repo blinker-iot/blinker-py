@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 setup(
     name='Blinker',
@@ -13,6 +13,8 @@ setup(
     url='https://github.com/blinker-iot/blinker-py',
     packages=['Blinker', 'BlinkerAdapters', 'BlinkerUtility'],
     # package_dir={'Blinker':'', 'BlinkerAdapters':'', 'BlinkerUtility':''},
+    zip_safe=False,
+    include_package_data=True,
     platforms='any',
     classifiers=[
         'Development Status :: 4 - Beta',
