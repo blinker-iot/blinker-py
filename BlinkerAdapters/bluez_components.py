@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 '''
 These classes and functions were taken from the example-advertisement.py and example-gatt-server.py scripts
 of the BlueZ project. They were grouped together in this file to simplify the usage of BlueZ's D-Bus API.
