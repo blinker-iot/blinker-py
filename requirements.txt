@@ -1,0 +1,6 @@
+SimpleWebSocketServer
+zeroconf
+paho-mqtt
+requests
+dbus-python
+pygobject
