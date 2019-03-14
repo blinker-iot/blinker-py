@@ -7,6 +7,7 @@ setup(
     name='Blinker',
     version='0.2.0',
     author='i3water',
+    author_email='121024123@qq.com',
     description='Blinker library in python',
     long_description=open('README.md').read(),
     license='MIT',
