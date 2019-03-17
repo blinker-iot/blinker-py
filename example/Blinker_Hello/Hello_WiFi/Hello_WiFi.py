@@ -4,7 +4,7 @@
 from Blinker import Blinker, BlinkerButton, BlinkerNumber
 from Blinker.BlinkerDebug import *
 
-auth = '90305ee5f36d'
+auth = 'Your Device Secret Key'
 
 BLINKER_DEBUG.debugAll()
 
@@ -32,8 +32,6 @@ def data_callback(data):
     BLINKER_LOG("Blinker readString: ", data)
     counter += 1
     number1.print(counter)
-
-    print('use original print for test')
 
 button1.attach(button1_callback)
 Blinker.attachData(data_callback)
