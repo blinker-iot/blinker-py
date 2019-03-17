@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from Blinker import *
+from Blinker import Blinker, BlinkerButton, BlinkerNumber
+from Blinker.BlinkerDebug import *
 
 BLINKER_DEBUG.debugAll()
 
-Blinker.mode(BLINKER_BLE)
+Blinker.mode("BLINKER_BLE")
 Blinker.begin()
 
 button1 = BlinkerButton("btn-abc")

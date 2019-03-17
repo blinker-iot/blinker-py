@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from Blinker import *
+from Blinker import Blinker, BlinkerRGB
+from Blinker.BlinkerDebug import *
 
 BLINKER_DEBUG.debugAll()
 
-Blinker.mode(BLINKER_BLE)
+Blinker.mode("BLINKER_BLE")
 Blinker.begin()
 
 rgb1 = BlinkerRGB("RGBKey")

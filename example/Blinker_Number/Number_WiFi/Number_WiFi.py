@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from Blinker import *
+from Blinker import Blinker, BlinkerButton, BlinkerNumber
+from Blinker.BlinkerDebug import *
 
 BLINKER_DEBUG.debugAll()
 
 auth = 'Your Device Secret Key'
 
-Blinker.mode(BLINKER_WIFI)
+Blinker.mode("BLINKER_WIFI")
 Blinker.begin(auth)
 
 button1 = BlinkerButton("btn-abc")
