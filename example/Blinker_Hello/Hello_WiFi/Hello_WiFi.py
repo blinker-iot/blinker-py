@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from Blinker import *
+from Blinker import Blinker, BlinkerButton, BlinkerNumber
+from Blinker.BlinkerDebug import *
 
-auth = 'Your Device Secret Key'
+auth = '90305ee5f36d'
 
 BLINKER_DEBUG.debugAll()
 
-Blinker.mode(BLINKER_WIFI)
+Blinker.mode("BLINKER_WIFI")
 Blinker.begin(auth)
 
 button1 = BlinkerButton("btn-abc")
@@ -31,6 +32,8 @@ def data_callback(data):
     BLINKER_LOG("Blinker readString: ", data)
     counter += 1
     number1.print(counter)
+
+    print('use original print for test')
 
 button1.attach(button1_callback)
 Blinker.attachData(data_callback)
