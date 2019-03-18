@@ -28,7 +28,7 @@ class Protocol():
 
         self.msgFrom = None
         self.msgBuf = None
-        self.sendBuf = {}
+        self.sendBuf = ''
         self.isFormat = False
         self.autoFormatFreshTime = millis()
         self.state = CONNECTING
@@ -244,11 +244,21 @@ class BlinkerPY:
             # data = {}
             if bProto.isFormat == False:
                 bProto.isFormat = True
+                bProto.autoFormatFreshTime = millis()
             
-            if (millis() - bProto.autoFormatFreshTime) >= 100 :
+            if (millis() - bProto.autoFormatFreshTime) < 100 :
                 bProto.autoFormatFreshTime = millis()
 
-            bProto.sendBuf[key] = value
+            buffer = {}
+
+            if bProto.sendBuf is not '' :
+                buffer = json.loads(bProto.sendBuf)
+            buffer[key] = value
+            bProto.sendBuf = json.dumps(buffer)
+            # # bProto.sendBuf[key] = value
+
+            # # BLINKER_LOG_ALL("key: ", key, ", value: ", bProto.sendBuf[key])
+            BLINKER_LOG_ALL("sendBuf: ", bProto.sendBuf)
 
         # if bProto.isFormat is False:
         #     _print(data)
@@ -256,7 +266,12 @@ class BlinkerPY:
     def checkAutoFormat(self):
         if bProto.isFormat :
             if (millis() - bProto.autoFormatFreshTime) >= 100 :
-                BlinkerPY._print(self, bProto.sendBuf)
+                # payload = {}
+                # for key in bProto.sendBuf :
+                #     BLINKER_LOG_ALL(key, ", ", bProto.sendBuf[key])
+                BlinkerPY._print(self, json.loads(bProto.sendBuf))
+                BLINKER_LOG_ALL("auto format: ", json.loads(bProto.sendBuf))
+                bProto.sendBuf = ''
                 bProto.isFormat = False
 
 
@@ -665,8 +680,9 @@ class BlinkerButton(object):
 
         if len(self.buttonData) :
             # data = json.dumps(self.buttonData)
-            data = {self.name: self.buttonData}
-            Blinker._print(data)
+            # data = {self.name: self.buttonData}
+            # Blinker._print(data)
+            Blinker.print(self.name, self.buttonData)
 
             self.buttonData.clear()
 
@@ -717,8 +733,9 @@ class BlinkerNumber(object):
 
         if len(self.numberData) :
             # data = json.dumps(self.numberData)
-            data = {self.name: self.numberData}
-            Blinker._print(data)
+            # data = {self.name: self.numberData}
+            # Blinker._print(data)
+            Blinker.print(self.name, self.numberData)
 
             self.numberData.clear()
 
@@ -756,8 +773,9 @@ class BlinkerRGB(object):
             self.rgbData.append(_bright)
         
         # _print(self.rgbData)
-        data = {self.name: self.rgbData}
-        Blinker._print(data)
+        # data = {self.name: self.rgbData}
+        # Blinker._print(data)
+        Blinker.print(self.name, self.rgbData)
 
 
 class BlinkerSlider(object):
@@ -783,8 +801,9 @@ class BlinkerSlider(object):
             self.sliderData[BLINKER_CMD_COLOR] = self.textClr
 
         # data = json.dumps(self.sliderData)
-        data = {self.name: self.sliderData}
-        Blinker._print(data)
+        # data = {self.name: self.sliderData}
+        # Blinker._print(data)
+        Blinker.print(self.name, self.sliderData)
 
 
 class BlinkerText(object):
@@ -802,8 +821,9 @@ class BlinkerText(object):
             self.textData[BLINKER_CMD_TEXT1] = text2
 
         # data = json.dumps(self.textData)        
-        data = {self.name: self.textData}
-        Blinker._print(data)
+        # data = {self.name: self.textData}
+        # Blinker._print(data)
+        Blinker.print(self.name, self.textData)
 
 
 class BlinkerJoystick(object):
