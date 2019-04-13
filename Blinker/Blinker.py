@@ -97,7 +97,7 @@ class BlinkerPY:
     def begin(self, auth = None):
         if bProto.conType == "BLINKER_BLE":
             # return
-            bProto.proto1.bleProto.debug = bProto.debug
+            # bProto.proto1.bleProto.debug = bProto.debug
             # bProto.conn1.run()
             bProto.conn1.start()
         elif bProto.conType == "BLINKER_WIFI":
