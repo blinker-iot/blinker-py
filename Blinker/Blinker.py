@@ -44,6 +44,13 @@ class Protocol():
         self.Toggles = {}
         self.Numbers = {}
         self.Texts = {}
+        self.Datas = {}
+
+        self.dataTime = BLINKER_DATA_FREQ_TIME
+        self.dataCount = 0
+        self.dataTimes = 0
+        self.dataTimesLimit = 0
+        self.dataStorageFunc = None
 
         # self.Joystick = [BLINKER_JOYSTICK_VALUE_DEFAULT, BLINKER_JOYSTICK_VALUE_DEFAULT]
         self.Joystick = {}
@@ -549,42 +556,42 @@ class BlinkerPY:
         BlinkerPY.print(self, BLINKER_CMD_VIBRATE, time)
 
     def time(self):
-        return _time.time()
+        return int(_time.time())
 
     def second(self):
-        localtime = _time.localtime(_time.time())
+        localtime = _time.localtime(int(_time.time()))
         return localtime.tm_sec
 
     def minute(self):
-        localtime = _time.localtime(_time.time())
+        localtime = _time.localtime(int(_time.time()))
         return localtime.tm_min
 
     def hour(self):
-        localtime = _time.localtime(_time.time())
+        localtime = _time.localtime(int(_time.time()))
         return localtime.tm_hour
 
     def mday(self):
-        localtime = _time.localtime(_time.time())
+        localtime = _time.localtime(int(_time.time()))
         return localtime.tm_mday
 
     def wday(self):
-        localtime = _time.localtime(_time.time())
+        localtime = _time.localtime(int(_time.time()))
         return (localtime.tm_wday + 1) % 7
 
     def month(self):
-        localtime = _time.localtime(_time.time())
+        localtime = _time.localtime(int(_time.time()))
         return localtime.tm_mon
 
     def year(self):
-        localtime = _time.localtime(_time.time())
+        localtime = _time.localtime(int(_time.time()))
         return localtime.tm_year
 
     def yday(self):
-        localtime = _time.localtime(_time.time())
+        localtime = _time.localtime(int(_time.time()))
         return localtime.tm_yday
 
     def dtime(self):
-        localtime = _time.localtime(_time.time())
+        localtime = _time.localtime(int(_time.time()))
         return localtime.tm_hour * 60 * 60 + localtime.tm_min * 60 + localtime.tm_sec
 
     def sms(self, msg):
@@ -617,6 +624,51 @@ class BlinkerPY:
         else:
             BLINKER_ERR_LOG('This code is intended to run on the MQTT!')
 
+    def dataStorageCallback(self):
+        bProto.dataStorageFunc()
+        bProto.dataTimesLimit = bProto.dataTimesLimit + 1
+
+        if bProto.dataTimesLimit == bProto.dataTimes:
+            BlinkerPY.dataUpdate(self)
+            bProto.dataTimesLimit = 0
+
+        timer = threading.Timer(bProto.dataTime, BlinkerPY.dataStorageCallback(self))
+        timer.start()
+
+    def attachDataStorage(self, func, limit = BLINKER_DATA_FREQ_TIME, times = 4):
+        bProto.dataStorageFunc = func
+        bProto.dataTime = limit
+        bProto.dataTimes = times
+        timer = threading.Timer(limit, BlinkerPY.dataStorageCallback(self))
+        timer.start()
+
+    def dataStorage(self, name, data):
+        now_time = BlinkerPY.time(self) - BlinkerPY.second(self)
+        now_time = now_time - now_time % 10
+        BLINKER_LOG_ALL('now_time: ', now_time)
+
+        if name in bProto.Datas:
+            bProto.Datas[name].saveData(data, now_time, bProto.dataTime)
+        else:
+            _Data = BlinkerData(name)
+            _Data.saveData(data, now_time, bProto.dataTime)
+            bProto.dataCount = bProto.dataCount + 1
+
+    def dataUpdate(self):
+        if bProto.dataCount == 0:
+            return
+        if bProto.conType == "BLINKER_MQTT":
+            datas = []
+            for name in bProto.Datas:
+                datas.append(bProto.Datas[name].getData())
+            if bProto.conn1.dataUpdate(datas):
+                for name in bProto.Datas:
+                    bProto.Datas[name].flush()
+
+        else:
+            BLINKER_ERR_LOG('This code is intended to run on the MQTT!')
+
+
 Blinker = BlinkerPY()
 
 def thread_run():
@@ -624,6 +676,38 @@ def thread_run():
         bProto.conn1.run()
     while True:
         Blinker.checkData()
+
+class BlinkerData(object):
+    """ """
+
+    def __init__(self, name):
+        self.name = name
+        self.lastTime = 0
+        self.dataCount = 0
+        self.data = []
+        
+        bProto.Datas[name] = self
+
+    # def name(self, name)
+    #     self.name = name
+    #     bProto.Datas[name] = self
+
+    def saveData(self, _data, _now, _limit):
+        if self.dataCount :
+            if (_now - self.lastTime) < _limit :
+                return
+        self.lastTime = _now
+        dataList = [_data, _now]
+        self.data.append(dataList)
+        self.dataCount = self.dataCount + 1
+        BLINKER_LOG_ALL(self.data)
+
+    def getData(self):
+        return self.data
+
+    def flush(self):
+        self.data.clear()
+
 
 class BlinkerButton(object):
     """ """

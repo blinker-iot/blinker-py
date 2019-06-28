@@ -85,6 +85,8 @@ BLINKER_CMD_BUILTIN_SWITCH      = 'switch'
 BLINKER_CMD_MESSAGE             = 'message'
 BLINKER_CMD_DETAIL              = 'detail'
 BLINKER_JOYSTICK_VALUE_DEFAULT  = 128
+BLINKER_MAX_DATA_COUNT          = 4
+BLINKER_DATA_FREQ_TIME          = 60.0
 
 BLINKER_MQTT_ALIYUN_HOST        = 'public.iot-as-mqtt.cn-shanghai.aliyuncs.com'
 BLINKER_MQTT_ALIYUN_PORT        = 1883
