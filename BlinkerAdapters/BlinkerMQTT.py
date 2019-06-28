@@ -289,6 +289,20 @@ class MQTTClient():
         if data[BLINKER_CMD_MESSAGE] != 1000:
             BLINKER_ERR_LOG(data[BLINKER_CMD_DETAIL])
 
+    def dataUpdate(self, msg):
+        payload = json.dumps({'deviceName':self.bmqtt.deviceName, 'key': self.auth, 'data': msg})
+        response = requests.post('https://iotdev.clz.me/api/v1/user/device/cloudStorage/',
+                                 data=payload, headers={'Content-Type': 'application/json'})
+
+        self.bmqtt.pushTime = millis()
+        data = response.json()
+        # if self.bmqtt.isDebugAll() is True:
+        BLINKER_LOG_ALL('response: ', data)
+        if data[BLINKER_CMD_MESSAGE] != 1000:
+            BLINKER_ERR_LOG(data[BLINKER_CMD_DETAIL])
+            return False
+        return True
+
     def weather(self, city):
         if self.bmqtt.checkWEATHER() is False:
             return
