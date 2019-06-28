@@ -510,10 +510,10 @@ class BlinkerPY:
 
     def attachAhrs(self):
         state = False
-        while connected() is False:
-            connect()
+        while BlinkerPY.connected(self) is False:
+            BlinkerPY.connect(self)
         BlinkerPY.print(self, BLINKER_CMD_AHRS, BLINKER_CMD_ON)
-        delay(100)
+        BlinkerPY.delay(self, 100)
         run()
         start_time = millis()
         state = bProto.Ahrs[AHRS_state]
@@ -522,7 +522,7 @@ class BlinkerPY:
                 BLINKER_LOG("AHRS attach failed...Try again")
                 start_time = millis()
                 BlinkerPY.print(self, BLINKER_CMD_AHRS, BLINKER_CMD_ON)
-                delay(100)
+                BlinkerPY.delay(self, 100)
                 BlinkerPY.run(self)
             state = bProto.Ahrs[AHRS_state]
         BLINKER_LOG("AHRS attach sucessed...")
@@ -536,8 +536,8 @@ class BlinkerPY:
 
     def gps(self, axis):
         BlinkerPY.print(self, BLINKER_CMD_GET, BLINKER_CMD_GPS)
-        delay(100)
-        run()
+        BlinkerPY.delay(self, 100)
+        BlinkerPY.run(self)
         if axis >= LONG and axis <= LAT:
             return bProto.GPS[axis]
         else:

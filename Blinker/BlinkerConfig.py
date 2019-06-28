@@ -26,6 +26,7 @@ LAT                             = 1
 R                               = 0
 G                               = 1
 B                               = 2
+BR                              = 3
 
 CONNECTING                      = 0
 CONNECTED                       = 1
@@ -81,6 +82,8 @@ BLINKER_CMD_TEXT1               = 'tex1'
 BLINKER_CMD_TEXTCOLOR           = 'tco'
 BLINKER_CMD_UNIT                = 'uni'
 BLINKER_CMD_BUILTIN_SWITCH      = 'switch'
+BLINKER_CMD_MESSAGE             = 'message'
+BLINKER_CMD_DETAIL              = 'detail'
 BLINKER_JOYSTICK_VALUE_DEFAULT  = 128
 
 BLINKER_MQTT_ALIYUN_HOST        = 'public.iot-as-mqtt.cn-shanghai.aliyuncs.com'
