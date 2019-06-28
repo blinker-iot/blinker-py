@@ -631,9 +631,9 @@ class BlinkerPY:
         bProto.dataStorageFunc()
         bProto.dataTimesLimit = bProto.dataTimesLimit + 1
 
-        if bProto.dataTimesLimit == bProto.dataTimes:
-            BlinkerPY.dataUpdate(self)
-            bProto.dataTimesLimit = 0
+        if bProto.dataTimesLimit >= bProto.dataTimes:
+            if BlinkerPY.dataUpdate(self):
+                bProto.dataTimesLimit = 0
 
     def attachDataStorage(self, func, limit = BLINKER_DATA_FREQ_TIME, times = 4):
         bProto.dataStorageFunc = func
@@ -661,12 +661,15 @@ class BlinkerPY:
         if bProto.dataCount == 0:
             return
         if bProto.conType == "BLINKER_MQTT":
-            datas = []
+            datas = {}
             for name in bProto.Datas:
-                datas.append(bProto.Datas[name].getData())
+                # datas.append(bProto.Datas[name].getData())
+                datas[name] = bProto.Datas[name].getData()
             if bProto.conn1.dataUpdate(datas):
                 for name in bProto.Datas:
                     bProto.Datas[name].flush()
+                return True
+            return False
 
         else:
             BLINKER_ERR_LOG('This code is intended to run on the MQTT!')
@@ -703,7 +706,7 @@ class BlinkerData(object):
             if (_now - self.lastTime) < _limit :
                 return
         self.lastTime = _now
-        dataList = [_data, _now]
+        dataList = [_now, _data]
         self.data.append(dataList)
         self.dataCount = self.dataCount + 1
         BLINKER_LOG_ALL(self.data)
