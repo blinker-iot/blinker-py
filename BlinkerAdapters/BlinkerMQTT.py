@@ -19,10 +19,18 @@ class MQTTProtocol(object):
     uuid = ''
     msgBuf = ''
     isRead = False
+    isAliRead = False
+    isDuerRead = False
     state = CONNECTING
     isAlive = False
+    isAliAlive = False
+    isDuerAlive = False
     printTime = 0
+    aliPrintTime = 0
+    duerPrintTime = 0
     kaTime = 0
+    aliKaTime = 0
+    duerKaTime = 0
     debug = BLINKER_DEBUG
     smsTime = 0
     pushTime = 0
@@ -50,11 +58,47 @@ class BlinkerMQTT(MQTTProtocol):
             self.isAlive = False
             return False
 
+    def checkAliKA(self):
+        if self.isAliAlive is False:
+            return False
+        if (millis() - self.aliKaTime) < BLINKER_MQTT_KEEPALIVE:
+            return True
+        else:
+            self.isAliAlive = False
+            return False    
+
+    def checkDuerKA(self):
+        if self.isDuerAlive is False:
+            return False
+        if (millis() - self.duerKaTime) < BLINKER_MQTT_KEEPALIVE:
+            return True
+        else:
+            self.isDuerAlive = False
+            return False
+
     def checkCanPrint(self):
         if self.checkKA() is False:
             BLINKER_ERR_LOG("MQTT NOT ALIVE OR MSG LIMIT")
             return False
         if (millis() - self.printTime) >= BLINKER_MQTT_MSG_LIMIT or self.printTime == 0:
+            return True
+        BLINKER_ERR_LOG("MQTT NOT ALIVE OR MSG LIMIT")
+        return False
+
+    def checkAliCanPrint(self):
+        if self.checkAliKA() is False:
+            BLINKER_ERR_LOG("MQTT NOT ALIVE OR MSG LIMIT")
+            return False
+        if (millis() - self.aliPrintTime) >= BLINKER_MQTT_MSG_LIMIT or self.aliPrintTime == 0:
+            return True
+        BLINKER_ERR_LOG("MQTT NOT ALIVE OR MSG LIMIT")
+        return False
+
+    def checkDuerCanPrint(self):
+        if self.checkDuerKA() is False:
+            BLINKER_ERR_LOG("MQTT NOT ALIVE OR MSG LIMIT")
+            return False
+        if (millis() - self.duerPrintTime) >= BLINKER_MQTT_MSG_LIMIT or self.duerPrintTime == 0:
             return True
         BLINKER_ERR_LOG("MQTT NOT ALIVE OR MSG LIMIT")
         return False
@@ -107,10 +151,10 @@ class BlinkerMQTT(MQTTProtocol):
         url = '/api/v1/user/device/diy/auth?authKey=' + auth
 
         if aliType :
-            url = url + '&aliType=' + aliType
+            url = url + aliType
 
         if duerType :
-            url = url + '&duerType=' + duerType
+            url = url + duerType
 
         r = requests.get(url=host + url)
         data = ''
@@ -197,12 +241,29 @@ class MQTTClient():
         data = data.decode('utf-8')
         # BLINKER_LOG('data: ', data)
         data = json.loads(data)
+        fromDevice = data['fromDevice']
         data = data['data']
         data = json.dumps(data)
-        self.bmqtt.msgBuf = data
-        self.bmqtt.isRead = True
-        self.bmqtt.isAlive = True
-        self.bmqtt.kaTime = millis()
+        # self.bmqtt.msgBuf = data
+        # self.bmqtt.isRead = True
+        # self.bmqtt.isAlive = True
+        # self.bmqtt.kaTime = millis()
+        BLINKER_LOG_ALL('data: ', data)
+        if fromDevice == self.bmqtt.uuid :
+            self.bmqtt.msgBuf = data
+            self.bmqtt.isRead = True
+            self.bmqtt.isAlive = True
+            self.bmqtt.kaTime = millis()
+        elif fromDevice == 'AliGenie':
+            self.bmqtt.msgBuf = data
+            self.bmqtt.isAliRead = True
+            self.bmqtt.isAliAlive = True
+            self.bmqtt.aliKaTime = millis()        
+        elif fromDevice == 'DuerOS':
+            self.bmqtt.msgBuf = data
+            self.bmqtt.isDuerRead = True
+            self.bmqtt.isDuerAlive = True
+            self.bmqtt.duerKaTime = millis()  
 
     def start(self, auth, aliType, duerType):
         self.auth = auth
@@ -232,6 +293,8 @@ class MQTTClient():
         self.bmqtt.printTime = millis()
 
     def aliPrint(self, msg):
+        if self.bmqtt.checkAliCanPrint() is False:
+            return
         payload = {'fromDevice': self.bmqtt.deviceName, 'toDevice': 'AliGenie_r', 'data': msg , 'deviceType': 'vAssistant'}
         payload = json.dumps(payload)
         # if self.bmqtt.isDebugAll() is True:
@@ -240,6 +303,8 @@ class MQTTClient():
         self.client.publish(self.bmqtt.pubtopic, payload)
 
     def duerPrint(self, msg):
+        if self.bmqtt.checkDuerCanPrint() is False:
+            return
         payload = {'fromDevice': self.bmqtt.deviceName, 'toDevice': 'DuerOS_r', 'data': msg , 'deviceType': 'vAssistant'}
         payload = json.dumps(payload)
         # if self.bmqtt.isDebugAll() is True:
