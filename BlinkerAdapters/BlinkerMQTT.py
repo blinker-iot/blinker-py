@@ -147,7 +147,7 @@ class BlinkerMQTT(MQTTProtocol):
 
     @classmethod
     def getInfo(cls, auth, aliType, duerType):
-        host = 'https://iotdev.clz.me'
+        host = 'https://iot.diandeng.tech'
         url = '/api/v1/user/device/diy/auth?authKey=' + auth
 
         if aliType :
@@ -316,7 +316,7 @@ class MQTTClient():
         if self.bmqtt.checkSMS() is False:
             return
         payload = json.dumps({'deviceName':self.bmqtt.deviceName, 'key': self.auth, 'msg': msg})
-        response = requests.post('https://iotdev.clz.me/api/v1/user/device/sms',
+        response = requests.post('https://iot.diandeng.tech/api/v1/user/device/sms',
                                  data=payload, headers={'Content-Type': 'application/json'})
 
         self.bmqtt.smsTime = millis()
@@ -330,7 +330,7 @@ class MQTTClient():
         if self.bmqtt.checkPUSH() is False:
             return
         payload = json.dumps({'deviceName':self.bmqtt.deviceName, 'key': self.auth, 'msg': msg})
-        response = requests.post('https://iotdev.clz.me/api/v1/user/device/push',
+        response = requests.post('https://iot.diandeng.tech/api/v1/user/device/push',
                                  data=payload, headers={'Content-Type': 'application/json'})
 
         self.bmqtt.pushTime = millis()
@@ -344,7 +344,7 @@ class MQTTClient():
         if self.bmqtt.checkWECHAT() is False:
             return
         payload = json.dumps({'deviceName':self.bmqtt.deviceName, 'key': self.auth, 'title':title, 'state':state, 'msg': msg})
-        response = requests.post('https://iotdev.clz.me/api/v1/user/device/wxMsg/',
+        response = requests.post('https://iot.diandeng.tech/api/v1/user/device/wxMsg/',
                                  data=payload, headers={'Content-Type': 'application/json'})
 
         self.bmqtt.pushTime = millis()
@@ -356,7 +356,7 @@ class MQTTClient():
 
     def dataUpdate(self, msg):
         payload = json.dumps({'deviceName':self.bmqtt.deviceName, 'key': self.auth, 'data': msg})
-        response = requests.post('https://iotdev.clz.me/api/v1/user/device/cloudStorage/',
+        response = requests.post('https://iot.diandeng.tech/api/v1/user/device/cloudStorage/',
                                  data=payload, headers={'Content-Type': 'application/json'})
 
         self.bmqtt.pushTime = millis()
@@ -371,7 +371,7 @@ class MQTTClient():
     def weather(self, city):
         if self.bmqtt.checkWEATHER() is False:
             return
-        host = 'https://iotdev.clz.me'
+        host = 'https://iot.diandeng.tech'
         url = '/api/v1/user/device/weather/now?deviceName=' + self.bmqtt.deviceName + '&key=' + self.auth + '&location=' + city
 
         r = requests.get(url=host + url)
@@ -389,7 +389,7 @@ class MQTTClient():
     def aqi(self, city):
         if self.bmqtt.checkAQI() is False:
             return
-        host = 'https://iotdev.clz.me'
+        host = 'https://iot.diandeng.tech'
         url = '/api/v1/user/device/weather/now?deviceName=' + self.bmqtt.deviceName + '&key=' + self.auth + '&location=' + city
 
         r = requests.get(url=host + url)
@@ -406,7 +406,7 @@ class MQTTClient():
 
 
         # payload = json.dumps({'deviceName':self.bmqtt.deviceName, 'key': self.auth, 'title':title, 'state':state, 'msg': msg})
-        # response = requests.post('https://iotdev.clz.me/api/v1/user/device/wxMsg/',
+        # response = requests.post('https://iot.diandeng.tech/api/v1/user/device/wxMsg/',
         #                          data=payload, headers={'Content-Type': 'application/json'})
 
         # self.bmqtt.pushTime = millis()
