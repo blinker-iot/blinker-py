@@ -64,6 +64,7 @@ class Protocol():
 
         self.aliType = None
         self.duerType = None
+        self.miType = None
 
         self.aliPowerSrareFunc = None
         self.aliSetColorFunc = None
@@ -84,6 +85,16 @@ class Protocol():
         # self.aliSetColorTempFunc = None
         # self.aliRelateColorTempFunc = None
         self.duerQueryFunc = None
+        
+        self.miPowerSrareFunc = None
+        self.miSetColorFunc = None
+        self.miSetModeFunc = None
+        self.miSetcModeFunc = None
+        self.miSetBrightFunc = None
+        #self.mtRelateBrightFunc = None
+        self.miSetColorTempFunc = None
+        #self.mtRelateColorTempFunc = None
+        self.miQueryFunc = None
 
 bProto = Protocol()
 
@@ -130,6 +141,17 @@ class BlinkerPY:
             bProto.duerType = '&duerType=MULTI_SOCKET'        
         elif _type == 'BLINKER_DUEROS_SENSOR':
             bProto.duerType = '&duerType=AIR_MONITOR'
+            
+
+    def miType(self, _type):
+        if _type == 'BLINKER_MIOT_LIGHT':
+            bProto.miType = '&miType=light'
+        elif _type == 'BLINKER_MIOT_OUTLET':
+            bProto.miType = '&miType=outlet'
+        elif _type == 'BLINKER_MIOT_MULTI_OUTLET':
+            bProto.miType = '&miType=multi_outlet'        
+        elif _type == 'BLINKER_MIOT_SENSOR':
+            bProto.miType = '&miType=sensor'
     # def debugLevel(level = BLINKER_DEBUG):
     #     bProto.debug = level
 
@@ -147,7 +169,7 @@ class BlinkerPY:
             # bProto.proto2.wsProto.debug = bProto.debug
             if auth :
                 bProto.msgFrom = "BLINKER_MQTT"
-                bProto.conn1.start(auth, bProto.aliType, bProto.duerType)
+                bProto.conn1.start(auth, bProto.aliType, bProto.duerType, bProto.miType)
                 bProto.conn2.start(bProto.conn1.bmqtt.deviceName)
                 bProto.conn1.run()
             else :
@@ -183,6 +205,10 @@ class BlinkerPY:
                 bProto.msgBuf = bProto.conn1.bmqtt.msgBuf
                 bProto.conn1.bmqtt.isDuerRead = False
                 BlinkerPY.duerParse(self)
+            if bProto.conn1.bmqtt.isMiRead is True:
+                bProto.msgBuf = bProto.conn1.bmqtt.msgBuf
+                bProto.conn1.bmqtt.isMiRead = False
+                BlinkerPY.miParse(self)
         elif bProto.conType == "BLINKER_MQTT":
             bProto.state = bProto.conn1.bmqtt.state
             if bProto.proto2.wsProto.state is CONNECTED:
@@ -207,6 +233,10 @@ class BlinkerPY:
                 bProto.msgBuf = bProto.conn1.bmqtt.msgBuf
                 bProto.conn1.bmqtt.isDuerRead = False
                 BlinkerPY.duerParse(self)
+            if bProto.conn1.bmqtt.isMiRead is True:
+                bProto.msgBuf = bProto.conn1.bmqtt.msgBuf
+                bProto.conn1.bmqtt.isMiRead = False
+                BlinkerPY.miParse(self)
 
     def run(self):
         if bProto.isThreadStart is False:
@@ -636,6 +666,109 @@ class BlinkerPY:
         finally:
             pass
 
+    
+    def miParse(self):
+        data = bProto.msgBuf
+        if not data:
+            return
+        try:
+            data = json.loads(data)
+            BLINKER_LOG(data)
+            # if data.has_key('set'):
+            if 'get' in data.keys():
+                _num = 0
+                if 'num' in data.keys():
+                    _num = int(data['num'])
+                data = data['get']
+                if data == 'state':
+                    if bProto.miType == '&miType=multi_outlet':
+                        bProto.miQueryFunc(BLINKER_CMD_QUERY_ALL_NUMBER, _num)
+                    else :
+                        bProto.miQueryFunc(BLINKER_CMD_QUERY_ALL_NUMBER)
+                elif data == 'pState':
+                    if bProto.aliType == '&miType=multi_outlet':
+                        bProto.miQueryFunc(BLINKER_CMD_QUERY_POWERSTATE_NUMBER, _num)
+                    else :
+                        bProto.miQueryFunc(BLINKER_CMD_QUERY_POWERSTATE_NUMBER)
+                elif data == 'col':
+                    if bProto.miQueryFunc:
+                        bProto.miQueryFunc(BLINKER_CMD_QUERY_COLOR_NUMBER)
+                elif data == 'clr':
+                    if bProto.miQueryFunc:
+                        bProto.miQueryFunc(BLINKER_CMD_QUERY_COLOR_NUMBER)
+                elif data == 'colTemp':
+                    if bProto.miQueryFunc:
+                        bProto.miQueryFunc(BLINKER_CMD_QUERY_COLORTEMP_NUMBER)
+                elif data == 'bright':
+                    if bProto.miQueryFunc:
+                        bProto.miQueryFunc(BLINKER_CMD_QUERY_BRIGHTNESS_NUMBER)
+                elif data == 'temp':
+                    if bProto.miQueryFunc:
+                        bProto.miQueryFunc(BLINKER_CMD_QUERY_TEMP_NUMBER)
+                elif data == 'humi':
+                    if bProto.miQueryFunc:
+                        bProto.miQueryFunc(BLINKER_CMD_QUERY_HUMI_NUMBER)
+                elif data == 'pm25':
+                    if bProto.miQueryFunc:
+                        bProto.miQueryFunc(BLINKER_CMD_QUERY_PM25_NUMBER)
+                elif data == 'pState':
+                    if bProto.miQueryFunc:
+                        bProto.miQueryFunc(BLINKER_CMD_QUERY_POWERSTATE_NUMBER)
+                elif data == 'mode':
+                    if bProto.miQueryFunc:
+                        bProto.miQueryFunc(BLINKER_CMD_QUERY_MODE_NUMBER)
+            
+            # elif data.has_key('get'):
+            elif 'set' in data.keys():
+                data = data['set']
+                _num = 0
+                if 'num' in data.keys():
+                    _num = int(data['num'])
+                for key, value in data.items():
+                    if key == 'pState':
+                        if bProto.miPowerSrareFunc:
+                            # if data.has_key('num'):                            
+                            if bProto.miType == '&miType=multi_outlet':
+                                bProto.miPowerSrareFunc(value, _num)
+                            else :
+                                bProto.miPowerSrareFunc(value)
+                    elif key == 'col':
+                        if bProto.miSetColorFunc:
+                            bProto.miSetColorFunc(value)
+                    elif key == 'clr':
+                        if bProto.miSetColorFunc:
+                            bProto.miSetColorFunc(value)
+                    elif key == 'bright':
+                        if bProto.miSetBrightFunc:
+                            bProto.miSetBrightFunc(value)
+                    elif key == 'upBright':
+                        if bProto.miRelateBrightFunc:
+                            bProto.miRelateBrightFunc(value)
+                    elif key == 'downBright':
+                        if bProto.miRelateBrightFunc:
+                            bProto.miRelateBrightFunc(value)
+                    elif key == 'colTemp':
+                        if bProto.miSetColorTempFunc:
+                            bProto.miSetColorTempFunc(value)
+                    elif key == 'upColTemp':
+                        if bProto.miRelateColorTempFunc:
+                            bProto.miRelateColorTempFunc(value)
+                    elif key == 'downColTemp':
+                        if bProto.miRelateColorTempFunc:
+                            bProto.miRelateColorTempFunc(value)
+                    elif key == 'mode':
+                        if bProto.miSetModeFunc:
+                            bProto.miSetModeFunc(value)
+                    elif key == 'cMode':
+                        if bProto.miSetcModeFunc:
+                            bProto.miSetcModeFunc(value)
+
+        except ValueError:
+            pass
+        except TypeError:
+            pass
+        finally:
+            pass
 
     def _parse(self, data):
         if data is '':
@@ -924,6 +1057,7 @@ class BlinkerPY:
 
     
 
+    ## ali
     def attachAliGenieSetPowerState(self, _func):
         bProto.aliPowerSrareFunc = _func
     
@@ -954,6 +1088,7 @@ class BlinkerPY:
     def aliPrint(self, data):
         bProto.conn1.aliPrint(data)
 
+    ## duer
     def attachDuerOSSetPowerState(self, _func):
         bProto.duerPowerSrareFunc = _func
     
@@ -983,6 +1118,36 @@ class BlinkerPY:
 
     def duerPrint(self, data):
         bProto.conn1.duerPrint(data)
+    ## mi
+    def attachMiSetPowerState(self, _func):
+        bProto.miPowerSrareFunc = _func
+    
+    def attachMiSetColor(self, _func):
+        bProto.miSetColorFunc = _func
+
+    def attachMiSetMode(self, _func):
+        bProto.miSetModeFunc = _func
+
+    def attachMiSetcMode(self, _func):
+        bProto.miSetcModeFunc = _func
+
+    def attachMiSetBrightness(self, _func):
+        bProto.miSetBrightFunc = _func
+
+    def attachMiRelativeBrightness(self, _func):
+        bProto.miRelateBrightFunc = _func
+
+    def attachMiSetColorTemperature(self, _func):
+        bProto.miSetColorTempFunc = _func
+
+    def attachMiRelativeColorTemperature(self, _func):
+        bProto.miRelateColorTempFunc = _func
+
+    def attachMiQuery(self, _func):
+        bProto.miQueryFunc = _func
+
+    def miPrint(self, data):
+        bProto.conn1.miPrint(data)
 
 
 Blinker = BlinkerPY()
@@ -1399,4 +1564,68 @@ class BLINKERA_DUEROS():
         self.payload.clear()
 
 BlinkerDuerOS = BLINKERA_DUEROS()
+
+class BLINKERA_MIOT():
+    def __init__(self):
+        self.payload = {}
+
+    def attachPowerState(self, _func):
+        Blinker.attachMiSetPowerState(_func)
+
+    def attachColor(self, _func):
+        Blinker.attachMiSetColor(_func)
+
+    def attachMode(self, _func):
+        Blinker.attachMiSetMode(_func)
+
+    def attachCancelMode(self, _func):
+        Blinker.attachMiSetcMode(_func)
+    
+    def attachBrightness(self, _func):
+        Blinker.attachMiSetBrightness(_func)
+
+    def attachRelativeBrightness(self, _func):
+        Blinker.attachMiRelativeBrightness(_func)
+
+    def attachColorTemperature(self, _func):
+        Blinker.attachMiSetColorTemperature(_func)
+
+    def attachRelativeColorTemperature(self, _func):
+        Blinker.attachMiRelativeColorTemperature(_func)
+
+    def attachQuery(self, _func):
+        Blinker.attachMiQuery(_func)
+
+    def powerState(self, state, num = None):
+        self.payload['pState'] = state
+        if num :
+            self.payload['num'] = num
+
+    def color(self, clr):
+        self.payload['clr'] = clr
+
+    def mode(self, md):
+        self.payload['mode'] = md
+
+    def colorTemp(self, clrTemp):
+        self.payload['colTemp'] = clrTemp
+
+    def brightness(self, bright):
+        self.payload['bright'] = bright
+
+    def temp(self, tem):
+        self.payload['temp'] = tem
+
+    def humi(self, hum):
+        self.payload['humi'] = hum
+
+    def pm25(self, pm):
+        self.payload['pm25'] = pm
+
+    def print(self):
+        BLINKER_LOG_ALL(self.payload)
+        Blinker.miPrint(self.payload)
+        self.payload.clear()
+
+BlinkerMiot = BLINKERA_MIOT()
 
