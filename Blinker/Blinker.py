@@ -1619,6 +1619,12 @@ class BLINKERA_MIOT():
     def brightness(self, bright):
         self.payload['bright'] = bright
 
+    def co2(self, pm):
+        self.payload['co2'] = pm
+
+    def aqi(self, pm):
+        self.payload['aqi'] = pm
+        
     def temp(self, tem):
         self.payload['temp'] = tem
 
