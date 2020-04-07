@@ -512,9 +512,6 @@ class BlinkerPY:
                 elif data == 'pm25':
                     if bProto.aliQueryFunc:
                         bProto.aliQueryFunc(BLINKER_CMD_QUERY_PM25_NUMBER)
-                elif data == 'pState':
-                    if bProto.aliQueryFunc:
-                        bProto.aliQueryFunc(BLINKER_CMD_QUERY_POWERSTATE_NUMBER)
                 elif data == 'mode':
                     if bProto.aliQueryFunc:
                         bProto.aliQueryFunc(BLINKER_CMD_QUERY_MODE_NUMBER)
@@ -717,9 +714,6 @@ class BlinkerPY:
                 elif data == 'pm25':
                     if bProto.miQueryFunc:
                         bProto.miQueryFunc(BLINKER_CMD_QUERY_PM25_NUMBER)
-                elif data == 'pState':
-                    if bProto.miQueryFunc:
-                        bProto.miQueryFunc(BLINKER_CMD_QUERY_POWERSTATE_NUMBER)
                 elif data == 'mode':
                     if bProto.miQueryFunc:
                         bProto.miQueryFunc(BLINKER_CMD_QUERY_MODE_NUMBER)

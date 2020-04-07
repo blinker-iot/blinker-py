@@ -9,7 +9,7 @@ auth = 'Your Device Secret Key'
 BLINKER_DEBUG.debugAll()
 
 Blinker.mode('BLINKER_WIFI')
-Blinker.miType('BLINKER_MIOT_LIGHT')
+Blinker.miType('BLINKER_MIOT_LIGHT') # BLINKER_MIOT_LIGHT 灯, BLINKER_MIOT_OUTLET 插座, BLINKER_MIOT_MULTI_OUTLET 多口插座, BLINKER_MIOT_SENSOR 传感器
 Blinker.begin(auth)
 
 button1 = BlinkerButton('btn-abc')
@@ -59,17 +59,17 @@ def miotMode(mode):
 
     BLINKER_LOG('need set mode: ', mode)
 
-    # if mode == BLINKER_CMD_Miot_READING:
+    # if mode == BLINKER_CMD_MIOT_READING:
     #     # Your mode function
-    # elif mode == BLINKER_CMD_Miot_MOVIE:
+    # elif mode == BLINKER_CMD_MIOT_MOVIE:
     #     # Your mode function
-    # elif mode == BLINKER_CMD_Miot_SLEEP:
+    # elif mode == BLINKER_CMD_MIOT_SLEEP:
     #     # Your mode function
-    # elif mode == BLINKER_CMD_Miot_HOLIDAY:
+    # elif mode == BLINKER_CMD_MIOT_HOLIDAY:
     #     # Your mode function
-    # elif mode == BLINKER_CMD_Miot_MUSIC:
+    # elif mode == BLINKER_CMD_MIOT_MUSIC:
     #     # Your mode function
-    # elif mode == BLINKER_CMD_Miot_COMMON:
+    # elif mode == BLINKER_CMD_MIOT_COMMON:
     #     # Your mode function
 
     BlinkerMiot.mode(mode)
@@ -80,17 +80,17 @@ def miotcMode(cmode):
 
     BLINKER_LOG('need cancel mode: ', cmode)
 
-    # if mode == BLINKER_CMD_Miot_READING:
+    # if mode == BLINKER_CMD_MIOT_READING:
     #     # Your mode function
-    # elif mode == BLINKER_CMD_Miot_MOVIE:
+    # elif mode == BLINKER_CMD_MIOT_MOVIE:
     #     # Your mode function
-    # elif mode == BLINKER_CMD_Miot_SLEEP:
+    # elif mode == BLINKER_CMD_MIOT_SLEEP:
     #     # Your mode function
-    # elif mode == BLINKER_CMD_Miot_HOLIDAY:
+    # elif mode == BLINKER_CMD_MIOT_HOLIDAY:
     #     # Your mode function
     # elif mode == BLINKER_CMD_Miot_MUSIC:
     #     # Your mode function
-    # elif mode == BLINKER_CMD_Miot_COMMON:
+    # elif mode == BLINKER_CMD_MIOT_COMMON:
     #     # Your mode function
 
     BlinkerMiot.mode(cMode)
@@ -113,6 +113,21 @@ def miotColorTemp(colorTemp):
     BlinkerMiot.colorTemp(colorTemp)
     BlinkerMiot.print()
 
+# 0xFF0000: # 'red'
+# 0xFFFF00: # 'yellow'
+# 0x0000FF: # 'blue'
+# 0x00FF00: # 'green'
+# 0xFFFFFF: # 'white'
+# 0x000000: # 'black'
+# 0x00FFFF: # 'cyan'
+# 0x800080: # 'purple'
+# 0xFFA500: # 'orange'
+colorMap = {'red':0xFF0000, 'green':0x00FF00, 'blue':0x0000FF}
+
+def _getCurColor():
+    current_color = 'red'
+    return colorMap.get(current_color)
+
 def miotQuery(queryCode):
     ''' '''
 
@@ -121,7 +136,7 @@ def miotQuery(queryCode):
     if queryCode == BLINKER_CMD_QUERY_ALL_NUMBER :
         BLINKER_LOG('Miot Query All')
         BlinkerMiot.powerState(wsState)
-        BlinkerMiot.color(getColor())
+        BlinkerMiot.color(_getCurColor())
         BlinkerMiot.mode(wsMode)
         BlinkerMiot.colorTemp(50)
         BlinkerMiot.brightness(100)

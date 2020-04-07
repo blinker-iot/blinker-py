@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from Blinker.Blinker import Blinker, BlinkerButton, BlinkerNumber, BlinkerMiot
 from Blinker.BlinkerConfig import *
@@ -17,6 +18,14 @@ wsState = 'on'
 
 counter = 0
 
+def miotPowerState(state):
+    ''' '''
+
+    BLINKER_LOG('need set power state: ', state)
+
+    BlinkerMiot.powerState(state)
+    BlinkerMiot.print()
+    
 def miQuery(queryCode):
     ''' '''
 
@@ -30,6 +39,10 @@ def miQuery(queryCode):
         BlinkerMiot.humi(21)
         BlinkerMiot.pm25(22)
         BlinkerMiot.co2(23)
+        BlinkerMiot.print()
+    elif queryCode == BLINKER_CMD_QUERY_POWERSTATE_NUMBER :
+        BLINKER_LOG('Miot Query Power State')
+        BlinkerMiot.powerState(wsState)
         BlinkerMiot.print()
     else :
         BlinkerMiot.powerState(wsState)
@@ -62,6 +75,7 @@ button1.attach(button1_callback)
 Blinker.attachData(data_callback)
 
 BlinkerMiot.attachQuery(miQuery)
+BlinkerMiot.attachPowerState(miotPowerState)
 
 if __name__ == '__main__':
 
