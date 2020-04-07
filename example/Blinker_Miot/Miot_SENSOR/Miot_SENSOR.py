@@ -22,8 +22,8 @@ def miotPowerState(state):
     ''' '''
 
     BLINKER_LOG('need set power state: ', state)
-
-    BlinkerMiot.powerState(state)
+    wsState = state  and 'on' or 'off'
+    BlinkerMiot.powerState(wsState)
     BlinkerMiot.print()
     
 def miQuery(queryCode):
