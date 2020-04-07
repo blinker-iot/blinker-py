@@ -75,7 +75,7 @@ button1.attach(button1_callback)
 Blinker.attachData(data_callback)
 
 BlinkerMiot.attachQuery(miQuery)
-BlinkerMiot.attachPowerState(miotPowerState)
+BlinkerMiot.attachPowerState(miotPowerState) # 服务端未实现? 发送语言开关命令时没收到服务器发来的mqtt消息。但light类型的可以
 
 if __name__ == '__main__':
 
