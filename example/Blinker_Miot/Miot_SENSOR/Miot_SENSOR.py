@@ -13,6 +13,7 @@ Blinker.begin(auth)
 
 button1 = BlinkerButton('btn-abc')
 number1 = BlinkerNumber('num-abc')
+wsState = 'on'
 
 counter = 0
 
@@ -23,14 +24,20 @@ def miQuery(queryCode):
 
     if queryCode == BLINKER_CMD_QUERY_ALL_NUMBER :
         BLINKER_LOG('MIOT Query All')
+        BlinkerMiot.powerState(wsState)
+        BlinkerMiot.aqi(19)
         BlinkerMiot.temp(20)
         BlinkerMiot.humi(21)
         BlinkerMiot.pm25(22)
+        BlinkerMiot.co2(23)
         BlinkerMiot.print()
     else :
-        BlinkerMiot.temp(23)
-        BlinkerMiot.humi(24)
-        BlinkerMiot.pm25(25)
+        BlinkerMiot.powerState(wsState)
+        BlinkerMiot.aqi(24)
+        BlinkerMiot.temp(25)
+        BlinkerMiot.humi(26)
+        BlinkerMiot.pm25(27)
+        BlinkerMiot.co2(28)
         BlinkerMiot.print()
 
 def button1_callback(state):

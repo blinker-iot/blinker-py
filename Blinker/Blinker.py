@@ -699,6 +699,12 @@ class BlinkerPY:
                 elif data == 'colTemp':
                     if bProto.miQueryFunc:
                         bProto.miQueryFunc(BLINKER_CMD_QUERY_COLORTEMP_NUMBER)
+                elif data == 'aqi':
+                    if bProto.miQueryFunc:
+                        bProto.miQueryFunc(BLINKER_CMD_QUERY_AQI_NUMBER)
+                elif data == 'co2':
+                    if bProto.miQueryFunc:
+                        bProto.miQueryFunc(BLINKER_CMD_QUERY_CO2_NUMBER)
                 elif data == 'bright':
                     if bProto.miQueryFunc:
                         bProto.miQueryFunc(BLINKER_CMD_QUERY_BRIGHTNESS_NUMBER)
