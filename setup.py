@@ -19,11 +19,12 @@ setup(
     platforms='any',
     install_requires=[
         'SimpleWebSocketServer',
-        'zeroconf',
+        'zeroconf==0.26.3',
         'paho-mqtt',
         'requests',
         'dbus-python',
         'pygobject',
+        'demjson',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
