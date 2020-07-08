@@ -6,11 +6,16 @@ import paho.mqtt.client as mqtt
 from Blinker.BlinkerConfig import *
 from Blinker.BlinkerDebug import *
 from BlinkerUtility import *
+import demjson
+import base64
 
 class MQTTProtocol(object):
     host = ''
     port = ''
     subtopic = ''
+    exatopic = ''
+    exapubtopic = ''
+    message_id = ''
     pubtopic = ''
     deviceName = ''
     clientID = ''
@@ -21,16 +26,20 @@ class MQTTProtocol(object):
     isRead = False
     isAliRead = False
     isDuerRead = False
+    isMiRead = False
     state = CONNECTING
     isAlive = False
     isAliAlive = False
     isDuerAlive = False
+    isMiAlive = False
     printTime = 0
     aliPrintTime = 0
     duerPrintTime = 0
+    miPrintTime = 0
     kaTime = 0
     aliKaTime = 0
     duerKaTime = 0
+    miKaTime = 0
     debug = BLINKER_DEBUG
     smsTime = 0
     pushTime = 0
@@ -75,6 +84,16 @@ class BlinkerMQTT(MQTTProtocol):
         else:
             self.isDuerAlive = False
             return False
+            return False    
+
+    def checkMiKA(self):
+        if self.isMiAlive is False:
+            return False
+        if (millis() - self.miKaTime) < BLINKER_MQTT_KEEPALIVE:
+            return True
+        else:
+            self.isMiAlive = False
+            return False
 
     def checkCanPrint(self):
         if self.checkKA() is False:
@@ -99,6 +118,15 @@ class BlinkerMQTT(MQTTProtocol):
             BLINKER_ERR_LOG("MQTT NOT ALIVE OR MSG LIMIT")
             return False
         if (millis() - self.duerPrintTime) >= BLINKER_MQTT_MSG_LIMIT or self.duerPrintTime == 0:
+            return True
+        BLINKER_ERR_LOG("MQTT NOT ALIVE OR MSG LIMIT")
+        return False
+
+    def checkMiCanPrint(self):
+        if self.checkMiKA() is False:
+            BLINKER_ERR_LOG("MQTT NOT ALIVE OR MSG LIMIT")
+            return False
+        if (millis() - self.miPrintTime) >= BLINKER_MQTT_MSG_LIMIT or self.miPrintTime == 0:
             return True
         BLINKER_ERR_LOG("MQTT NOT ALIVE OR MSG LIMIT")
         return False
@@ -146,7 +174,7 @@ class BlinkerMQTT(MQTTProtocol):
                 self.delay10s()
 
     @classmethod
-    def getInfo(cls, auth, aliType, duerType):
+    def getInfo(cls, auth, aliType, duerType, miType):
         host = 'https://iot.diandeng.tech'
         url = '/api/v1/user/device/diy/auth?authKey=' + auth
 
@@ -155,6 +183,11 @@ class BlinkerMQTT(MQTTProtocol):
 
         if duerType :
             url = url + duerType
+
+        if miType :
+            url = url + miType
+
+        BLINKER_LOG_ALL('url: ', host + url)
 
         r = requests.get(url=host + url)
         data = ''
@@ -190,6 +223,8 @@ class BlinkerMQTT(MQTTProtocol):
             bmt.port = BLINKER_MQTT_ALIYUN_PORT
             bmt.subtopic = '/' + productKey + '/' + deviceName + '/r'
             bmt.pubtopic = '/' + productKey + '/' + deviceName + '/s'
+            bmt.exatopic = '/sys/' + productKey + '/' + deviceName + '/rrpc/request/+'
+            bmt.exapubtopic = '/sys/' + productKey + '/' + deviceName + '/rrpc/response/'
             bmt.clientID = deviceName
             bmt.userName = iotId
         elif broker == 'qcloud':
@@ -237,13 +272,26 @@ class MQTTClient():
         # if self.bmqtt.isDebugAll() is True:
         BLINKER_LOG_ALL('Subscribe topic: ', msg.topic)
         BLINKER_LOG_ALL('payload: ', msg.payload)
+
+        get_topic = msg.topic[0:55]
+        message_id = msg.topic[55:]
+
+        self.bmqtt.message_id = message_id
+
+        BLINKER_LOG_ALL('Get topic: ', get_topic)
+        BLINKER_LOG_ALL('message_id: ', message_id)
+
         data = msg.payload
+        # if get_topic != self.bmqtt.exatopic:
         data = data.decode('utf-8')
-        # BLINKER_LOG('data: ', data)
-        data = json.loads(data)
+        BLINKER_LOG('data: ', data)
+        data = demjson.decode(data)
+        BLINKER_LOG('data: ', data)
         fromDevice = data['fromDevice']
         data = data['data']
         data = json.dumps(data)
+        # else :
+
         # self.bmqtt.msgBuf = data
         # self.bmqtt.isRead = True
         # self.bmqtt.isAlive = True
@@ -258,16 +306,21 @@ class MQTTClient():
             self.bmqtt.msgBuf = data
             self.bmqtt.isAliRead = True
             self.bmqtt.isAliAlive = True
-            self.bmqtt.aliKaTime = millis()        
+            self.bmqtt.aliKaTime = millis()
         elif fromDevice == 'DuerOS':
             self.bmqtt.msgBuf = data
             self.bmqtt.isDuerRead = True
             self.bmqtt.isDuerAlive = True
-            self.bmqtt.duerKaTime = millis()  
+            self.bmqtt.duerKaTime = millis()
+        elif fromDevice == 'MIOT':
+            self.bmqtt.msgBuf = data
+            self.bmqtt.isMiRead = True
+            self.bmqtt.isMiAlive = True
+            self.bmqtt.miKaTime = millis() 
 
-    def start(self, auth, aliType, duerType):
+    def start(self, auth, aliType, duerType, miType):
         self.auth = auth
-        self.bmqtt = self.mProto.getInfo(auth, aliType, duerType)
+        self.bmqtt = self.mProto.getInfo(auth, aliType, duerType, miType)
         self.client = mqtt.Client(client_id=self.bmqtt.clientID)
         self.client.username_pw_set(self.bmqtt.userName, self.bmqtt.password)
         self.client.on_connect = self.on_connect
@@ -298,9 +351,12 @@ class MQTTClient():
         payload = {'fromDevice': self.bmqtt.deviceName, 'toDevice': 'AliGenie_r', 'data': msg , 'deviceType': 'vAssistant'}
         payload = json.dumps(payload)
         # if self.bmqtt.isDebugAll() is True:
-        BLINKER_LOG_ALL('Publish topic: ', self.bmqtt.pubtopic)
+        pub_topic = self.bmqtt.exapubtopic + self.bmqtt.message_id
+        BLINKER_LOG_ALL('Publish topic: ', pub_topic)
+        payload = base64.b64encode(payload.encode("utf-8"))
+        payload = str(payload, encoding = "utf-8")  
         BLINKER_LOG_ALL('payload: ', payload)
-        self.client.publish(self.bmqtt.pubtopic, payload)
+        self.client.publish(pub_topic, payload)
 
     def duerPrint(self, msg):
         if self.bmqtt.checkDuerCanPrint() is False:
@@ -308,9 +364,29 @@ class MQTTClient():
         payload = {'fromDevice': self.bmqtt.deviceName, 'toDevice': 'DuerOS_r', 'data': msg , 'deviceType': 'vAssistant'}
         payload = json.dumps(payload)
         # if self.bmqtt.isDebugAll() is True:
-        BLINKER_LOG_ALL('Publish topic: ', self.bmqtt.pubtopic)
+        pub_topic = self.bmqtt.exapubtopic + self.bmqtt.message_id
+        BLINKER_LOG_ALL('Publish topic: ', pub_topic)
+        payload = base64.b64encode(payload.encode("utf-8"))
+        # payload.decode('utf-8')
+        payload = str(payload, encoding = "utf-8")  
         BLINKER_LOG_ALL('payload: ', payload)
-        self.client.publish(self.bmqtt.pubtopic, payload)
+        # BLINKER_LOG_ALL('payload: ', base64.b64decode(payload))
+        self.client.publish(pub_topic, payload)
+
+    def miPrint(self, msg):
+        if self.bmqtt.checkMiCanPrint() is False:
+            return
+        payload = {'fromDevice': self.bmqtt.deviceName, 'toDevice': 'MIOT_r', 'data': msg , 'deviceType': 'vAssistant'}
+        payload = json.dumps(payload)
+        # if self.bmqtt.isDebugAll() is True:
+        pub_topic = self.bmqtt.exapubtopic + self.bmqtt.message_id
+        BLINKER_LOG_ALL('Publish topic: ', pub_topic)
+        payload = base64.b64encode(payload.encode("utf-8"))
+        # payload.decode('utf-8')
+        payload = str(payload, encoding = "utf-8")  
+        BLINKER_LOG_ALL('payload: ', payload)
+        # BLINKER_LOG_ALL('payload: ', base64.b64decode(payload))
+        self.client.publish(pub_topic, payload)
 
     def sms(self, msg):
         if self.bmqtt.checkSMS() is False:

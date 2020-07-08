@@ -4,7 +4,7 @@
 from Blinker import Blinker, BlinkerButton, BlinkerNumber
 from Blinker.BlinkerDebug import *
 
-auth = 'Your Device Secret Key'
+auth = 'a3ed8e406003'
 
 BLINKER_DEBUG.debugAll()
 
