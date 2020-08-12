@@ -25,6 +25,7 @@ setup(
         'dbus-python',
         'pygobject',
         'demjson',
+        'qrcode',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',

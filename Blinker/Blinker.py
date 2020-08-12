@@ -115,12 +115,19 @@ class BlinkerPY:
             bProto.conType = "BLINKER_MQTT"
 
             import BlinkerAdapters.BlinkerLinuxWS as bWS
-            import BlinkerAdapters as bMQTT
+            import BlinkerAdapters.BlinkerMQTT as bMQTT
 
             bProto.proto1 = bMQTT
             bProto.proto2 = bWS
             bProto.conn1 = bProto.proto1.MQTTClient()
             bProto.conn2 = bProto.proto2.WebSocketServer(BLINKER_DIY_MQTT)
+        
+        elif bProto.conType == "BLINKER_PRO_QRCODE":
+            import BlinkerAdapters.BlinkerQRCode as bMQTT
+
+            bProto.proto1 = bMQTT
+            bProto.conn1 = bProto.proto1.MQTTClientQRCode()
+
 
     def aliType(self, _type):
         if _type == 'BLINKER_ALIGENIE_LIGHT':
@@ -154,7 +161,7 @@ class BlinkerPY:
     # def debugLevel(level = BLINKER_DEBUG):
     #     bProto.debug = level
 
-    def begin(self, auth = None):
+    def begin(self, type = None, auth = None, time = 60):
         if bProto.conType == "BLINKER_BLE":
             # return
             # bProto.proto1.bleProto.debug = bProto.debug
@@ -173,6 +180,11 @@ class BlinkerPY:
                 bProto.conn1.run()
             else :
                 BLINKER_ERR_LOG('Please input your device secret key!')
+        elif bProto.conType == "BLINKER_PRO_QRCODE":
+            bProto.conn1.start(type, auth, time, bProto.aliType, bProto.duerType, bProto.miType)
+            if bProto.conn1.connect() :
+                bProto.conn1.run()
+
 
     # def thread_run(self):
     #     if bProto.conType == "BLINKER_BLE":
