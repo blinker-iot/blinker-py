@@ -181,6 +181,7 @@ class BlinkerPY:
     #         BlinkerPY.checkData(self)
 
     def checkData(self):
+        _time.sleep(0.1)
         if bProto.conType == "BLINKER_BLE":
             # return
             bProto.state = bProto.proto1.bleProto.state
