@@ -26,3 +26,4 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ubuntu
           privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
+          recursive: true
