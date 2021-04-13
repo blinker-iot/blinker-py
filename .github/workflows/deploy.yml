@@ -4,8 +4,11 @@ jobs:
   archive-file:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: action-zip
-        run: zip -r blinker-py.zip . -x ".git/*" ".github/*"
+        uses: montudor/action-zip@v0.1.1
+        with:
+          args: zip -qq -r blinker-py.zip .
       
       - name: list file
         run: ls *.zip
