@@ -7,10 +7,7 @@ jobs:
       - name: action-zip
         uses: montudor/action-zip@v0.1.1
         with:
-          args: zip -qq -r blinker-py.zip . -i /home/runner/work/blinker-py/blinker-py
-      
-      - name: workspance
-        run: ls /home/runner/work/blinker-py/blinker-py
+          args: zip -qq -r blinker-py.zip . -i /home/runner/work/blinker-py
       
       - name: list file
         run: ls *.zip
