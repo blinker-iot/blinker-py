@@ -5,9 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: action-zip
-        uses: montudor/action-zip@v0.1.1
-        with:
-          args: zip -qq -r blinker-py.zip . -i /home/runner/work/blinker-py/blinker-py/../blinker-py/
+        run: zip -r blinker-py.zip . -x ".git/*" ".github/*"
       
       - name: list file
         run: ls *.zip
