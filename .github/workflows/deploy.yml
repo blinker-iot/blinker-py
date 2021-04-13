@@ -1,0 +1,28 @@
+name: auto-deploy
+on: [push]
+jobs:
+  archive-file:
+    runs-on: ubuntu-latest
+    steps:
+      - name: action-zip
+        uses: montudor/action-zip@v0.1.1
+        with:
+          args: zip -qq -r blinker-library.zip /github/workspace
+      
+      - name: current dir
+        run: pwd
+      
+      - name: list file
+        run: ls *.zip
+      
+      - name: list all file
+        run: ls *
+
+      - name: Deploy
+        uses: garygrossgarten/github-action-scp@v0.5.3
+        with:
+          local: blinker-library.zip
+          remote: /home/ubuntu/
+          host: ${{ secrets.SERVER_IP }}
+          username: ubuntu
+          privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
