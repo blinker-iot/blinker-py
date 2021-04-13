@@ -7,10 +7,10 @@ jobs:
       - name: action-zip
         uses: montudor/action-zip@v0.1.1
         with:
-          args: zip -qq -r blinker-py.zip ${{ github.workspace }}
+          args: zip -qq -r blinker-py.zip /home/runner/work/blinker-py/blinker-py
       
-      - name: current dir
-        run: pwd
+      - name: workspance
+        run: ls ${{ github.workspace }}
       
       - name: list file
         run: ls *.zip
