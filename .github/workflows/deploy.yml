@@ -10,7 +10,7 @@ jobs:
           args: zip -qq -r blinker-py.zip . -i /home/runner/work/blinker-py/blinker-py
       
       - name: workspance
-        run: ls ${{ github.workspace }}
+        run: ls /home/runner/work/blinker-py/blinker-py
       
       - name: list file
         run: ls *.zip
