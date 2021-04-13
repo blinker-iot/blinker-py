@@ -8,7 +8,7 @@ jobs:
       - name: action-zip
         uses: montudor/action-zip@v0.1.1
         with:
-          args: zip -qq -r blinker-py.zip .
+          args: zip -qq -r blinker-py.zip . -x .github/* -x .git/*
       
       - name: list file
         run: ls *.zip
