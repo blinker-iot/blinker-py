@@ -7,7 +7,7 @@ jobs:
       - name: action-zip
         uses: montudor/action-zip@v0.1.1
         with:
-          args: zip -qq -r blinker-library.zip /github/workspace
+          args: zip -qq -r blinker-py.zip /github/workspace
       
       - name: current dir
         run: pwd
@@ -21,7 +21,7 @@ jobs:
       - name: Deploy
         uses: garygrossgarten/github-action-scp@v0.5.3
         with:
-          local: blinker-library.zip
+          local: blinker-py.zip
           remote: /home/ubuntu/
           host: ${{ secrets.SERVER_IP }}
           username: ubuntu
