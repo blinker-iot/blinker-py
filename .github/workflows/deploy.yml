@@ -6,16 +6,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: get version
-        uses: juliangruber/read-file-action@v1
+        uses: notiz-dev/github-action-json-property@release
         with:
-          path: setup.py
-      - name: echo setup.py
-        run: echo ${{ steps.package.outputs.content }}
+          path: 'version.json'
+          prop_path: 'version'
       
-      # - name: action-zip
-      #   uses: montudor/action-zip@v0.1.1
-      #   with:
-      #     args: zip -qq -r blinker-py.zip . -x .github/* -x .git/*
+      - name: action-zip
+        uses: montudor/action-zip@v0.1.1
+        with:
+          args: zip -qq -r blinker-py-${{steps.format_script.outputs.prop}}.zip . -x .github/* -x .git/*
+      
+      - name: ls dir
+        run: ls *.zip
 
       # - name: Deploy
       #   uses: garygrossgarten/github-action-scp@v0.5.3
