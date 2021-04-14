@@ -1,5 +1,8 @@
 name: auto-deploy
-on: [push]
+on:
+  push:
+    branches: [master]
+
 jobs:
   archive-file:
     runs-on: ubuntu-latest
@@ -35,7 +38,7 @@ jobs:
         uses: garygrossgarten/github-action-scp@v0.5.3
         with:
           local: blinker-py-${{steps.version.outputs.prop}}.zip
-          remote: /home/ubuntu/blinker-py-${{steps.version.outputs.prop}}.zip
+          remote: /home/ubuntu/www/diandeng.tech/sdk/blinker-py-${{steps.version.outputs.prop}}.zip
           host: ${{ secrets.SERVER_IP }}
           username: ubuntu
           privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -45,7 +48,7 @@ jobs:
         uses: garygrossgarten/github-action-scp@v0.5.3
         with:
           local: python.json
-          remote: /home/ubuntu/python.json
+          remote: /home/ubuntu/www/diandeng.tech/sdk/python.json
           host: ${{ secrets.SERVER_IP }}
           username: ubuntu
           privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
