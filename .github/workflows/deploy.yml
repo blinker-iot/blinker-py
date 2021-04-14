@@ -31,11 +31,21 @@ jobs:
           name: "python.json"
           json: '{"img": "assets/sdk/python.png", "text": "Python", "update": ${{ steps.current-time.outputs.formattedTime}}, "version": ${{steps.version.outputs.prop}}, "github": "https://github.com/blinker-iot/blinker-py", "document": "https://diandeng.tech/doc/python-support", "download": "sdk/blinker-py-${{steps.version.outputs.prop}}.zip" }'
 
-      - name: Deploy
+      - name: upload zip
         uses: garygrossgarten/github-action-scp@v0.5.3
         with:
-          local: blinker-py-${{steps.version.outputs.prop}}.zip python.json
-          remote: /home/ubuntu/
+          local: blinker-py-${{steps.version.outputs.prop}}.zip
+          remote: /home/ubuntu/blinker-py-${{steps.version.outputs.prop}}.zip
+          host: ${{ secrets.SERVER_IP }}
+          username: ubuntu
+          privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
+          recursive: true
+      
+      - name: upload json
+        uses: garygrossgarten/github-action-scp@v0.5.3
+        with:
+          local: python.json
+          remote: /home/ubuntu/python.json
           host: ${{ secrets.SERVER_IP }}
           username: ubuntu
           privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
