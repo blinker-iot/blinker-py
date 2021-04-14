@@ -6,6 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: get version
+        id: version
         uses: notiz-dev/github-action-json-property@release
         with:
           path: 'version.json'
@@ -14,7 +15,7 @@ jobs:
       - name: action-zip
         uses: montudor/action-zip@v0.1.1
         with:
-          args: zip -qq -r blinker-py-${{steps.format_script.outputs.prop}}.zip . -x .github/* -x .git/*
+          args: zip -qq -r blinker-py-${{steps.version.outputs.prop}}.zip . -x .github/* -x .git/*
       
       - name: ls dir
         run: ls *.zip
