@@ -34,8 +34,8 @@ jobs:
       - name: Deploy
         uses: garygrossgarten/github-action-scp@v0.5.3
         with:
-          local: blinker-py-${{steps.version.outputs.prop}}.zip
-          remote: /home/ubuntu/blinker-py-${{steps.version.outputs.prop}}.zip
+          local: blinker-py-${{steps.version.outputs.prop}}.zip python.json
+          remote: /home/ubuntu/
           host: ${{ secrets.SERVER_IP }}
           username: ubuntu
           privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
