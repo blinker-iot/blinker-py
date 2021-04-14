@@ -8,7 +8,7 @@ jobs:
       - name: get version
         uses: juliangruber/read-file-action@v1
         with:
-          path: .setup.py
+          path: setup.py
       - name: echo setup.py
         run: echo ${{ steps.package.outputs.content }}
       
