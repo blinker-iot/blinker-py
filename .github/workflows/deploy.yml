@@ -12,20 +12,31 @@ jobs:
           path: 'version.json'
           prop_path: 'version'
       
+      - name: get current time
+        uses: 1466587594/get-current-time@v2
+        id: current-time
+        with:
+          format: YYYY.MM.DD
+          utcOffset: "+08:00"
+      
       - name: action-zip
         uses: montudor/action-zip@v0.1.1
         with:
           args: zip -qq -r blinker-py-${{steps.version.outputs.prop}}.zip . -x .github/* -x .git/*
       
-      - name: ls dir
-        run: ls *.zip
+      - name: create json
+        id: jsonfile
+        uses: jsdaniell/create-json@1.1.2
+        with:
+          name: "python.json"
+          json: '{"img": "assets/sdk/python.png", "text": "Python", "update": ${{ steps.current-time.outputs.formattedTime}}, "version": ${{steps.version.outputs.prop}}, "github": "https://github.com/blinker-iot/blinker-py", "document": "https://diandeng.tech/doc/python-support", "download": "sdk/blinker-py-${{steps.version.outputs.prop}}.zip" }'
 
-      # - name: Deploy
-      #   uses: garygrossgarten/github-action-scp@v0.5.3
-      #   with:
-      #     local: blinker-py.zip
-      #     remote: /home/ubuntu/blinker-py.zip
-      #     host: ${{ secrets.SERVER_IP }}
-      #     username: ubuntu
-      #     privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
-      #     recursive: true
+      - name: Deploy
+        uses: garygrossgarten/github-action-scp@v0.5.3
+        with:
+          local: blinker-py-${{steps.version.outputs.prop}}.zip
+          remote: /home/ubuntu/blinker-py-${{steps.version.outputs.prop}}.zip
+          host: ${{ secrets.SERVER_IP }}
+          username: ubuntu
+          privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
+          recursive: true
