@@ -5,23 +5,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: action-zip
-        uses: montudor/action-zip@v0.1.1
+      - name: get version
+        uses: juliangruber/read-file-action@v1
         with:
-          args: zip -qq -r blinker-py.zip . -x .github/* -x .git/*
+          path: .setup.py
+      - name: echo setup.py
+        run: echo ${{ steps.package.outputs.content }}
       
-      - name: list file
-        run: ls *.zip
-      
-      - name: list all file
-        run: ls *
+      # - name: action-zip
+      #   uses: montudor/action-zip@v0.1.1
+      #   with:
+      #     args: zip -qq -r blinker-py.zip . -x .github/* -x .git/*
 
-      - name: Deploy
-        uses: garygrossgarten/github-action-scp@v0.5.3
-        with:
-          local: blinker-py.zip
-          remote: /home/ubuntu/blinker-py.zip
-          host: ${{ secrets.SERVER_IP }}
-          username: ubuntu
-          privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
-          recursive: true
+      # - name: Deploy
+      #   uses: garygrossgarten/github-action-scp@v0.5.3
+      #   with:
+      #     local: blinker-py.zip
+      #     remote: /home/ubuntu/blinker-py.zip
+      #     host: ${{ secrets.SERVER_IP }}
+      #     username: ubuntu
+      #     privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     recursive: true
