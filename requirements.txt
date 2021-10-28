@@ -2,4 +2,3 @@ aiohttp~=3.7.4.post0
 certifi~=2021.10.8
 loguru~=0.5.3
 paho-mqtt~=1.6.1
-demjson~=1.6
