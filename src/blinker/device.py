@@ -8,14 +8,14 @@ import json
 
 from loguru import logger
 
-from _http import *
-from broker import *
+from ._http import *
+from .broker import *
 
 __all__ = ["Device"]
 
 
 class BaseDevice(object):
-    def __init__(self, authkey: str, version: str = "1.0", protocol: str = "mqtt", ali_type: str = None,
+    def __init__(self, authkey: str, *, version: str = "1.0", protocol: str = "mqtt", ali_type: str = None,
                  duer_type: str = None, mi_type: str = None):
         self.authKey = authkey
         self.version = version
@@ -28,11 +28,14 @@ class BaseDevice(object):
         self.broker = None
 
         self.push_broker_msg = None
+        self.target_device = ""
 
         self.widgets = {}  # {key: widget}
 
-    async def add_widget(self, widget):
+    def add_widget(self, widget):
+        widget.device = self
         self.widgets[widget.key] = widget
+        return widget
 
     async def handle_widget_data(self, key, data):
         return self.widgets[key].func(data)
@@ -72,6 +75,11 @@ class BaseDevice(object):
             logger.info("Send heartbeat")
             await asyncio.sleep(600)
 
+    def push_msg(self, data, target=None):
+        if not target:
+            target = self.target_device
+        self.push_broker_msg(data, target)
+
     async def handle_data(self):
         await self.waiting_broker_connected()
         while True:
@@ -81,7 +89,7 @@ class BaseDevice(object):
             received_msg = json.loads(self.broker.received_msg.pop())
             logger.info("received msg: {0}".format(received_msg))
 
-            target_device = received_msg["fromDevice"]
+            self.target_device = received_msg["fromDevice"]
             received_data = received_msg["data"]
 
             if isinstance(received_data, (str, int)):
@@ -90,7 +98,14 @@ class BaseDevice(object):
 
             if "get" in received_data:
                 if received_data["get"] == "state":
-                    self.push_broker_msg(target_device, {"state": "online"})
+                    self.push_msg({"state": "online"})
+            elif "set" in received_data:
+                pass
+            else:
+                for key in received_data.keys():
+                    if key in self.widgets.keys():
+                        widget = self.widgets[key]
+                        widget.change.on_next({"fromDevice": self.target_device, "data": received_data[key]})
 
     def task(self):
         asyncio.ensure_future(self.init_actions())
@@ -110,9 +125,7 @@ class BaseDevice(object):
 
 
 class Device(BaseDevice):
-    pass
-
-
-if __name__ == '__main__':
-    device = Device("a2f2011c7cd9")
-    device.run()
+    def __init__(self, authkey: str, version: str = "1.0", protocol: str = "mqtt", ali_type: str = None,
+                 duer_type: str = None, mi_type: str = None):
+        super(Device, self).__init__(authkey=authkey, version=version, protocol=protocol, ali_type=ali_type,
+                                     duer_type=duer_type, mi_type=mi_type)

@@ -10,7 +10,7 @@ import json
 import ssl
 import certifi
 
-from errors import BlinkerHttpException
+from .errors import BlinkerHttpException
 
 __all__ = ["device_auth", "send_heartbeat"]
 

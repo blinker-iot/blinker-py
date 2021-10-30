@@ -8,3 +8,5 @@ Debug/
 *.pyc
 Blinker/__pycache__
 .idea/
+dist/
+*.egg-info

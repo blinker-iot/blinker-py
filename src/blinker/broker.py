@@ -14,7 +14,7 @@ from collections import deque
 
 from paho.mqtt.client import Client
 
-from errors import BlinkerBrokerException
+from .errors import BlinkerBrokerException
 
 __all__ = ["Broker"]
 
@@ -82,9 +82,9 @@ class Broker:
         self.client.connect_async(self.host, int(self.port))
         self.client.loop_start()
 
-    def pub(self, to_device, data):
+    def pub(self, data, to_device):
         if not self.client.is_connected():
             self.client.reconnect()
-
         payload = json.dumps({"fromDevice": self.clientId, "toDevice": to_device, "data": data})
+        logger.info("send mqtt message: {0}".format(payload))
         self.client.publish(self._pub_topic, payload)
