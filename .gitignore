@@ -10,3 +10,4 @@ Blinker/__pycache__
 .idea/
 dist/
 *.egg-info
+build/

@@ -6,7 +6,7 @@ __author__ = "stao"
 from loguru import logger
 from blinker import Device, ButtonWidget, NumberWidget
 
-device = Device("d40ddab19ebb", protocol="mqtts")
+device = Device("", protocol="mqtts")
 
 button1 = device.add_widget(ButtonWidget('btn-123'))
 button2 = device.add_widget(ButtonWidget('btn-abc'))
@@ -20,7 +20,7 @@ def button1_callback(msg):
 
     num += 1
 
-    number1.text("tt")
+    number1.text("num")
     number1.value(num).update()
 
 
