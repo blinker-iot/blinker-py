@@ -3,10 +3,9 @@
 
 __author__ = "stao"
 
-from loguru import logger
 from blinker import Device, ButtonWidget, NumberWidget
 
-device = Device("", protocol="mqtts")
+device = Device("authKey", protocol="mqtts")
 
 button1 = device.add_widget(ButtonWidget('btn-123'))
 button2 = device.add_widget(ButtonWidget('btn-abc'))
@@ -25,11 +24,16 @@ def button1_callback(msg):
 
 
 def button2_callback(msg):
-    logger.info("Button2: {0}".format(msg))
+    print("Button2: {0}".format(msg))
+
+
+def heartbeat_test():
+    print("Heartbeat test")
 
 
 button1.func = button1_callback
 button2.func = button2_callback
+device.heartbeat_callable = heartbeat_test
 
 if __name__ == '__main__':
     device.run()

@@ -9,50 +9,18 @@ from rx.subject import Subject
 
 from loguru import logger
 
-__all__ = ["ButtonWidget", "TextWidget", "NumberWidget", "RangeWidget", "RGBWidget", "JoystickWidget", "ImageWidget",
-           "VideoWidget", "ChartWidget"]
+__all__ = ["BuiltinSwitch", "ButtonWidget", "TextWidget", "NumberWidget", "RangeWidget", "RGBWidget", "JoystickWidget",
+           "ImageWidget", "VideoWidget", "ChartWidget"]
 
 
 class BuiltinSwitch:
-    def __init__(self):
+    device = None
+
+    def __init__(self, func=None):
         self.key = "switch"
         self.state = ""
 
-        self.change = Subject()
-
-        self.device = None
-
-    def set_state(self, state):
-        self.state = state
-        return self
-
-    def update(self):
-        msg = {self.key: self.state}
-        self.device.push_msg(msg)
-
-
-class _Widget:
-    def __init__(self, key: str):
-        self.key = key
-        self.state = {}
-
-        self._device = None
-        self.targetDevice = ""
-
-        self._func = None
-
-        self.change = Subject()
-        self.change.subscribe(
-            lambda msg: self._sub_change_func(msg)
-        )
-
-    @property
-    def device(self):
-        return self._device
-
-    @device.setter
-    def device(self, device):
-        self._device = device
+        self._func = func
 
     @property
     def func(self):
@@ -61,6 +29,41 @@ class _Widget:
     @func.setter
     def func(self, func):
         self._func = func
+
+    def set_state(self, state):
+        self.state = state
+        return self
+
+    def update(self):
+        msg = {self.key: self.state}
+        self.device.mqtt_client.send_to_device(msg)
+
+    async def handler(self, msg):
+        self.func(msg)
+
+
+class _Widget:
+    device = None
+
+    def __init__(self, key: str, func=None):
+        self.key = key
+        self.state = {}
+
+        self._device = None
+        self.targetDevice = ""
+
+        self._func = func
+
+    @property
+    def func(self):
+        return self._func
+
+    @func.setter
+    def func(self, func):
+        self._func = func
+
+    async def handler(self, msg):
+        self._func(msg)
 
     # def listen(self):
     #     self._change.subscribe(lambda msg: self._sub_change_func(msg))
@@ -76,7 +79,7 @@ class _Widget:
 
     def update(self):
         msg = {self.key: self.state}
-        self.device.push_msg(msg)
+        self.device.mqtt_client.send_to_device(msg)
 
 
 class ButtonWidget(_Widget):
