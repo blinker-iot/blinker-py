@@ -6,17 +6,16 @@
 
 __author__ = 'stao'
 
-from blinker import Device, Storage
+from blinker import Device
 
 
-def save_log_data():
-    storage = Storage(device)
+async def ready_func():
     while True:
-        log = "Test log"
-        storage.save_log(log)
+        log = "This is log test"
+        await device.saveLogData(log)
 
 
-device = Device("authKey", protocol="mqtts", init_ready_func=save_log_data)
+device = Device("authKey", protocol="mqtts", ready_func=ready_func)
 
 if __name__ == '__main__':
     device.run()

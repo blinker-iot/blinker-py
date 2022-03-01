@@ -32,7 +32,11 @@ class Timing(object):
 class TimingTasks(object):
     """定时任务 """
 
+    device = None
     tasks = {}
+
+    def __init__(self, device):
+        self.device = device
 
     def add(self, task):
         if task["ena"] == 0:
@@ -40,17 +44,17 @@ class TimingTasks(object):
         else:
             hour = math.floor(task["tim"] / 60)
             minute = task["tim"] % 60
+
             day_of_week = []
             for i in range(len(task["day"])):
-                if task[i] == "1":
-                    day_of_week.append(i)
-            conf = {"minute": minute, "hour": hour}
-            if len(day_of_week) == 1:
-                conf["dayOfWeek"] = day_of_week[0]
-            elif len(day_of_week) > 1:
-                conf["dayOfWeek"] = day_of_week
+                if task["day"][i] == "1":
+                    day_of_week.append((str(i)))
 
-            self.tasks[task["task"]] = sched.scheduler()
+            conf = {"minute": minute, "hour": hour}
+            if day_of_week:
+                conf["day_of_week"] = ",".join(day_of_week)
+
+            self.device.schedule.add_job("func", "cron", **conf)
 
     def delete(self, task_id: str):
         pass

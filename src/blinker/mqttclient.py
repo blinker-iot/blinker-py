@@ -43,22 +43,20 @@ class MqttClient:
 
     def __init__(self, device):
         self.device = device
-        self.name = device.broker.broker
-        self.client_id = device.broker.deviceName
+        self.name = device.config.broker
+        self.client_id = device.config.deviceName
         self.client = Client(client_id=self.client_id)
-        broker_info = generate_broker_info(self.name, self.client_id, device.broker.productKey, )
+        broker_info = generate_broker_info(self.name, self.client_id, device.config.productKey, )
         self._sub_topic = broker_info["sub_topic"]
         self._pub_topic = broker_info["pub_topic"]
 
-        self.port = device.broker.port
-        self.username = device.broker.iotId
-        self.password = device.broker.iotToken
+        self.port = device.config.port
+        self.username = device.config.iotId
+        self.password = device.config.iotToken
 
-        mqtt_url = device.broker.host.split("//")
+        mqtt_url = device.config.host.split("//")
         self.protocol = mqtt_url[0]
         self.host = mqtt_url[-1]
-
-        self.received_msg = SimpleQueue()
 
         self.device.mqtt_client = self
 
@@ -85,7 +83,7 @@ class MqttClient:
             received_data = received_msg
 
         if received_data:
-            self.received_msg.put_nowait(received_data)
+            self.device.received_data.put(received_data)
 
     async def connection(self):
         self.client.username_pw_set(self.username, self.password)
@@ -128,17 +126,21 @@ class MqttClient:
     def send_ts_data(self, data: List):
         self._check_or_reconnect()
         payload = json.dumps(self._format_msg_to_storage(data, "ts"))
+        payload = payload.replace(" ", "")
         self.client.publish(self._pub_topic, payload)
         logger.info("sended ts data")
 
     def send_obj_data(self, data: Dict):
         self._check_or_reconnect()
-        data = json.dumps(data)
+        # data = json.dumps(data)
         payload = json.dumps(self._format_msg_to_storage(data, "ot"))
-        logger.info("send mqtt message: {0}".format(payload))
+        payload = payload.replace(" ", "")
+        logger.info("mqtt message topic: {0}".format(self._pub_topic))
+        logger.info("mqtt message payload: {0}".format(payload))
         self.client.publish(self._pub_topic, payload)
 
     def send_text_data(self, data: str):
         self._check_or_reconnect()
         payload = json.dumps(self._format_msg_to_storage(data, "tt"))
+        payload = payload.replace(" ", "")
         self.client.publish(self._pub_topic, payload)

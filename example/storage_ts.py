@@ -7,12 +7,10 @@ __author__ = 'stao'
 
 import random
 
-from blinker import Device, Storage
+from blinker import Device
 
 
-# 时序数据存储
-def save_ts_data():
-    storage = Storage(device)
+async def ready_func():
     while True:
         print("save ts data...")
         data = {
@@ -20,11 +18,10 @@ def save_ts_data():
             "temp": random.randint(0, 100)
         }
 
-        storage.save_ts(data)
+        await device.saveTsData(data)
 
 
-device = Device("authKey", protocol="mqtts", init_ready_func=save_ts_data)
-
+device = Device("authKey", protocol="mqtts", ready_func=ready_func)
 
 if __name__ == '__main__':
     device.run()

@@ -70,9 +70,9 @@ class HttpClient(_HttpRequestConf):
             async with session.get(url, ssl_context=ssl_context) as response:
                 return await self._async_response_handler(response)
 
-    async def _async_post(self, url: str, data: Dict):
+    async def _async_post(self, url: str, **kwargs):
         async with aiohttp.ClientSession() as session:
-            async with session.post(url, json=data) as response:
+            async with session.post(url, **kwargs, ssl_context=ssl_context) as response:
                 return await self._async_response_handler(response)
 
     @staticmethod
@@ -134,10 +134,9 @@ class HttpClient(_HttpRequestConf):
             "data": [int(time.time()), [lng, lat]]
         }
 
-        return await self._async_post(url, data)
+        return await self._async_post(url, json=data)
 
-    # 存储
-    def save_ts_data(self, data: Dict):
+    async def save_ts_data(self, data: Dict):
         """
         data: {"key": [[t1, v], [t2, v], ...]}
         """
@@ -148,9 +147,9 @@ class HttpClient(_HttpRequestConf):
             "data": json.dumps(data)
         }
 
-        return self._post(url, req_data)
+        return await self._async_post(url, data=req_data)
 
-    def save_log_data(self, data: List):
+    async def save_log_data(self, data: List):
         """
         data: [[t1, string], [t2, string], ...]
         """
@@ -161,23 +160,51 @@ class HttpClient(_HttpRequestConf):
             "data": data
         }
 
-        return self._response_handler(requests.post(url, json=req_data))
+        return await self._async_post(url, json=req_data)
+
+    # 存储
+    # def save_ts_data(self, data: Dict):
+    #     """
+    #     data: {"key": [[t1, v], [t2, v], ...]}
+    #     """
+    #     url = self.API["TS_STORAGE"]
+    #     req_data = {
+    #         "deviceName": self.device,
+    #         "key": self.auth_key,
+    #         "data": json.dumps(data)
+    #     }
+    #
+    #     return self._post(url, req_data)
+
+    # def save_log_data(self, data: List):
+    #     """
+    #     data: [[t1, string], [t2, string], ...]
+    #     """
+    #
+    #     url = self.API["LOG"]
+    #     req_data = {
+    #         "token": self.auth_token,
+    #         "data": data
+    #     }
+    #
+    #     return self._response_handler(requests.post(url, json=req_data))
 
     # 天气
     async def get_weather(self, city_code):
-        url = '{0}?device={1}&key={2}&code={3}'.format(self.API["WEATHER"], self.device, self.auth_key, city_code)
+        url = '{0}?device={1}&key={2}&code={3}'.format(self.API["WEATHER"], self.device, self.auth_token, city_code)
         return await self._async_get(url)
 
     async def get_forecast(self, city_code):
-        url = '{0}?device={1}&key={2}&code={3}'.format(self.API["WEATHER"], self.device, self.auth_key, city_code)
+        url = '{0}?device={1}&key={2}&code={3}'.format(self.API["WEATHER_FORECAST"], self.device, self.auth_token,
+                                                       city_code)
         return await self._async_get(url)
 
     async def get_air(self, city_code):
-        url = '{0}?device={1}&key={2}&code={3}'.format(self.API["WEATHER"], self.device, self.auth_key, city_code)
+        url = '{0}?device={1}&key={2}&code={3}'.format(self.API["AIR"], self.device, self.auth_token, city_code)
         return await self._async_get(url)
 
     # 消息
-    def send_sms(self, data: str, phone: str = ""):
+    async def send_sms(self, data: str, phone: str = ""):
         url = self.API["SMS"]
         req_data = {
             "deviceName": self.device,
@@ -186,9 +213,9 @@ class HttpClient(_HttpRequestConf):
             "msg": data
         }
 
-        return self._post(url, req_data)
+        return await self._async_post(url, data=req_data)
 
-    def send_wx_template_msg(self, title, state, text):
+    async def send_wx_template_msg(self, title, state, text):
         url = self.API["WECHAT"]
         req_data = {
             "deviceName": self.device,
@@ -198,9 +225,9 @@ class HttpClient(_HttpRequestConf):
             "msg": text
         }
 
-        return self._post(url, req_data)
+        return await self._async_post(url, data=req_data)
 
-    def send_push_msg(self, msg: str, receivers: List = None):
+    async def send_push_msg(self, msg: str, receivers: List = None):
         url = self.API["PUSH"]
         req_data = {
             "deviceName": self.device,
@@ -211,4 +238,4 @@ class HttpClient(_HttpRequestConf):
         if receivers:
             req_data["receivers"] = receivers
 
-        return self._post(url, req_data)
+        return await self._async_post(url, data=req_data)
