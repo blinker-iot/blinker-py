@@ -19,25 +19,6 @@ ssl_context = ssl.create_default_context()
 ssl_context.load_verify_locations(certifi.where())
 
 
-def generate_broker_info(broker, client_id, product_key="") -> Dict:
-    if broker == "aliyun":
-        info = {
-            "sub_topic": f"/{product_key}/{client_id}/r",
-            "pub_topic": f"/{product_key}/{client_id}/s",
-            "exasub_topic": f"/sys/{product_key}/{client_id}/rrpc/request/+",
-            "exapub_topic": f"/sys/{product_key}/{client_id}/rrpc/response/"
-        }
-    elif broker == "blinker":
-        info = {
-            "sub_topic": f"/device/{client_id}/r",
-            "pub_topic": f"/device/{client_id}/s"
-        }
-    else:
-        raise BlinkerBrokerException(message=102, detail="Not support broker")
-
-    return info
-
-
 class MqttClient:
     device = None
 
@@ -46,9 +27,10 @@ class MqttClient:
         self.name = device.config.broker
         self.client_id = device.config.deviceName
         self.client = Client(client_id=self.client_id)
-        broker_info = generate_broker_info(self.name, self.client_id, device.config.productKey, )
-        self._sub_topic = broker_info["sub_topic"]
-        self._pub_topic = broker_info["pub_topic"]
+        self._sub_topic = f"/device/{self.client_id}/r"
+        self._pub_topic = f"/device/{self.client_id}/s"
+        self._exasub_topic = f"/device/ServerSender/r"
+        self._exapub_topic = f"/device/ServerReceiver/s"
 
         self.port = device.config.port
         self.username = device.config.iotId
@@ -65,7 +47,7 @@ class MqttClient:
         if rc == 0:
             logger.success("Broker connected...")
             self.device.mqtt_connected.set()
-            self.client.subscribe(self._sub_topic)
+            self.client.subscribe([(self._sub_topic, 0), (self._exasub_topic, 0)])
         else:
             logger.error("Connect to broker error, code is {0}".format(rc))
 
@@ -83,7 +65,10 @@ class MqttClient:
             received_data = received_msg
 
         if received_data:
-            self.device.received_data.put(received_data)
+            if received_data["fromDevice"] == "ServerSender":
+                self.device.voice_assistant.va_received_data.put(received_data)
+            else:
+                self.device.received_data.put(received_data)
 
     async def connection(self):
         self.client.username_pw_set(self.username, self.password)
@@ -108,6 +93,9 @@ class MqttClient:
     def _format_msg_to_storage(self, data: Any, storage_type: str) -> Dict:
         return {"fromDevice": self.client_id, "toStorage": storage_type, "data": data}
 
+    def _format_msg_to_voiceassistant(self, data: Any) -> Dict:
+        return {"fromDevice": self.client_id, "toDevice": "ServerReceiver", "data": data}
+
     def _check_or_reconnect(self):
         if not self.client.is_connected():
             self.client.reconnect()
@@ -117,6 +105,12 @@ class MqttClient:
         payload = json.dumps(self._format_msg_to_device(data, to_device))
         logger.info("send mqtt message: {0}".format(payload))
         self.client.publish(self._pub_topic, payload)
+
+    def send_to_voiceassistant(self, data):
+        self._check_or_reconnect()
+        payload = json.dumps(self._format_msg_to_voiceassistant(data))
+        logger.info("send mqtt message to voice assistant: {0}".format(payload))
+        self.client.publish(self._exapub_topic, payload)
 
     # 存储
     def _save_check(self):

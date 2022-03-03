@@ -51,6 +51,8 @@ class Device(object):
     shared_user_list = []
     cache_data = None
 
+    voice_assistant = None
+
     received_data = SimpleQueue()
     data_reader = SimpleQueue()
 
@@ -118,6 +120,11 @@ class Device(object):
         widget.device = self
         self.widgets[widget.key] = widget
         return widget
+
+    def addVoiceAssistant(self, voice_assistant):
+        voice_assistant.device = self
+        self.voice_assistant = voice_assistant
+        return voice_assistant
 
     async def device_init(self):
         broker_info = await self.http_client.diy_device_auth(
@@ -334,6 +341,9 @@ class Device(object):
 
         if self.ready_callable:
             tasks.append(threading.Thread(target=asyncio.run, args=(self._custom_runner(self.ready_callable),)))
+
+        if self.voice_assistant:
+            tasks.append(threading.Thread(target=asyncio.run, args=(self.voice_assistant.listen(),)))
 
         # start
         for task in tasks:
