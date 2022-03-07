@@ -22,7 +22,6 @@ from loguru import logger
 
 from .httpclient import *
 from .mqttclient import *
-from .cache import *
 from .errors import *
 
 __all__ = ["Device"]
