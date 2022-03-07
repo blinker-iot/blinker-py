@@ -5,41 +5,11 @@
 
 __author__ = 'stao'
 
-from rx.subject import Subject
-
+from asyncio.coroutines import iscoroutinefunction
 from loguru import logger
 
-__all__ = ["BuiltinSwitch", "ButtonWidget", "TextWidget", "NumberWidget", "RangeWidget", "RGBWidget", "JoystickWidget",
+__all__ = ["ButtonWidget", "TextWidget", "NumberWidget", "RangeWidget", "RGBWidget", "JoystickWidget",
            "ImageWidget", "VideoWidget", "ChartWidget"]
-
-
-class BuiltinSwitch:
-    device = None
-
-    def __init__(self, func=None):
-        self.key = "switch"
-        self.state = ""
-
-        self._func = func
-
-    @property
-    def func(self):
-        return self._func
-
-    @func.setter
-    def func(self, func):
-        self._func = func
-
-    def set_state(self, state):
-        self.state = state
-        return self
-
-    def update(self):
-        msg = {self.key: self.state}
-        self.device.mqtt_client.send_to_device(msg)
-
-    async def handler(self, msg):
-        self.func(msg)
 
 
 class _Widget:
@@ -63,7 +33,10 @@ class _Widget:
         self._func = func
 
     async def handler(self, msg):
-        self._func(msg)
+        if iscoroutinefunction(self._func):
+            await self._func(msg)
+        else:
+            self._func(msg)
 
     # def listen(self):
     #     self._change.subscribe(lambda msg: self._sub_change_func(msg))

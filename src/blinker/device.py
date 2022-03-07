@@ -4,7 +4,9 @@
 __author__ = "stao"
 
 import asyncio
+import datetime
 import math
+import os
 import threading
 import time
 import websockets
@@ -24,6 +26,38 @@ from .cache import *
 from .errors import *
 
 __all__ = ["Device"]
+
+
+class BuiltinSwitch:
+    device = None
+    key = "switch"
+    state = ""
+
+    def __init__(self, device, func=None):
+        self.device = device
+        self._func = func
+
+    @property
+    def func(self):
+        return self._func
+
+    @func.setter
+    def func(self, func):
+        self._func = func
+
+    async def handler(self, msg):
+        if iscoroutinefunction(self._func):
+            await self._func(msg)
+        else:
+            self._func(msg)
+
+    async def set_state(self, state):
+        self.state = state
+        return self
+
+    async def update(self):
+        message = {self.key: self.state}
+        self.device.mqtt_client.send_to_device(message)
 
 
 class DeviceConf(object):
@@ -56,7 +90,11 @@ class Device(object):
     received_data = SimpleQueue()
     data_reader = SimpleQueue()
 
+    realtime_tasks = {}
+
     scheduler = BackgroundScheduler(timezone="Asia/Shanghai")
+    countdown_timer = None
+    countdown_timer2 = None
 
     auth_finished = Event()
     auth_finished.clear()
@@ -67,7 +105,7 @@ class Device(object):
 
     def __init__(self, auth_key, protocol: str = "mqtt", version: str = "1.0", ali_type: str = None,
                  duer_type: str = None, mi_type: str = None, websocket: bool = False, heartbeat_func=None,
-                 ready_func=None):
+                 realtime_func=None, ready_func=None, builtin_switch_func=None):
         self.auth_key = auth_key
         self.version = version
         self.protocol = protocol
@@ -76,8 +114,13 @@ class Device(object):
         self.mi_type = mi_type
 
         self.websocket = websocket
+        self.temp_data_path = ""
+        self.temp_data = {}
+
         self._heartbeat_callable = heartbeat_func
         self._ready_callable = ready_func
+        self._realtime_callable = realtime_func
+        self._builtin_switch_callable = builtin_switch_func
 
     @property
     def heartbeat_callable(self):
@@ -95,6 +138,22 @@ class Device(object):
     def ready_callable(self, func):
         self._ready_callable = func
 
+    @property
+    def realtime_callable(self):
+        return self._realtime_callable
+
+    @realtime_callable.setter
+    def realtime_callable(self, func):
+        self._ready_callable = func
+
+    @property
+    def builtin_switch_callable(self):
+        return self._builtin_switch_callable
+
+    @builtin_switch_callable.setter
+    def builtin_switch_callable(self, func):
+        self._builtin_switch_callable = func
+
     def scheduler_run(self):
         self.scheduler.start()
         print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
@@ -107,14 +166,14 @@ class Device(object):
             # Not strictly necessary if daemonic mode is enabled but should be done if possible
             self.scheduler.shutdown()
 
-    async def _custom_runner(self, func):
+    async def _custom_runner(self, func, **kwargs):
         self.auth_finished.wait()
         self.mqtt_connected.wait()
 
         if iscoroutinefunction(func):
-            await func()
+            await func(**kwargs)
         else:
-            func()
+            func(**kwargs)
 
     def add_widget(self, widget):
         widget.device = self
@@ -141,15 +200,29 @@ class Device(object):
         share_info_res = await self.http_client.get_share_info()
         self.shared_user_list = share_info_res["users"]
 
-        from .widget import BuiltinSwitch
-        self.add_widget(BuiltinSwitch())
+        # 初始化内置开关
+        builtin_switch = BuiltinSwitch(self)
+        builtin_switch.func = self._builtin_switch_callable
+        self.add_widget(builtin_switch)
 
-        # # 加载缓存数据
-        # self.cache_data = CacheData(self.broker.deviceName)
-        # self.timing_tasks.load()
+        # 加载缓存数据
+        self.temp_data_path = f".{self.config.deviceName}.json"
+        self.temp_data = await self.load_json_file()
+        await self.load_timing_task()
 
         self.auth_finished.set()
         logger.success("Device auth successful...")
+
+    async def load_json_file(self):
+        if os.path.exists(self.temp_data_path):
+            with open(self.temp_data_path) as f:
+                return json.load(f)
+        else:
+            return {}
+
+    def save_json_file(self, data):
+        with open(self.temp_data_path, "w") as f:
+            json.dump(data, f)
 
     async def mqttclient_init(self):
         self.auth_finished.wait()
@@ -174,13 +247,49 @@ class Device(object):
     def vibrate(self, t=500):
         self.mqtt_client.send_to_device({"vibrate": t})
 
-    def disable_timing_task(self, task):
-        pass
+    def del_timing_task(self, task_id):
+        self.disable_timing_task(task_id)
 
-    def execution_timing_task(self, act):
-        self.received_data.put(act)
+    def disable_timing_task(self, task_id):
+        self.temp_data["timing"][task_id]["ena"] = 0
+        self.scheduler.remove_job(f'timing-{task_id}')
 
-    def add_timing_task(self, task_data):
+        self.save_json_file(self.temp_data)
+
+    async def load_timing_task(self):
+        if "timing" not in self.temp_data:
+            return
+
+        for task in self.temp_data["timing"]:
+            if task["ena"] == 1:
+                await self.add_timing_task(task)
+
+    def _execution_timing_task(self, task_data):
+        self.received_data.put(task_data["act"][0])
+        if task_data["day"] == "0000000":
+            self.disable_timing_task(task_data["task"])
+        self.mqtt_client.send_to_device(self.get_timing_data())
+
+    def get_timing_data(self):
+        if "timing" not in self.temp_data:
+            return {"timing": []}
+        else:
+            return {"timing": self.temp_data["timing"]}
+
+    async def set_timing_data(self, data):
+        if "timing" not in self.temp_data:
+            self.temp_data["timing"] = []
+            index = 0
+        else:
+            index = data[0]["task"]
+        if index < len(self.temp_data["timing"]):
+            self.temp_data["timing"][index] = data[0]
+        else:
+            self.temp_data["timing"].append(data[0])
+
+        await self.add_timing_task(data[0])
+
+    async def add_timing_task(self, task_data):
         if task_data["ena"] == 0:
             self.disable_timing_task(task_data["task"])
         else:
@@ -196,7 +305,67 @@ class Device(object):
             if day_of_week:
                 conf["day_of_week"] = ",".join(day_of_week)
 
-            self.scheduler.add_job(self.execution_timing_task(task_data["act"][0]), "cron", **conf)
+            self.scheduler.add_job(self._execution_timing_task, "cron", **conf, args=[task_data],
+                                   id=f'timing-{task_data["task"]}')
+
+    async def del_timing_data(self, task_id):
+        self.del_timing_task(task_id)
+        del self.temp_data["timing"][task_id]
+        for index in range(len(self.temp_data["timing"])):
+            if index >= task_id:
+                self.temp_data["timing"][index]["task"] = index
+            index += 1
+
+        self.save_json_file(self.temp_data)
+
+    def get_countdown_data(self):
+        if "countdown" not in self.temp_data:
+            return {"countdown": False}
+        else:
+            return {"countdown": self.temp_data["countdown"]}
+
+    def _countdown_func(self):
+        if "countdown" in self.temp_data and not isinstance(self.temp_data["countdown"], bool):
+            self.temp_data["countdown"]["rtim"] += 1
+            self.mqtt_client.send_to_device(self.get_countdown_data())
+
+            if self.temp_data["countdown"]["rtim"] == self.temp_data["countdown"]["ttim"]:
+                self.received_data.put(self.temp_data["countdown"]["act"][0])
+                self.temp_data["countdown"] = False
+                self.mqtt_client.send_to_device(self.get_countdown_data())
+
+    async def clear_countdown_job(self):
+        if self.countdown_timer:
+            self.countdown_timer.remove()
+
+    async def set_countdown_data(self, data):
+        if data == "dlt":
+            # 删除倒计时
+            self.temp_data["countdown"] = False
+            await self.clear_countdown_job()
+        elif "run" in data and self.countdown_timer:
+            if "countdown" not in self.temp_data:
+                self.temp_data["countdown"] = {}
+            self.temp_data["countdown"]["run"] = data["run"]
+            if self.temp_data["countdown"]["run"] == 0:
+                # 暂停倒计时
+                self.countdown_timer.pause()
+            elif self.temp_data["countdown"]["run"] == 1:
+                # 重启倒计时
+                self.countdown_timer.resume()
+        else:
+            # 设置倒计时
+            self.temp_data["countdown"] = data
+            self.temp_data["countdown"]["rtim"] = 0
+            await self.clear_countdown_job()
+
+            # 添加倒计时任务
+            countdown_time = self.temp_data["countdown"]["ttim"]  # 分钟
+            start_date = datetime.datetime.now()
+            end_date = start_date + datetime.timedelta(minutes=+countdown_time)
+            self.countdown_timer = self.scheduler.add_job(self._countdown_func, "interval", minutes=1,
+                                                          start_date=start_date, end_date=end_date,
+                                                          id="countdownjob")
 
     async def _receiver(self):
         self.mqtt_connected.wait()
@@ -209,8 +378,15 @@ class Device(object):
             if isinstance(data, str):
                 data = json.loads(data)
 
-            self.target_device = data["fromDevice"]
-            received_data = data["data"]
+            if "fromDevice" in data:
+                self.target_device = data["fromDevice"]
+            else:
+                self.target_device = self.config.uuid
+
+            if "data" in data:
+                received_data = data["data"]
+            else:
+                received_data = data
 
             if "get" in received_data:
                 if received_data["get"] == "state":
@@ -218,30 +394,27 @@ class Device(object):
                         await self.heartbeat_callable()
                     self.mqtt_client.send_to_device({"state": "online"})
                 elif received_data["get"] == "timing":
-                    # TODO 反馈定时任务
-                    pass
+                    self.mqtt_client.send_to_device(self.get_timing_data())
                 elif received_data["get"] == "countdown":
-                    # TODO 反馈倒计时任务
-                    pass
+                    self.mqtt_client.send_to_device(self.get_countdown_data())
             elif "set" in received_data:
                 if "timing" in received_data["set"]:
                     if "dlt" in received_data["set"]["timing"][0]:
-                        # TODO 删除定时
-                        pass
+                        await self.del_timing_data(received_data["set"]["timing"][0]["dlt"])
                     else:
-                        # TODO 设置定时任务
-                        pass
-                    # TODO 反馈定时任务
+                        await self.set_timing_data(received_data["set"]["timing"])
+
+                    self.mqtt_client.send_to_device(self.get_timing_data())
                 elif "countdown" in received_data["set"]:
-                    # TODO 设定并反馈倒计时任务
-                    pass
+                    await self.set_countdown_data(received_data["set"]["countdown"])
+                    self.mqtt_client.send_to_device(self.get_countdown_data())
             elif "rt" in received_data:
-                # TODO 实时数据
-                pass
+                if self._realtime_callable:
+                    await self._custom_runner(self._realtime_callable, keys=received_data["rt"])
             else:
                 for key in received_data.keys():
                     if key in self.widgets.keys():
-                        await self.widgets[key].handler(data)
+                        await self.widgets[key].handler(received_data)
                     else:
                         self.data_reader.put({"fromDevice": self.target_device, "data": {key: received_data[key]}})
 
@@ -323,6 +496,17 @@ class Device(object):
 
     async def getWeatherForecast(self, city_code=""):
         return await self.http_client.get_forecast(city_code)
+
+    # 实时数据
+    async def sendRtData(self, key: str, data_func, t: int = 1):
+        if key in self.realtime_tasks:
+            self.realtime_tasks[key].remove()
+
+        def rt_func():
+            message = {key: {"val": data_func(), "date": int(time.time())}}
+            self.mqtt_client.send_to_device(message, to_device=self.config.uuid)
+
+        self.realtime_tasks[key] = self.scheduler.add_job(rt_func, "interval", seconds=t)
 
     async def main(self):
         tasks = [

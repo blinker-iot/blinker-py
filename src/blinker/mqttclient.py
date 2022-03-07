@@ -53,7 +53,6 @@ class MqttClient:
 
     def _on_message(self, client, userdata, msg):
         received_msg = msg.payload.decode("utf8")
-        logger.info("received msg: {0}".format(received_msg))
 
         if isinstance(received_msg, str):
             try:
@@ -81,7 +80,11 @@ class MqttClient:
         self.client.loop_start()
 
     def _get_target_device(self, to_device: str = None):
-        return to_device if to_device else self.device.target_device
+        if to_device:
+            return to_device
+        if self.device.target_device:
+            return self.device.target_device
+        return self.device.uuid
 
     def _format_msg_to_device(self, data: Any, to_device: str = "") -> Dict:
         return {"deviceType": "OwnApp", "fromDevice": self.client_id, "toDevice": self._get_target_device(to_device),

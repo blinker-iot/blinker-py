@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-mqtt数据处理
+mqtt其它数据处理
 """
 
 __author__ = 'stao'
@@ -9,11 +9,11 @@ __author__ = 'stao'
 from blinker import Device
 
 
-def data_read_func():
+async def ready_func():
     print(device.data_reader.get())
 
 
-device = Device("authKey", protocol="mqtts", ready_func=data_read_func)
+device = Device("authKey", ready_func=ready_func)
 
 if __name__ == '__main__':
     device.run()

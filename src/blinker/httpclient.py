@@ -61,6 +61,7 @@ class HttpClient(_HttpRequestConf):
             raise BlinkerHttpException(-1, "Decode http response error, err is {0}".format(e))
 
         if result["message"] != 1000:
+            logger.error("code: {0}, message: {1}".format(result["message"], result["detail"]))
             raise BlinkerHttpException(message=result["message"], detail=result["detail"])
 
         return result["detail"]
