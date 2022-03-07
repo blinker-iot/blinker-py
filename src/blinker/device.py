@@ -394,7 +394,7 @@ class Device(object):
             if "get" in received_data:
                 if received_data["get"] == "state":
                     if self.heartbeat_callable:
-                        await self.heartbeat_callable()
+                        await self._custom_runner(self.heartbeat_callable, msg=received_data)
                     self.mqtt_client.send_to_device({"state": "online"})
                 elif received_data["get"] == "timing":
                     self.mqtt_client.send_to_device(self.get_timing_data())
@@ -523,8 +523,8 @@ class Device(object):
         if self.websocket:
             tasks.append(threading.Thread(target=asyncio.run, args=(self.init_local_service(),)))
 
-        if self.heartbeat_callable:
-            tasks.append(threading.Thread(target=asyncio.run, args=(self._custom_runner(self.heartbeat_callable),)))
+        # if self.heartbeat_callable:
+        #     tasks.append(threading.Thread(target=asyncio.run, args=(self._custom_runner(self.heartbeat_callable),)))
 
         if self.ready_callable:
             tasks.append(threading.Thread(target=asyncio.run, args=(self._custom_runner(self.ready_callable),)))
