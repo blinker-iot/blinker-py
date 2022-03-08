@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
+天猫精灵接入
 """
 
 __author__ = 'stao'

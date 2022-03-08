@@ -49,12 +49,15 @@ class BuiltinSwitch:
         self._func = func
 
     async def handler(self, msg):
-        if iscoroutinefunction(self._func):
-            await self._func(msg)
+        if self.func:
+            if iscoroutinefunction(self._func):
+                await self._func(msg)
+            else:
+                self._func(msg)
         else:
-            self._func(msg)
+            logger.warning("Not setting callable func for {0}".format(self.key))
 
-    async def set_state(self, state):
+    def set_state(self, state):
         self.state = state
         return self
 
@@ -92,6 +95,8 @@ class Device(object):
 
     received_data = SimpleQueue()
     data_reader = SimpleQueue()
+
+    builtinSwitch: BuiltinSwitch = None
 
     realtime_tasks = {}
 
@@ -204,9 +209,9 @@ class Device(object):
         self.shared_user_list = share_info_res["users"]
 
         # 初始化内置开关
-        builtin_switch = BuiltinSwitch(self)
-        builtin_switch.func = self._builtin_switch_callable
-        self.add_widget(builtin_switch)
+        self.builtinSwitch = BuiltinSwitch(self)
+        self.builtinSwitch.func = self._builtin_switch_callable
+        self.add_widget(self.builtinSwitch)
 
         # 加载缓存数据
         self.temp_data_path = f".{self.config.deviceName}.json"

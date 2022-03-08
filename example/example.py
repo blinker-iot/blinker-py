@@ -27,8 +27,9 @@ def button2_callback(msg):
     print("Button2: {0}".format(msg))
 
 
-async def heartbeat_test():
-    print("Heartbeat test")
+async def heartbeat_func(msg):
+    print("Heartbeat func received: {0}".format(msg))
+    # 文本组件
 
 
 async def ready_func():
@@ -38,7 +39,8 @@ async def ready_func():
 
 button1.func = button1_callback
 button2.func = button2_callback
-device.heartbeat_callable = heartbeat_test
+
+device.heartbeat_callable = heartbeat_func
 device.ready_callable = ready_func
 
 if __name__ == '__main__':

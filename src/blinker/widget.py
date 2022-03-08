@@ -33,10 +33,21 @@ class _Widget:
         self._func = func
 
     async def handler(self, msg):
-        if iscoroutinefunction(self._func):
-            await self._func(msg)
+        if self.func:
+            if iscoroutinefunction(self._func):
+                await self._func(msg)
+            else:
+                self._func(msg)
         else:
-            self._func(msg)
+            logger.warning("Not setting callable func for {0}".format(self.key))
+
+    def set_state(self, state):
+        self.state = state
+        return self
+
+    async def update(self):
+        message = {self.key: self.state}
+        self.device.mqtt_client.send_to_device(message)
 
     # def listen(self):
     #     self._change.subscribe(lambda msg: self._sub_change_func(msg))
@@ -49,10 +60,6 @@ class _Widget:
             self._func(msg)
         except TypeError:
             logger.error("Widget {0} not set callback func".format(self.key))
-
-    def update(self):
-        msg = {self.key: self.state}
-        self.device.mqtt_client.send_to_device(msg)
 
 
 class ButtonWidget(_Widget):
