@@ -11,9 +11,9 @@ from blinker import Device
 async def builtin_switch_func(msg):
     print("builtinSwitch: {0}".format(msg))
     if msg["switch"] == "on":
-        await (await device.builtinSwitch.set_state("on")).update()
+        await device.builtinSwitch.set_state("on").update()
     else:
-        await (await device.builtinSwitch.set_state("off")).update()
+        await device.builtinSwitch.set_state("off").update()
 
 
 device = Device("authKey", builtin_switch_func=builtin_switch_func)

@@ -14,16 +14,15 @@ number1 = device.add_widget(NumberWidget('num-abc'))
 num = 0
 
 
-def button1_callback(msg):
+async def button1_callback(msg):
     global num
 
     num += 1
 
-    number1.text("num")
-    number1.value(num).update()
+    await number1.text("num").value(num).update()
 
 
-def button2_callback(msg):
+async def button2_callback(msg):
     print("Button2: {0}".format(msg))
 
 
