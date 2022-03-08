@@ -486,9 +486,15 @@ class Device(object):
         self.mqtt_client.send_obj_data(data)
         await asyncio.sleep(60)
 
+    async def loadObjectData(self, keyword=None):
+        return await self.http_client.get_object_data(keyword=keyword)
+
     async def saveTextData(self, data: str):
         await self.mqtt_client.send_text_data(data)
         await asyncio.sleep(60)
+
+    async def loadTextData(self):
+        return await self.http_client.get_text_data()
 
     async def saveLogData(self, data: str):
         req_data = [[int(time.time()), data]]

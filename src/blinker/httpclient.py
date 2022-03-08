@@ -31,7 +31,9 @@ class _HttpRequestConf:
         "WECHAT": SERVER + '/api/v1/user/device/wxMsg/',
         "PUSH": SERVER + '/api/v1/user/device/push',
         "SHARE": SERVER + '/api/v1/user/device/share/device',
-        "TS_STORAGE": SERVER + "/api/v1/user/device/cloudStorage/",
+        "STORAGE_TS": SERVER + "/api/v1/user/device/cloudStorage/",
+        "STORAGE_OBJ": SERVER + "/api/v1/user/device/cloud_storage/object",
+        "STORAGE_TEXT": SERVER + "/api/v1/user/device/cloud_storage/text",
         "LOG": SERVER + '/api/v1/user/device/cloud_storage/logs',
         "POSITION": SERVER + '/api/v1/user/device/cloud_storage/coordinate',
         "WEATHER": SERVER + '/api/v3/weather',
@@ -141,7 +143,7 @@ class HttpClient(_HttpRequestConf):
         """
         data: {"key": [[t1, v], [t2, v], ...]}
         """
-        url = self.API["TS_STORAGE"]
+        url = self.API["STORAGE_TS"]
         req_data = {
             "deviceName": self.device,
             "key": self.auth_key,
@@ -162,6 +164,17 @@ class HttpClient(_HttpRequestConf):
         }
 
         return await self._async_post(url, json=req_data)
+
+    async def get_object_data(self, keyword=None):
+        url = self.API["STORAGE_OBJ"] + "?deviceId=" + self.device
+        if keyword:
+            url += "&keyword={0}".format(keyword)
+
+        return await self._async_get(url)
+
+    async def get_text_data(self):
+        url = self.API["STORAGE_TEXT"] + "?deviceId=" + self.device
+        return await self._async_get(url)
 
     # 存储
     # def save_ts_data(self, data: Dict):
