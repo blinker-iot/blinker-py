@@ -111,9 +111,9 @@ class Device(object):
 
     # timing_tasks = TimingTasks()
 
-    def __init__(self, auth_key, protocol: str = "mqtt", version: str = "1.0", ali_type: str = None,
-                 duer_type: str = None, mi_type: str = None, websocket: bool = False, heartbeat_func=None,
-                 realtime_func=None, ready_func=None, builtin_switch_func=None):
+    def __init__(self, auth_key, protocol: str = "mqtt", websocket: bool = True, source_check: bool = False,
+                 version: str = "1.0", ali_type: str = None, duer_type: str = None, mi_type: str = None,
+                 heartbeat_func=None, realtime_func=None, ready_func=None, builtin_switch_func=None):
         self.auth_key = auth_key
         self.version = version
         self.protocol = protocol
@@ -121,6 +121,7 @@ class Device(object):
         self.duer_type = duer_type
         self.mi_type = mi_type
 
+        self._source_check = source_check
         self.websocket = websocket
         self.temp_data_path = ""
         self.temp_data = {}
