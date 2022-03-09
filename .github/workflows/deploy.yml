@@ -1,7 +1,7 @@
 name: auto-deploy
 on:
   push:
-    branches: [dev3.0]
+    branches: [dev_3.0]
 
 jobs:
   archive-file:
