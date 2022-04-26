@@ -101,7 +101,7 @@ class HttpClient(_HttpRequestConf):
         res = requests.post(url, data=data)
         return self._response_handler(res)
 
-    async def diy_device_auth(self, auth_key, /, protocol="mqtt", version="", ali_type=None, duer_type=None,
+    async def diy_device_auth(self, auth_key, protocol="mqtt", version="", ali_type=None, duer_type=None,
                               mi_type=None):
         url = "{0}?authKey={1}&protocol={2}".format(self.API["DIY_AUTH"], auth_key, protocol)
         if version:
