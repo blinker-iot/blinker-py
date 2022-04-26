@@ -6,7 +6,7 @@ __author__ = "stao"
 import asyncio
 import datetime
 import json
-
+import platform
 import math
 import os
 import threading
@@ -27,6 +27,9 @@ from loguru import logger
 from .httpclient import *
 from .mqttclient import *
 from .errors import *
+
+if platform.system() == "Windows":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 __all__ = ["Device"]
 
@@ -165,7 +168,6 @@ class Device(object):
 
     def scheduler_run(self):
         self.scheduler.start()
-        print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
 
         try:
             # This is here to simulate application activity (which keeps the main thread alive).
@@ -525,11 +527,11 @@ class Device(object):
 
     async def main(self):
         tasks = [
-            threading.Thread(target=asyncio.run, args=(self.device_init(),)),
-            threading.Thread(target=asyncio.run, args=(self.mqttclient_init(),)),
-            threading.Thread(target=asyncio.run, args=(self._cloud_heartbeat(),)),
-            threading.Thread(target=asyncio.run, args=(self._receiver(),)),
-            threading.Thread(target=self.scheduler_run)
+            threading.Thread(target=asyncio.run, args=(self.device_init(),), daemon=True),
+            threading.Thread(target=asyncio.run, args=(self.mqttclient_init(),), daemon=True),
+            threading.Thread(target=asyncio.run, args=(self._cloud_heartbeat(),), daemon=True),
+            threading.Thread(target=asyncio.run, args=(self._receiver(),), daemon=True),
+            threading.Thread(target=self.scheduler_run, daemon=True)
         ]
 
         if self.websocket:
