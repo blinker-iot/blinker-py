@@ -7,9 +7,9 @@ from blinker import Device, ButtonWidget, NumberWidget
 
 device = Device("authKey")
 
-button1 = device.add_widget(ButtonWidget('btn-123'))
-button2 = device.add_widget(ButtonWidget('btn-abc'))
-number1 = device.add_widget(NumberWidget('num-abc'))
+button1 = device.addWidget(ButtonWidget('btn-123'))
+button2 = device.addWidget(ButtonWidget('btn-abc'))
+number1 = device.addWidget(NumberWidget('num-abc'))
 
 num = 0
 

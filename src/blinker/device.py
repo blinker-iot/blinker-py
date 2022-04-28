@@ -186,7 +186,7 @@ class Device(object):
         else:
             func(**kwargs)
 
-    def add_widget(self, widget):
+    def addWidget(self, widget):
         widget.device = self
         self.widgets[widget.key] = widget
         return widget
@@ -214,7 +214,7 @@ class Device(object):
         # 初始化内置开关
         self.builtinSwitch = BuiltinSwitch(self)
         self.builtinSwitch.func = self._builtin_switch_callable
-        self.add_widget(self.builtinSwitch)
+        self.addWidget(self.builtinSwitch)
 
         # 加载缓存数据
         self.temp_data_path = f".{self.config.deviceName}.json"
